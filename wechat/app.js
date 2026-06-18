@@ -31,7 +31,7 @@ App({
     const hasRun = wx.getStorageSync('_demo_initialized')
     if (hasRun) return
 
-    console.log('[PetChat] 首次启动，注入演示数据…')
+    console.log('[Gengdongta] 首次启动，注入演示数据…')
     wx.setStorageSync('token', 'demo_token_local')
     wx.setStorageSync('userInfo', mockUser)
     wx.setStorageSync('pets', mockPets)

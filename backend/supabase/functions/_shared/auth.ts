@@ -89,7 +89,7 @@ export async function exchangeWechatCode(
   const openid = wxData.openid;
 
   // Step 2: Upsert Supabase auth user (use openid as email-like identity)
-  const email = `${openid}@wechat.petchat.local`;
+  const email = `${openid}@wechat.gengdongta.local`;
   const password = wxData.session_key;
 
   // Try sign-in first, fall back to sign-up

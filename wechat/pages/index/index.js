@@ -131,6 +131,6 @@ Page({
 
   // Share
   onShareAppMessage() {
-    return { title: 'PetChat 灵犀 - 懂宠物，更懂你', path: '/pages/index/index' }
+    return { title: 'Gengdongta - 懂宠物，更懂你', path: '/pages/index/index' }
   }
 })

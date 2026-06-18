@@ -40,5 +40,5 @@
     </button>
   </view>
 
-  <loading visible="{{generating}}" text="灵犀正在联动人宠双档案…" />
+  <loading visible="{{generating}}" text="Gengdongta正在联动人宠双档案…" />
 </view>

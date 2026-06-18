@@ -144,5 +144,5 @@
   </view>
 
   <!-- Loading State -->
-  <loading visible="{{generating}}" text="灵犀正在解读中…" />
+  <loading visible="{{generating}}" text="Gengdongta正在解读中…" />
 </view>

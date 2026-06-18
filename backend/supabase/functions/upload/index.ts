@@ -10,7 +10,7 @@ import { AppError, errorResponse } from "../_shared/errors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const STORAGE_BUCKET = Deno.env.get("STORAGE_BUCKET") || "petchat-assets";
+const STORAGE_BUCKET = Deno.env.get("STORAGE_BUCKET") || "gengdongta-assets";
 
 interface UploadBody {
   fileName: string;   // e.g. "pet-photos/abc123.jpg"

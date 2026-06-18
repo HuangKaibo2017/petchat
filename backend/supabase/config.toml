@@ -1,4 +1,4 @@
-# PetChat Supabase Edge Functions Configuration
+# Gengdongta Supabase Edge Functions Configuration
 # Deploy: supabase functions deploy <function-name> --project-ref dlvgbwyvxjdggxpddpod
 
 [functions.emotion-report]

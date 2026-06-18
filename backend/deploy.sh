@@ -1,5 +1,5 @@
 #!/bin/bash
-# PetChat Backend Deployment Script
+# Gengdongta Backend Deployment Script
 # Usage: ./deploy.sh <supabase-project-ref>
 #
 # Prerequisites:
@@ -16,7 +16,7 @@ if [ -z "$PROJECT_REF" ]; then
   exit 1
 fi
 
-echo "=== PetChat Backend Deployment ==="
+echo "=== Gengdongta Backend Deployment ==="
 echo "Project: $PROJECT_REF"
 echo ""
 
