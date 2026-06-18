@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 7. 运营内容 / CMS
+-- PetChat (更懂它) / 7. 运营内容 / CMS
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -9,7 +9,7 @@
 --   Banner / 活动 / 落地页 (运营位内容)
 --
 -- 依赖:
---   01_enums.sql       (t_status, t_lang)
+--   01_enums.sql       (t_activity_type, t_status, t_lang)
 --
 -- 被本文件引用的脚本 (下游):
 --   13_welfare.sql     -> t_donation.f_target_type='activity' (弱引用)
@@ -27,17 +27,17 @@
 -- ============================================================
 CREATE TABLE public.t_banner (
     f_id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    f_lang        VARCHAR(8)  NOT NULL,
-    f_title       VARCHAR(128) NOT NULL,
-    f_description TEXT         NOT NULL DEFAULT '',
-    f_image_url   VARCHAR(512) NOT NULL,
-    f_link_type   VARCHAR(32)  NOT NULL DEFAULT 'url',
-    f_link_url    VARCHAR(512) NOT NULL DEFAULT '',
-    f_order       INTEGER      NOT NULL DEFAULT 0,
+    f_lang        VARCHAR(8)    NOT NULL,
+    f_title       VARCHAR(128)  NOT NULL,
+    f_description TEXT          NOT NULL DEFAULT '',
+    f_image_url   VARCHAR(2048) NOT NULL,
+    f_link_type   VARCHAR(32)   NOT NULL DEFAULT 'url',
+    f_link_url    VARCHAR(2048) NOT NULL DEFAULT '',
+    f_order       INTEGER       NOT NULL DEFAULT 0,
     f_starts_at   TIMESTAMPTZ,
     f_ends_at     TIMESTAMPTZ,
-    f_status_user INTEGER      NOT NULL DEFAULT 1,
-    f_created_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    f_status_user INTEGER       NOT NULL DEFAULT 1,
+    f_created_at  TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_t_banner_lang FOREIGN KEY (f_lang)        REFERENCES public.t_lang(f_code)  ON DELETE NO ACTION,
     CONSTRAINT fk_t_banner_stat FOREIGN KEY (f_status_user) REFERENCES public.t_status(f_id) ON DELETE NO ACTION,
     CONSTRAINT ck_t_banner_link CHECK (f_link_type IN ('url','product','activity','hospital','page'))
@@ -66,7 +66,7 @@ CREATE TABLE public.t_activity (
     f_title            VARCHAR(128) NOT NULL,
     f_description      TEXT         NOT NULL DEFAULT '',
     f_cover_image_url  VARCHAR(512) NOT NULL DEFAULT '',
-    f_activity_type    VARCHAR(32)  NOT NULL,
+    f_activity_type_id INTEGER      NOT NULL,
     f_start_time       TIMESTAMPTZ  NOT NULL,
     f_end_time         TIMESTAMPTZ  NOT NULL,
     f_location         VARCHAR(256) NOT NULL DEFAULT '',
@@ -74,9 +74,9 @@ CREATE TABLE public.t_activity (
     f_meta_info        JSONB        NOT NULL DEFAULT '{}'::jsonb,
     f_status_user      INTEGER      NOT NULL DEFAULT 1,
     f_created_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_t_activity_lang FOREIGN KEY (f_lang)        REFERENCES public.t_lang(f_code)  ON DELETE NO ACTION,
-    CONSTRAINT fk_t_activity_stat FOREIGN KEY (f_status_user) REFERENCES public.t_status(f_id) ON DELETE NO ACTION,
-    CONSTRAINT ck_t_activity_type CHECK (f_activity_type IN ('adoption','lecture','volunteer','exhibition','offline','online')),
+    CONSTRAINT fk_t_activity_lang FOREIGN KEY (f_lang)             REFERENCES public.t_lang(f_code)          ON DELETE NO ACTION,
+    CONSTRAINT fk_t_activity_stat FOREIGN KEY (f_status_user)      REFERENCES public.t_status(f_id)          ON DELETE NO ACTION,
+    CONSTRAINT fk_t_activity_type FOREIGN KEY (f_activity_type_id) REFERENCES public.t_activity_type(f_id) ON DELETE NO ACTION,
     CONSTRAINT ck_t_activity_time CHECK (f_end_time > f_start_time),
     CONSTRAINT ck_t_activity_max  CHECK (f_max_participants IS NULL OR f_max_participants > 0)
 );
@@ -86,7 +86,7 @@ COMMENT ON COLUMN public.t_activity.f_lang             IS 'FK -> public.t_lang(f
 COMMENT ON COLUMN public.t_activity.f_title            IS '活动标题';
 COMMENT ON COLUMN public.t_activity.f_description      IS '活动描述';
 COMMENT ON COLUMN public.t_activity.f_cover_image_url  IS '封面图 URL';
-COMMENT ON COLUMN public.t_activity.f_activity_type    IS '活动类型 (白名单): adoption / lecture / volunteer / exhibition / offline / online';
+COMMENT ON COLUMN public.t_activity.f_activity_type_id IS 'FK -> public.t_activity_type(f_id) | defined in 01_enums.sql | 活动类型';
 COMMENT ON COLUMN public.t_activity.f_start_time       IS '活动开始时间 (UTC) | 约束: < f_end_time';
 COMMENT ON COLUMN public.t_activity.f_end_time         IS '活动结束时间 (UTC)';
 COMMENT ON COLUMN public.t_activity.f_location         IS '活动地点 (线下) 或直播间 (线上)';
@@ -101,15 +101,15 @@ COMMENT ON COLUMN public.t_activity.f_created_at       IS '创建时间 (UTC)';
 -- ============================================================
 CREATE TABLE public.t_landing_page (
     f_id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    f_activity_id     BIGINT       NOT NULL,
-    f_lang            VARCHAR(8)   NOT NULL,
-    f_title           VARCHAR(128) NOT NULL,
-    f_subtitle        VARCHAR(256) NOT NULL DEFAULT '',
-    f_cover_image_url VARCHAR(512) NOT NULL DEFAULT '',
-    f_cta_text        VARCHAR(64)  NOT NULL DEFAULT '',
-    f_cta_url         VARCHAR(512) NOT NULL DEFAULT '',
-    f_status_user     INTEGER      NOT NULL DEFAULT 1,
-    f_created_at      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    f_activity_id     BIGINT        NOT NULL,
+    f_lang            VARCHAR(8)    NOT NULL,
+    f_title           VARCHAR(128)  NOT NULL,
+    f_subtitle        VARCHAR(256)  NOT NULL DEFAULT '',
+    f_cover_image_url VARCHAR(2048) NOT NULL DEFAULT '',
+    f_cta_text        VARCHAR(64)   NOT NULL DEFAULT '',
+    f_cta_url         VARCHAR(2048) NOT NULL DEFAULT '',
+    f_status_user     INTEGER       NOT NULL DEFAULT 1,
+    f_created_at      TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_t_landing_activity FOREIGN KEY (f_activity_id) REFERENCES public.t_activity(f_id) ON DELETE CASCADE,
     CONSTRAINT fk_t_landing_lang     FOREIGN KEY (f_lang)        REFERENCES public.t_lang(f_code)   ON DELETE NO ACTION,
     CONSTRAINT fk_t_landing_stat     FOREIGN KEY (f_status_user) REFERENCES public.t_status(f_id)   ON DELETE NO ACTION

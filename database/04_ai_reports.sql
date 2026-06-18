@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 4. AI 报告 / AI Reports & Prompts
+-- PetChat (更懂它) / 4. AI 报告 / AI Reports & Prompts
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -38,7 +38,6 @@ CREATE TABLE public.t_prompt (
     f_lang        VARCHAR(8)   NOT NULL,
     f_ver         INTEGER      NOT NULL,
     f_content     TEXT         NOT NULL,
-    f_description VARCHAR(512) NOT NULL DEFAULT '',
     f_is_active   BOOLEAN      NOT NULL DEFAULT true,
     f_status_user INTEGER      NOT NULL DEFAULT 1,
     f_created_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,7 +53,6 @@ COMMENT ON COLUMN public.t_prompt.f_code        IS '提示词业务代码, e.g. 
 COMMENT ON COLUMN public.t_prompt.f_lang        IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql | 提示词语言';
 COMMENT ON COLUMN public.t_prompt.f_ver         IS '逻辑版本号, 同 (code, lang) 内单调递增 | 引用: 应用层通过 (code, lang, max_ver) 取最新';
 COMMENT ON COLUMN public.t_prompt.f_content     IS '提示词正文 (模板, 支持 {{pet_name}} 等占位符)';
-COMMENT ON COLUMN public.t_prompt.f_description IS '版本说明, e.g. "调整情绪标签阈值"';
 COMMENT ON COLUMN public.t_prompt.f_is_active   IS '是否启用 (false = 历史版本, 不再被加载)';
 COMMENT ON COLUMN public.t_prompt.f_status_user IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
 COMMENT ON COLUMN public.t_prompt.f_created_at  IS '创建时间 (UTC)';
@@ -69,7 +67,7 @@ CREATE TABLE public.t_report_emotion (
     f_user_id       BIGINT       NOT NULL,
     f_pet_id        BIGINT       NOT NULL,
     f_lang          VARCHAR(8)   NOT NULL DEFAULT 'zh-CN',
-    f_report_type_id BIGINT      NOT NULL,
+    f_report_type_id INTEGER     NOT NULL,
     f_emotion_score NUMERIC(5,2) NOT NULL,
     f_emotion_state VARCHAR(32)  NOT NULL,
     f_emotion_tags  JSONB        NOT NULL DEFAULT '[]'::jsonb,
@@ -107,9 +105,9 @@ CREATE TABLE public.t_report_health (
     f_user_id             BIGINT       NOT NULL,
     f_pet_id              BIGINT       NOT NULL,
     f_lang                VARCHAR(8)   NOT NULL DEFAULT 'zh-CN',
-    f_report_type_id      BIGINT       NOT NULL,
+    f_report_type_id      INTEGER      NOT NULL,
     f_health_score        NUMERIC(5,2) NOT NULL,
-    f_health_level        VARCHAR(16)  NOT NULL,
+    f_health_level_id     INTEGER      NOT NULL,
     f_health_issues       JSONB        NOT NULL DEFAULT '[]'::jsonb,
     f_health_suggestions  JSONB        NOT NULL DEFAULT '[]'::jsonb,
     f_status_user         INTEGER      NOT NULL DEFAULT 1,
@@ -120,7 +118,7 @@ CREATE TABLE public.t_report_health (
     CONSTRAINT fk_t_report_health_type    FOREIGN KEY (f_report_type_id) REFERENCES public.t_report_type(f_id) ON DELETE NO ACTION,
     CONSTRAINT fk_t_report_health_status  FOREIGN KEY (f_status_user)    REFERENCES public.t_status(f_id)       ON DELETE NO ACTION,
     CONSTRAINT ck_t_report_health_score   CHECK (f_health_score BETWEEN 0 AND 100),
-    CONSTRAINT ck_t_report_health_level   CHECK (f_health_level IN ('优秀','良好','一般','较差','严重'))
+    CONSTRAINT fk_t_report_health_health  FOREIGN KEY (f_health_level_id) REFERENCES public.t_health_level(f_id) ON DELETE NO ACTION,
 );
 COMMENT ON TABLE  public.t_report_health IS '宠物健康评估报告';
 COMMENT ON COLUMN public.t_report_health.f_id                 IS '主键 | 弱引用: t_share_record.f_report_id, t_interpretation_voice.f_report_id (in 06_share_interpretation.sql, f_report_type=health)';
@@ -129,7 +127,7 @@ COMMENT ON COLUMN public.t_report_health.f_pet_id             IS 'FK -> public.t
 COMMENT ON COLUMN public.t_report_health.f_lang               IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql';
 COMMENT ON COLUMN public.t_report_health.f_report_type_id     IS 'FK -> public.t_report_type(f_id) | defined in 01_enums.sql | 业务值约定: health';
 COMMENT ON COLUMN public.t_report_health.f_health_score       IS '健康分 0-100';
-COMMENT ON COLUMN public.t_report_health.f_health_level       IS '健康等级 (白名单): 优秀 / 良好 / 一般 / 较差 / 严重';
+COMMENT ON COLUMN public.t_report_health.f_health_level_id    IS 'FK -> public.t_health_level(f_id) | defined in 01_enums.sql | 健康等级';
 COMMENT ON COLUMN public.t_report_health.f_health_issues      IS '健康问题 JSONB 数组, e.g. [{"code":"obesity","severity":"low"}]';
 COMMENT ON COLUMN public.t_report_health.f_health_suggestions IS '健康建议 JSONB 数组';
 COMMENT ON COLUMN public.t_report_health.f_status_user        IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
@@ -144,8 +142,8 @@ CREATE TABLE public.t_report_human_pet_risk (
     f_user_id                BIGINT       NOT NULL,
     f_pet_id                 BIGINT       NOT NULL,
     f_lang                   VARCHAR(8)   NOT NULL DEFAULT 'zh-CN',
-    f_report_type_id         BIGINT       NOT NULL,
-    f_risk_level_id          BIGINT       NOT NULL,
+    f_report_type_id         INTEGER      NOT NULL,
+    f_risk_level_id          INTEGER      NOT NULL,
     f_risk_score             NUMERIC(5,2) NOT NULL,
     f_risk_factors           JSONB        NOT NULL DEFAULT '[]'::jsonb,
     f_risk_recommendations   JSONB        NOT NULL DEFAULT '[]'::jsonb,
@@ -181,11 +179,11 @@ CREATE TABLE public.t_report_personality (
     f_user_id              BIGINT       NOT NULL,
     f_pet_id               BIGINT       NOT NULL,
     f_lang                 VARCHAR(8)   NOT NULL DEFAULT 'zh-CN',
-    f_report_type_id       BIGINT       NOT NULL,
+    f_report_type_id       INTEGER      NOT NULL,
     f_personality_tags     JSONB        NOT NULL DEFAULT '[]'::jsonb,
     f_personality_traits   JSONB        NOT NULL DEFAULT '{}'::jsonb,
     f_personality_analysis TEXT         NOT NULL DEFAULT '',
-    f_status_user          INTEGER      NOT NULL DEFAULT 1,
+    f_status_user          INTEGER      NOT NULL DEFAULT -1,
     f_created_at           TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_t_report_pers_user    FOREIGN KEY (f_user_id)        REFERENCES public.t_user(f_id)         ON DELETE NO ACTION,
     CONSTRAINT fk_t_report_pers_pet     FOREIGN KEY (f_pet_id)         REFERENCES public.t_pet(f_id)         ON DELETE NO ACTION,
