@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 0. 扩展 / Extensions
+-- PetChat (更懂它) / 0. 扩展 / Extensions
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -32,8 +32,23 @@
 -- ============================================================
 -- 0. 扩展 / Extensions
 -- ============================================================
--- Supabase Cloud: pgroonga 已在 Dashboard 启用
--- 自建: 需先在 OS 安装, 然后执行 CREATE EXTENSION
+--
+-- pgroonga: 全文检索引擎 (Groonga 的 PG 集成)
+--   支持中日韩 (CJK) 语言的全文搜索, 比内置 tsvector 对中文分词更友好。
+--   典型用途: 宠物百科/帖子的中文搜索、用户昵称模糊搜索、商品搜索等。
+--   Supabase Cloud: 已在 Dashboard 启用; 自建需先在 OS 安装 Groonga。
+--
+-- pgcrypto: 加密工具库
+--   提供密码哈希 (crypt + gen_salt, 支持 bcrypt)、安全随机数
+--   (gen_random_bytes)、PGP 加解密等。用于密码存储、Token 生成、
+--   敏感数据 (如医疗健康数据) 加密。
+--   附带提供 gen_random_uuid() 函数 —— 生成符合 RFC 9562 的 UUIDv4,
+--   随机质量优于 uuid-ossp 的 uuid_generate_v4(), 推荐在新项目使用。
+--   (PostgreSQL 13+ 中 gen_random_uuid() 已内置为核心函数, 无需扩展)
+--
+-- 注意: 不使用 uuid-ossp 扩展。uuid_generate_v4() 是遗留方案,
+--   pgcrypto 内置的 gen_random_uuid() 质量更好且无需额外扩展。
+--   PG 15+ 建表时直接 DEFAULT gen_random_uuid() 即可。
+--
 CREATE EXTENSION IF NOT EXISTS pgroonga   WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

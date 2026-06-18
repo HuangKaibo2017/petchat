@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 5. 聊天与评论 / Chat & Comments
+-- PetChat (更懂它) / 5. 聊天与评论 / Chat & Comments
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -23,9 +23,9 @@
 
 
 -- ============================================================
--- 5.1 聊天会话 / Chat Session
+-- 5.1 聊天历史 / Chat History
 -- ============================================================
-CREATE TABLE public.t_chat_session (
+CREATE TABLE public.t_chat_history (
     f_id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     f_user_id       BIGINT      NOT NULL,
     f_pet_id        BIGINT,
@@ -35,26 +35,26 @@ CREATE TABLE public.t_chat_session (
     f_meta_info     JSONB       NOT NULL DEFAULT '{}'::jsonb,
     f_started_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     f_ended_at      TIMESTAMPTZ,
-    f_status_user   INTEGER     NOT NULL DEFAULT 1,
-    CONSTRAINT fk_t_chat_session_user    FOREIGN KEY (f_user_id)        REFERENCES public.t_user(f_id)            ON DELETE NO ACTION,
-    CONSTRAINT fk_t_chat_session_pet     FOREIGN KEY (f_pet_id)         REFERENCES public.t_pet(f_id)             ON DELETE NO ACTION,
-    CONSTRAINT fk_t_chat_session_lang    FOREIGN KEY (f_lang)           REFERENCES public.t_lang(f_code)          ON DELETE NO ACTION,
-    CONSTRAINT fk_t_chat_session_status  FOREIGN KEY (f_status_session) REFERENCES public.t_session_status(f_id) ON DELETE NO ACTION,
-    CONSTRAINT fk_t_chat_session_user_st FOREIGN KEY (f_status_user)    REFERENCES public.t_status(f_id)          ON DELETE NO ACTION,
-    CONSTRAINT ck_t_chat_session_history CHECK (jsonb_typeof(f_chat_history) = 'array'),
-    CONSTRAINT ck_t_chat_session_ended   CHECK (f_ended_at IS NULL OR f_ended_at >= f_started_at)
+    f_status_user   INTEGER     NOT NULL DEFAULT -1,
+    CONSTRAINT fk_t_chat_history_user    FOREIGN KEY (f_user_id)        REFERENCES public.t_user(f_id)            ON DELETE NO ACTION,
+    CONSTRAINT fk_t_chat_history_pet     FOREIGN KEY (f_pet_id)         REFERENCES public.t_pet(f_id)             ON DELETE NO ACTION,
+    CONSTRAINT fk_t_chat_history_lang    FOREIGN KEY (f_lang)           REFERENCES public.t_lang(f_code)          ON DELETE NO ACTION,
+    CONSTRAINT fk_t_chat_history_status  FOREIGN KEY (f_status_session) REFERENCES public.t_session_status(f_id) ON DELETE NO ACTION,
+    CONSTRAINT fk_t_chat_history_user_st FOREIGN KEY (f_status_user)    REFERENCES public.t_status(f_id)          ON DELETE NO ACTION,
+    CONSTRAINT ck_t_chat_history_history CHECK (jsonb_typeof(f_chat_history) = 'array'),
+    CONSTRAINT ck_t_chat_history_ended   CHECK (f_ended_at IS NULL OR f_ended_at >= f_started_at)
 );
-COMMENT ON TABLE  public.t_chat_session IS '聊天会话 (用户与 AI 的对话上下文)';
-COMMENT ON COLUMN public.t_chat_session.f_id             IS '主键';
-COMMENT ON COLUMN public.t_chat_session.f_user_id        IS 'FK -> public.t_user(f_id) | defined in 02_rbac_users.sql | 会话创建者';
-COMMENT ON COLUMN public.t_chat_session.f_pet_id         IS 'FK -> public.t_pet(f_id) | defined in 03_pet_profile.sql | 弱关联 (可空); 宠物删除时应用层将 f_status_session=2 关闭会话, 而非 FK SET NULL';
-COMMENT ON COLUMN public.t_chat_session.f_lang           IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql | 会话语言';
-COMMENT ON COLUMN public.t_chat_session.f_status_session IS 'FK -> public.t_session_status(f_id) | defined in 01_enums.sql | 1=active 2=closed 3=archived';
-COMMENT ON COLUMN public.t_chat_session.f_chat_history   IS '聊天历史 JSONB 数组, e.g. [{"role":"user","content":"...","at":"2026-06-17T..."}]';
-COMMENT ON COLUMN public.t_chat_session.f_meta_info      IS '扩展元数据 (模型/token消耗/...)';
-COMMENT ON COLUMN public.t_chat_session.f_started_at     IS '会话开始时间 (UTC)';
-COMMENT ON COLUMN public.t_chat_session.f_ended_at       IS '会话结束时间 (UTC, 可空) | 约束: >= f_started_at';
-COMMENT ON COLUMN public.t_chat_session.f_status_user    IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
+COMMENT ON TABLE  public.t_chat_history IS '聊天历史 (用户与 AI 的对话上下文)';
+COMMENT ON COLUMN public.t_chat_history.f_id             IS '主键';
+COMMENT ON COLUMN public.t_chat_history.f_user_id        IS 'FK -> public.t_user(f_id) | defined in 02_rbac_users.sql | 会话创建者';
+COMMENT ON COLUMN public.t_chat_history.f_pet_id         IS 'FK -> public.t_pet(f_id) | defined in 03_pet_profile.sql | 弱关联 (可空); 宠物删除时应用层将 f_status_session=2 关闭会话, 而非 FK SET NULL';
+COMMENT ON COLUMN public.t_chat_history.f_lang           IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql | 会话语言';
+COMMENT ON COLUMN public.t_chat_history.f_status_session IS 'FK -> public.t_session_status(f_id) | defined in 01_enums.sql | 1=active 2=closed 3=archived';
+COMMENT ON COLUMN public.t_chat_history.f_chat_history   IS '聊天历史 JSONB 数组, e.g. [{"role":"user","content":"...","at":"2026-06-17T..."}]';
+COMMENT ON COLUMN public.t_chat_history.f_meta_info      IS '扩展元数据 (模型/token消耗/...)';
+COMMENT ON COLUMN public.t_chat_history.f_started_at     IS '会话开始时间 (UTC)';
+COMMENT ON COLUMN public.t_chat_history.f_ended_at       IS '会话结束时间 (UTC, 可空) | 约束: >= f_started_at';
+COMMENT ON COLUMN public.t_chat_history.f_status_user    IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
 
 
 -- ============================================================

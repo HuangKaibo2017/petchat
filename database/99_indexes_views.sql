@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 99. 跨模块索引与视图 / Cross-Module Indexes & Views
+-- PetChat (更懂它) / 99. 跨模块索引与视图 / Cross-Module Indexes & Views
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -59,9 +59,8 @@ CREATE INDEX IF NOT EXISTS idx_t_pet_photo_pet        ON public.t_pet_photo(f_pe
 CREATE INDEX IF NOT EXISTS idx_t_pet_photo_primary    ON public.t_pet_photo(f_pet_id) WHERE f_is_primary;
 
 -- 聊天: 按用户时间/按宠物
-CREATE INDEX IF NOT EXISTS idx_t_chat_session_user ON public.t_chat_session(f_user_id, f_started_at DESC);
-CREATE INDEX IF NOT EXISTS idx_t_chat_session_pet  ON public.t_chat_session(f_pet_id);
-ALTER TABLE public.t_chat_session ADD COLUMN IF NOT EXISTS f_started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
+CREATE INDEX IF NOT EXISTS idx_t_chat_history_user ON public.t_chat_history(f_user_id, f_started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_chat_history_pet  ON public.t_chat_history(f_pet_id);
 
 -- 捐款: 按用户/按目标
 CREATE INDEX IF NOT EXISTS idx_t_donation_user_created ON public.t_donation(f_user_id, f_created_at DESC);

@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 3. 宠物档案 / Pet Profile
+-- PetChat (更懂它) / 3. 宠物档案 / Pet Profile
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -35,10 +35,10 @@ CREATE TABLE public.t_pet (
     f_id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     f_user_id       BIGINT      NOT NULL,
     f_lang          VARCHAR(8)  NOT NULL DEFAULT 'zh-CN',
-    f_pet_type_id   BIGINT      NOT NULL,
-    f_breed_id      BIGINT,
+    f_pet_type_id   INTEGER     NOT NULL,
+    f_breed_id      INTEGER,
     f_name          VARCHAR(64) NOT NULL,
-    f_gender_id     BIGINT,
+    f_gender_id     INTEGER NOT NULL DEFAULT -1,
     f_birth_date    DATE,
     f_birth_year    INTEGER,
     f_birth_month   INTEGER,
@@ -66,7 +66,7 @@ CREATE TABLE public.t_pet (
     CONSTRAINT ck_t_pet_personality_array CHECK (jsonb_typeof(f_personality_tags) = 'array')
 );
 COMMENT ON TABLE  public.t_pet IS '宠物主表';
-COMMENT ON COLUMN public.t_pet.f_id               IS '主键 | 引用方: t_pet_photo.f_pet_id (本文件) / t_chat_session.f_pet_id (in 05_chat_comments.sql) / t_report_emotion.f_pet_id, t_report_health.f_pet_id, t_report_hpr.f_pet_id, t_report_pers.f_pet_id (in 04_ai_reports.sql) / t_appointment.f_pet_id (in 12_healthcare.sql) / t_adoption.f_pet_id, t_record_lost_pet.f_pet_id (in 13_welfare.sql)';
+COMMENT ON COLUMN public.t_pet.f_id               IS '主键 | 引用方: t_pet_photo.f_pet_id (本文件) / t_chat_history.f_pet_id (in 05_chat_comments.sql) / t_report_emotion.f_pet_id, t_report_health.f_pet_id, t_report_hpr.f_pet_id, t_report_pers.f_pet_id (in 04_ai_reports.sql) / t_appointment.f_pet_id (in 12_healthcare.sql) / t_adoption.f_pet_id, t_record_lost_pet.f_pet_id (in 13_welfare.sql)';
 COMMENT ON COLUMN public.t_pet.f_user_id          IS 'FK -> public.t_user(f_id) | defined in 02_rbac_users.sql | 宠物主人';
 COMMENT ON COLUMN public.t_pet.f_lang             IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql | 宠物档案主语言';
 COMMENT ON COLUMN public.t_pet.f_pet_type_id      IS 'FK -> public.t_pet_type(f_id) | defined in 01_enums.sql | 必填, 不可空';
@@ -93,7 +93,7 @@ COMMENT ON COLUMN public.t_pet.f_updated_at       IS '更新时间 (UTC), 由 tr
 CREATE TABLE public.t_pet_photo (
     f_id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     f_pet_id        BIGINT       NOT NULL,
-    f_photo_type_id BIGINT       NOT NULL,
+    f_photo_type_id INTEGER      NOT NULL,
     f_photo_url     VARCHAR(512) NOT NULL,
     f_thumbnail_url VARCHAR(512) NOT NULL DEFAULT '',
     f_is_primary    BOOLEAN      NOT NULL DEFAULT false,

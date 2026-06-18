@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (灵犀宠语) / 2. 身份与权限 / RBAC & Users
+-- PetChat (更懂它) / 2. 身份与权限 / RBAC & Users
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -10,7 +10,7 @@
 --   加载顺序: 在 01_enums 之后, 在所有业务表之前
 --
 -- 依赖:
---   00_extensions.sql  (pgcrypto, uuid-ossp)
+--   00_extensions.sql  (pgcrypto)
 --   01_enums.sql       (t_lang, t_status)
 --
 -- 被本文件引用的脚本 (下游, 均通过 t_user.f_id 关联):
