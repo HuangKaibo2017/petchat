@@ -86,7 +86,56 @@ const RealAPI = {
     }
   },
 
+  // === 聊天 ===
+  Chat: {
+    listSessions: async () => {
+      return await RealAPI.get('/api/chat/sessions')
+    },
+    createSession: async (petId) => {
+      return await RealAPI.post('/api/chat/sessions', { petId })
+    },
+    getMessages: async (sessionId) => {
+      return await RealAPI.get('/api/chat/sessions/' + sessionId + '/messages')
+    },
+    send: async (sessionId, text) => {
+      return await RealAPI.post('/api/chat/sessions/' + sessionId + '/messages', { content: text })
+    }
+  },
+
   // === 收藏 ===
+  Chat: {
+    listSessions: async () => {
+      const history = wx.getStorageSync('chatHistory') || []
+      return { sessions: history }
+    },
+    createSession: async (petId) => {
+      const id = Date.now()
+      return { sessionId: id, petId }
+    },
+    getMessages: async (sessionId) => {
+      return {
+        messages: [{
+          id: Date.now(), role: 'pet',
+          content: '汪汪！我是你的宠物，今天想跟你聊聊天~',
+          at: new Date().toISOString()
+        }]
+      }
+    },
+    send: async (sessionId, text) => {
+      const replies = [
+        '主人你今天心情不错！我也很开心~',
+        '我有点想吃零食了，能不能给我一点点？',
+        '今天外面好热闹，我看到小鸟了！',
+        '你摸摸我的头好不好，我喜欢你摸我。',
+        '我感觉你今天有点累，要不要休息一下？'
+      ]
+      const reply = replies[Math.floor(Math.random() * replies.length)]
+      return {
+        userMessage: { id: Date.now(), role: 'user', content: text, at: new Date().toISOString() },
+        petMessage: { id: Date.now() + 1, role: 'pet', content: reply, at: new Date().toISOString() }
+      }
+    }
+  },
   Favorite: {
     toggle: async (reportId, type) => {
       return await RealAPI.post('/api/favorites/toggle', { reportId, type })
@@ -173,6 +222,39 @@ const MockNamespaced = {
   Upload: {
     upload: async (filePath) => {
       return { publicUrl: filePath }
+    }
+  },
+  Chat: {
+    listSessions: async () => {
+      const history = wx.getStorageSync('chatHistory') || []
+      return { sessions: history }
+    },
+    createSession: async (petId) => {
+      const id = Date.now()
+      return { sessionId: id, petId }
+    },
+    getMessages: async (sessionId) => {
+      return {
+        messages: [{
+          id: Date.now(), role: 'pet',
+          content: '汪汪！我是你的宠物，今天想跟你聊聊天~',
+          at: new Date().toISOString()
+        }]
+      }
+    },
+    send: async (sessionId, text) => {
+      const replies = [
+        '主人你今天心情不错！我也很开心~',
+        '我有点想吃零食了，能不能给我一点点？',
+        '今天外面好热闹，我看到小鸟了！',
+        '你摸摸我的头好不好，我喜欢你摸我。',
+        '我感觉你今天有点累，要不要休息一下？'
+      ]
+      const reply = replies[Math.floor(Math.random() * replies.length)]
+      return {
+        userMessage: { id: Date.now(), role: 'user', content: text, at: new Date().toISOString() },
+        petMessage: { id: Date.now() + 1, role: 'pet', content: reply, at: new Date().toISOString() }
+      }
     }
   },
   Favorite: {

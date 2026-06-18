@@ -20,26 +20,24 @@ Page({
   },
 
   async loadSessions() {
-    if (!app.globalData.isAuthorized) return
-
     this.setData({ loading: true })
     try {
       const res = await API.Chat.listSessions()
-      if (res && res.sessions) {
+      if (res && res.sessions && res.sessions.length) {
         const pets = this.data.pets
-        const petMap = new Map(pets.map(p => [p.id, p]))
+        const petMap = {}
+        pets.forEach(p => { petMap[p.id] = p })
         this.setData({
           sessions: res.sessions.map(s => ({
-            id: s.f_id,
-            petId: s.f_pet_id,
-            petName: petMap.get(s.f_pet_id)?.name || '宠物',
-            lastActive: s.f_started_at,
-            status: s.f_status_session,
+            id: s.id || s.f_id,
+            petId: s.petId || s.f_pet_id,
+            petName: petMap[s.petId || s.f_pet_id]?.name || '宠物',
+            lastMessage: s.lastMessage || '',
+            time: s.time || s.f_started_at || ''
           }))
         })
       }
     } catch (e) {
-      // Fall back to local storage
       const chatHistory = wx.getStorageSync('chatHistory') || []
       this.setData({ sessions: chatHistory })
     }
@@ -48,29 +46,44 @@ Page({
 
   async startChat(e) {
     const petId = e.currentTarget.dataset.id
-
-    if (!app.globalData.isAuthorized) {
-      app.requestAuth(() => this.startChat(e))
-      return
-    }
+    if (!petId) return
 
     try {
       wx.showLoading({ title: '创建会话...' })
       const res = await API.Chat.createSession(petId)
       wx.hideLoading()
 
+      // 保存到本地历史
+      const chatHistory = wx.getStorageSync('chatHistory') || []
+      const exists = chatHistory.find(h => h.petId === petId)
+      if (!exists) {
+        chatHistory.unshift({
+          id: res.sessionId,
+          petId,
+          petName: this.data.pets.find(p => p.id === petId)?.name || '宠物',
+          time: new Date().toLocaleString()
+        })
+        wx.setStorageSync('chatHistory', chatHistory)
+      }
+
       wx.navigateTo({
         url: `/pages/chat/list/list?sessionId=${res.sessionId}&petId=${petId}`
       })
     } catch (err) {
       wx.hideLoading()
-      wx.showToast({ title: '创建会话失败', icon: 'none' })
+      // 兜底：直接进入聊天
+      wx.navigateTo({
+        url: `/pages/chat/list/list?petId=${petId}`
+      })
     }
   },
 
   openChat(e) {
     const id = e.currentTarget.dataset.id
-    wx.navigateTo({ url: `/pages/chat/list/list?sessionId=${id}` })
+    const petId = e.currentTarget.dataset['petId'] || e.currentTarget.dataset.petId
+    wx.navigateTo({
+      url: `/pages/chat/list/list?sessionId=${id}&petId=${petId || ''}`
+    })
   },
 
   goRegister() { wx.navigateTo({ url: '/pages/mine/register/register' }) }

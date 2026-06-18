@@ -23,17 +23,17 @@
   </view>
 
   <!-- Chat History -->
-  <view class="section" wx:if="{{chatHistory.length}}">
+  <view class="section" wx:if="{{sessions.length}}">
     <view class="section-title">最近聊天</view>
-    <view class="chat-history-item flex items-center" wx:for="{{chatHistory}}" wx:key="id" bindtap="openChat" data-id="{{item.id}}">
+    <view class="chat-history-item flex items-center" wx:for="{{sessions}}" wx:key="id" bindtap="openChat" data-id="{{item.id}}" data-pet-id="{{item.petId}}">
       <image class="avatar-sm" src="{{item.petAvatar || '/images/default-pet.png'}}" mode="aspectFill" />
       <view class="ml-sm flex-1">
         <view class="text-sm font-bold">{{item.petName}}</view>
-        <view class="text-xs text-hint">{{item.lastMessage}}</view>
+        <view class="text-xs text-hint">{{item.lastMessage || '点击继续聊天'}}</view>
       </view>
       <view class="text-xs text-hint">{{item.time}}</view>
     </view>
   </view>
 
-  <empty-state wx:if="{{!pets.length}}" title="暂未添加宠物" desc="添加宠物后即可开始拟态聊天" actionText="去添加" bind:action="goRegister" />
+  <empty-state wx:if="{{!pets.length && !sessions.length}}" title="暂未添加宠物" desc="添加宠物后即可开始拟态聊天" actionText="去添加" bind:action="goRegister" />
 </view>
