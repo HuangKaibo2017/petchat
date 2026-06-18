@@ -1,0 +1,7 @@
+.banner-swiper { height:200rpx; margin:16rpx 32rpx; border-radius:24rpx; overflow:hidden; }
+.banner-item { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 32rpx; }
+.activity-card { margin-bottom: 16rpx; }
+.tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
+.tag-warning { background:#FFFBEB; color:#F59E0B; }
+.feed-card { margin-bottom: 16rpx; }
+.feed-img { width:100%; height:320rpx; border-radius:16rpx; }

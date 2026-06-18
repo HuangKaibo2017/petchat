@@ -1,0 +1,68 @@
+.duration-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+.duration-item {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 20rpx 8rpx;
+  text-align: center;
+  font-size: 26rpx;
+  border: 3rpx solid transparent;
+  transition: all 0.2s;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.duration-item.active {
+  border-color: #F97316;
+  background: #FFF7ED;
+  color: #F97316;
+  font-weight: 600;
+}
+
+.dual-divination {
+  padding: 16rpx;
+  border-radius: 16rpx;
+}
+
+.upload-row { margin-top: 16rpx; }
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx 32rpx;
+  background: #F3F4F6;
+  border-radius: 9999rpx;
+  font-size: 26rpx;
+  color: #6B7280;
+}
+.upload-preview {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  margin-top: 16rpx;
+}
+
+.number-grid {
+  display: flex;
+  gap: 16rpx;
+  justify-content: center;
+  margin-top: 16rpx;
+}
+.number-input {
+  width: 80rpx;
+  height: 80rpx;
+  background: #FFFFFF;
+  border: 3rpx solid #E5E7EB;
+  border-radius: 20rpx;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+.number-input.filled {
+  border-color: #F97316;
+  background: #FFF7ED;
+}

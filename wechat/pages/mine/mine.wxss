@@ -1,0 +1,56 @@
+.user-card {
+  margin: 24rpx 32rpx;
+  padding: 32rpx;
+  background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+  border-radius: 24rpx;
+}
+.pet-switch { padding: 16rpx; }
+.pet-scroll { white-space: nowrap; display: flex; gap: 16rpx; }
+.pet-mini {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12rpx 20rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+.pet-mini.active { border-color: #F97316; background: #FFF7ED; }
+.pet-mini.add { border: 2rpx dashed #D1D5DB; }
+
+.menu-section { padding: 0 32rpx; margin-top: 24rpx; }
+.menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16rpx; }
+.menu-item {
+  position: relative;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.menu-icon { font-size: 40rpx; }
+.badge { position: absolute; top: 8rpx; right: 8rpx; }
+
+.func-list {
+  margin: 24rpx 32rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.func-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 24rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+.func-item:last-child { border-bottom: none; }
+.func-left { display: flex; align-items: center; gap: 16rpx; }
+.func-icon { font-size: 36rpx; }
+.func-right { display: flex; align-items: center; }
+.tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
+.tag-success { background:#F0FDF4; color:#22C55E; }

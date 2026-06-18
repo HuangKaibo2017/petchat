@@ -1,0 +1,98 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/emotion/emotion",
+    "pages/emotion/report/report",
+    "pages/health/health",
+    "pages/health/report/report",
+    "pages/risk/risk",
+    "pages/risk/report/report",
+    "pages/chat/chat",
+    "pages/chat/list/list",
+    "pages/shop/shop",
+    "pages/shop/detail/detail",
+    "pages/shop/cart/cart",
+    "pages/shop/checkout/checkout",
+    "pages/service/service",
+    "pages/mine/mine",
+    "pages/mine/register/register",
+    "pages/mine/pets/pets",
+    "pages/mine/pets/edit/edit",
+    "pages/mine/history/history",
+    "pages/mine/settings/settings",
+    "pages/mine/orders/orders",
+    "pages/mine/agent/agent",
+    "pages/medical/medical",
+    "pages/medical/detail/detail",
+    "pages/insurance/insurance",
+    "pages/hospitals/hospitals",
+    "pages/hospitals/detail/detail",
+    "pages/community/community",
+    "pages/community/post/post",
+    "pages/favorites/favorites"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFF7ED",
+    "navigationBarTitleText": "PetChat 灵犀",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF7ED"
+  },
+  "tabBar": {
+    "color": "#9CA3AF",
+    "selectedColor": "#F97316",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "聊天",
+        "iconPath": "images/tab-chat.png",
+        "selectedIconPath": "images/tab-chat-active.png"
+      },
+      {
+        "pagePath": "pages/shop/shop",
+        "text": "商城",
+        "iconPath": "images/tab-shop.png",
+        "selectedIconPath": "images/tab-shop-active.png"
+      },
+      {
+        "pagePath": "pages/service/service",
+        "text": "服务",
+        "iconPath": "images/tab-service.png",
+        "selectedIconPath": "images/tab-service-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "images/tab-mine.png",
+        "selectedIconPath": "images/tab-mine-active.png"
+      }
+    ]
+  },
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/nav-bar",
+    "pet-card": "/components/pet-card/pet-card",
+    "report-card": "/components/report-card/report-card",
+    "empty-state": "/components/empty-state/empty-state",
+    "loading": "/components/loading/loading",
+    "authorize": "/components/authorize/authorize"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于推荐附近合作医院"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseAddress"
+  ],
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

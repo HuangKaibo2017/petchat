@@ -1,0 +1,41 @@
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: #FFF7ED;
+}
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  padding: 0 32rpx;
+  position: relative;
+}
+.nav-left {
+  position: absolute;
+  left: 16rpx;
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+.nav-title {
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-right {
+  position: absolute;
+  right: 32rpx;
+  display: flex;
+  align-items: center;
+}

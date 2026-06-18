@@ -1,0 +1,19 @@
+.pet-form-card { margin: 16rpx 0; }
+.gender-row { display: flex; gap: 16rpx; }
+.gender-btn {
+  flex: 1;
+  padding: 16rpx;
+  text-align: center;
+  background: #F3F4F6;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  border: 3rpx solid transparent;
+  transition: all 0.2s;
+}
+.gender-btn.active {
+  border-color: #F97316;
+  background: #FFF7ED;
+  color: #F97316;
+  font-weight: 600;
+}
+.add-pet-btn { padding: 24rpx; }

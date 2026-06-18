@@ -1,0 +1,39 @@
+<nav-bar title="找宠物聊天" />
+<view class="page-container">
+  <!-- Quick Start -->
+  <view class="chat-hero card text-center">
+    <view class="text-2xl mb-sm">💬</view>
+    <view class="text-xl font-bold">拟态聊天</view>
+    <view class="text-sm text-muted mt-sm">以宠物的视角与您对话</view>
+  </view>
+
+  <!-- Pet Selection for Chat -->
+  <view class="section" wx:if="{{pets.length}}">
+    <view class="section-title">选择聊天对象</view>
+    <view class="chat-pet-list">
+      <view class="chat-pet-item card flex items-center" wx:for="{{pets}}" wx:key="id" bindtap="startChat" data-id="{{item.id}}">
+        <image class="avatar-md" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+        <view class="ml-md flex-1">
+          <view class="text-md font-bold">{{item.name}}</view>
+          <view class="text-xs text-hint">拟态聊天 · 宠物视角</view>
+        </view>
+        <view class="chat-arrow text-primary">开始聊天 ›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Chat History -->
+  <view class="section" wx:if="{{chatHistory.length}}">
+    <view class="section-title">最近聊天</view>
+    <view class="chat-history-item flex items-center" wx:for="{{chatHistory}}" wx:key="id" bindtap="openChat" data-id="{{item.id}}">
+      <image class="avatar-sm" src="{{item.petAvatar || '/images/default-pet.png'}}" mode="aspectFill" />
+      <view class="ml-sm flex-1">
+        <view class="text-sm font-bold">{{item.petName}}</view>
+        <view class="text-xs text-hint">{{item.lastMessage}}</view>
+      </view>
+      <view class="text-xs text-hint">{{item.time}}</view>
+    </view>
+  </view>
+
+  <empty-state wx:if="{{!pets.length}}" title="暂未添加宠物" desc="添加宠物后即可开始拟态聊天" actionText="去添加" bind:action="goRegister" />
+</view>

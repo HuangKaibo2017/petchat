@@ -1,0 +1,8 @@
+.cart-item { margin: 16rpx 32rpx; display: flex; align-items: center; }
+.cart-img { width: 120rpx; height: 120rpx; border-radius: 16rpx; }
+.cart-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24rpx 32rpx; background: #FFFFFF;
+  box-shadow: 0 -2rpx 8rpx rgba(0,0,0,0.04);
+}

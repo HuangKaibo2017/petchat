@@ -1,0 +1,10 @@
+.search-bar { background:#FFFFFF; }
+.search-input { background:#F3F4F6; border-radius:9999rpx; padding:12rpx 24rpx; }
+.filter-row { gap:12rpx; background:#FFFFFF; }
+.filter-chip { padding:8rpx 20rpx; background:#F3F4F6; border-radius:9999rpx; font-size:24rpx; color:#6B7280; white-space:nowrap; }
+.filter-chip.active { background:#FFF7ED; color:#F97316; font-weight:600; }
+.hospital-list { padding: 16rpx 0; }
+.hospital-card { margin: 0 32rpx 16rpx; padding: 20rpx; }
+.hospital-img { width: 120rpx; height: 120rpx; border-radius: 16rpx; flex-shrink: 0; }
+.tag { display:inline-flex; align-items:center; padding:4rpx 12rpx; border-radius:9999rpx; font-size:20rpx; font-weight:500; margin-right:8rpx; }
+.tag-primary { background:#FFF7ED; color:#F97316; }

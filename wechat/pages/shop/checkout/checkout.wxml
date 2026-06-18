@@ -1,0 +1,7 @@
+<nav-bar title="确认订单" showBack="{{true}}" />
+<view class="page-container section">
+  <view class="card"><view class="text-md font-bold mb-sm">收货地址</view><view class="text-sm text-hint" bindtap="chooseAddress">{{address || '请选择收货地址'}}</view></view>
+  <view class="card mt-md"><view class="text-md font-bold mb-sm">商品信息</view><view class="text-sm">灵犀NFC项圈 × 1</view><view class="text-primary font-bold text-lg mt-sm">¥{{totalPrice}}</view></view>
+  <view class="card mt-md"><view class="text-md font-bold mb-sm">支付方式</view><view class="text-sm">微信支付</view></view>
+  <button class="btn btn-primary btn-block mt-xl" bindtap="submitOrder">确认支付 ¥{{totalPrice}}</button>
+</view>
