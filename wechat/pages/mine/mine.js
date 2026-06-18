@@ -51,7 +51,7 @@ Page({
   contactService() {
     wx.showModal({
       title: '联系客服',
-      content: '客服微信：PetChat_KF\n工作时间：9:00-21:00',
+      content: '客服微信：Gengdongta_KF\n工作时间：9:00-21:00',
       showCancel: true
     })
   },

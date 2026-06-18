@@ -1,5 +1,5 @@
 {
-  "description": "PetChat - 宠物智能养护平台",
+  "description": "Gengdongta - 宠物智能养护平台",
   "packOptions": {
     "ignore": [
       {
@@ -55,7 +55,7 @@
   "compileType": "miniprogram",
   "libVersion": "3.3.4",
   "appid": "wx67bdea24d2893ced",
-  "projectname": "petchat",
+  "projectname": "gengdongta",
   "condition": {},
   "miniprogramRoot": "",
   "editorSetting": {

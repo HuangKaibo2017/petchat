@@ -2,7 +2,7 @@
 <view class="page-container section">
   <view class="card text-center" style="padding:64rpx 32rpx">
     <view class="text-2xl mb-md">💎</view>
-    <view class="text-xl font-bold mb-sm">成为PetChat代理</view>
+    <view class="text-xl font-bold mb-sm">成为Gengdongta代理</view>
     <view class="text-sm text-muted mb-lg">分享宠物养护知识，赚取佣金收益</view>
     <view class="agent-benefits text-left">
       <view class="text-md font-bold mb-sm">代理权益</view>

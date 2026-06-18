@@ -1,10 +1,10 @@
-<nav-bar title="PetChat 灵犀" />
+<nav-bar title="Gengdongta" />
 <view class="page-container">
   <!-- Brand Hero -->
   <view class="hero-section">
     <image class="hero-bg" src="/images/hero-bg.png" mode="aspectFill" />
     <view class="hero-overlay">
-      <view class="hero-brand text-3xl font-bold">PetChat 灵犀</view>
+      <view class="hero-brand text-3xl font-bold">Gengdongta</view>
       <view class="hero-slogan text-md">懂宠物，更懂你</view>
     </view>
   </view>
@@ -126,7 +126,7 @@
   <!-- Recommend Products -->
   <view class="section">
     <view class="flex-between mb-sm">
-      <view class="section-title" style="margin-bottom:0">灵犀好物</view>
+      <view class="section-title" style="margin-bottom:0">推荐好物</view>
       <view class="text-sm text-primary" bindtap="goShop">更多 ›</view>
     </view>
     <view class="grid-2">

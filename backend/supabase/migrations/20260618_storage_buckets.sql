@@ -1,12 +1,12 @@
 -- ============================================================
--- PetChat Storage Buckets
+-- Gengdongta Storage Buckets
 -- ============================================================
 
 -- Create storage bucket for user-uploaded assets
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
-  'petchat-assets',
-  'petchat-assets',
+  'gengdongta-assets',
+  'gengdongta-assets',
   true,                         -- public access for images
   10485760,                     -- 10 MB max file size
   ARRAY[
@@ -20,27 +20,27 @@ VALUES (
 -- Storage RLS: authenticated users can read all files
 CREATE POLICY "Anyone can read assets"
   ON storage.objects FOR SELECT
-  USING (bucket_id = 'petchat-assets');
+  USING (bucket_id = 'gengdongta-assets');
 
 -- Storage RLS: only owner can upload/update their files
 -- Files are organized as: {category}/{userId}_{timestamp}_{random}.{ext}
 CREATE POLICY "Users can upload their own files"
   ON storage.objects FOR INSERT
   WITH CHECK (
-    bucket_id = 'petchat-assets'
+    bucket_id = 'gengdongta-assets'
     AND auth.role() = 'authenticated'
   );
 
 CREATE POLICY "Users can update their own files"
   ON storage.objects FOR UPDATE
   USING (
-    bucket_id = 'petchat-assets'
+    bucket_id = 'gengdongta-assets'
     AND auth.role() = 'authenticated'
   );
 
 CREATE POLICY "Users can delete their own files"
   ON storage.objects FOR DELETE
   USING (
-    bucket_id = 'petchat-assets'
+    bucket_id = 'gengdongta-assets'
     AND auth.role() = 'authenticated'
   );

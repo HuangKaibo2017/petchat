@@ -1,4 +1,4 @@
-# PetChat Backend
+# Gengdongta Backend
 
 > Supabase Edge Functions + PostgREST · 微信小程序后端  
 > Version: 1.0.0 · Last Updated: 2026-06-18
@@ -678,7 +678,7 @@ Prefer: return=representation
 | `AI_API_KEY` | 是 | AI API Key（OpenAI 或兼容） | `sk-...` |
 | `AI_BASE_URL` | 否 | AI API 地址 | `https://api.openai.com/v1` (默认) |
 | `AI_MODEL` | 否 | 模型名 | `gpt-4o-mini` (默认) |
-| `STORAGE_BUCKET` | 否 | Storage 桶名 | `petchat-assets` (默认) |
+| `STORAGE_BUCKET` | 否 | Storage 桶名 | `gengdongta-assets` (默认) |
 
 ### 换用国产大模型
 
@@ -870,7 +870,7 @@ curl -X POST http://localhost:54321/functions/v1/emotion-report \
 症状: 上传大图返回 413
 原因: 超过文件大小限制
 修复: storage.buckets 表中 file_size_limit 默认为 10MB
-      如需调整: UPDATE storage.buckets SET file_size_limit = 20971520 WHERE id = 'petchat-assets';
+      如需调整: UPDATE storage.buckets SET file_size_limit = 20971520 WHERE id = 'gengdongta-assets';
 ```
 
 ### CORS 错误
@@ -883,5 +883,5 @@ curl -X POST http://localhost:54321/functions/v1/emotion-report \
 
 ---
 
-**维护者**: PetChat Platform Team  
+**维护者**: Gengdongta Platform Team  
 **最后更新**: 2026-06-18

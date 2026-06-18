@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (更懂它) / 部署入口 / Deployment Orchestrator
+-- Gengdongta (更懂它) / 部署入口 / Deployment Orchestrator
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -20,10 +20,10 @@
 --   1. 部署前确保 PostgreSQL 15+ 已安装, 角色有 CREATE / EXTENSION 权限
 --   2. Supabase Cloud: pgroonga 已在 Dashboard 启用, 自建需先 OS 安装
 --   3. rpc/rpc_gen_uuid.sql 必须在 02_rbac_users.sql 之前手动执行 (用于 t_user.f_public_id DEFAULT)
---   4. 部署完成后, 再执行 petchat_db_init.sql 写入初始 enum 数据 / 系统用户 / 匿名哨兵
+--   4. 部署完成后, 再执行 gengdongta_db_init.sql 写入初始 enum 数据 / 系统用户 / 匿名哨兵
 -- ============================================================
 
-\echo '=== PetChat 数据库部署开始 ==='
+\echo '=== Gengdongta 数据库部署开始 ==='
 \echo 'Step 1/15: 00_extensions.sql'
 \i 00_extensions.sql
 \echo 'Step 2/15: 01_enums.sql'
@@ -54,5 +54,5 @@
 \i 13_welfare.sql
 \echo 'Step 15/15: 99_indexes_views.sql'
 \i 99_indexes_views.sql
-\echo '=== PetChat 数据库部署完成 ==='
-\echo '下一步: 执行 petchat_db_init.sql 写入初始数据'
+\echo '=== Gengdongta 数据库部署完成 ==='
+\echo '下一步: 执行 gengdongta_db_init.sql 写入初始数据'

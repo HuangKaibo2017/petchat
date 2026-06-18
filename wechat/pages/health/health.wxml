@@ -46,5 +46,5 @@
     <button class="btn btn-primary btn-block mt-xl" disabled="{{!canSubmit}}" bindtap="generateReport">生成健康报告</button>
   </view>
 
-  <loading visible="{{generating}}" text="灵犀正在分析中…" />
+  <loading visible="{{generating}}" text="Gengdongta正在分析中…" />
 </view>

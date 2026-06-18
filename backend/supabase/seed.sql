@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat Seed Data
+-- Gengdongta Seed Data
 -- Run after all DDL and RLS policies are applied
 -- ============================================================
 

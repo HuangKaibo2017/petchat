@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat RLS Policies
+-- Gengdongta RLS Policies
 -- Applied after all DDL to enable row-level security
 -- ============================================================
 

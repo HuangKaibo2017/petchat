@@ -239,7 +239,7 @@ app.get('/api/health', (req, res) => {
 // ==================== 启动 ====================
 app.listen(PORT, () => {
   console.log('═══════════════════════════════════')
-  console.log('  🐾 PetChat 灵犀 后端已启动')
+  console.log('  🐾 Gengdongta 后端已启动')
   console.log(`  📡 http://localhost:${PORT}`)
   console.log(`  🐱 演示宠物: ${db.pets.map(p => p.name).join(', ')}`)
   console.log(`  🛒 商品数: ${db.products.length}`)
