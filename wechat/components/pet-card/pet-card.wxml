@@ -1,0 +1,15 @@
+<view class="pet-card {{selected ? 'selected' : ''}}" bindtap="onTap">
+  <image class="pet-avatar" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+  <view class="pet-info">
+    <view class="pet-name font-bold">{{pet.name}}</view>
+    <view class="pet-detail text-xs text-muted">
+      {{pet.breed}} · {{pet.gender === 'male' ? '♂' : '♀'}} · {{pet.age}}
+    </view>
+    <view class="pet-tags" wx:if="{{pet.tags && pet.tags.length}}">
+      <text class="tag tag-primary" wx:for="{{pet.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+    </view>
+  </view>
+  <view class="pet-arrow" wx:if="{{showArrow}}">
+    <text class="text-hint">›</text>
+  </view>
+</view>

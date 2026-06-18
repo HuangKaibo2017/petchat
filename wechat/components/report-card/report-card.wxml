@@ -1,0 +1,32 @@
+<view class="report-card" bindtap="onTap">
+  <view class="report-header flex-between">
+    <view class="flex items-center">
+      <view class="report-icon {{type}}">
+        <text>{{typeIcon}}</text>
+      </view>
+      <view class="report-type text-md font-bold">{{report.typeName || '解读报告'}}</view>
+    </view>
+    <view class="report-time text-xs text-hint">{{report.createdAt}}</view>
+  </view>
+  <view class="report-pet text-sm text-muted" wx:if="{{report.petName}}">
+    {{report.petName}}
+  </view>
+  <view class="report-summary text-md mt-sm" wx:if="{{report.summary}}">
+    {{report.summary}}
+  </view>
+  <view class="report-footer flex-between mt-sm">
+    <view class="flex items-center">
+      <view class="tag tag-{{report.riskLevel || 'success'}}" wx:if="{{report.riskLevel}}">
+        {{report.riskText}}
+      </view>
+    </view>
+    <view class="report-actions flex">
+      <view class="action-btn" catchtap="onFavorite">
+        <text>{{report.favorited ? '❤️' : '🤍'}}</text>
+      </view>
+      <view class="action-btn" catchtap="onShare">
+        <text>📤</text>
+      </view>
+    </view>
+  </view>
+</view>

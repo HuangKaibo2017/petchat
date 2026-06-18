@@ -1,0 +1,13 @@
+{
+  "name": "petchat-backend",
+  "version": "1.0.0",
+  "description": "PetChat 灵犀 - 后端 API 服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

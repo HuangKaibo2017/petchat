@@ -1,0 +1,19 @@
+<nav-bar title="{{type === 'newpet' ? '新宠购买指南' : '医疗科普指南'}}" showBack="{{true}}" />
+<view class="page-container section">
+  <view wx:if="{{type !== 'newpet'}}">
+    <view class="section-title">症状咨询</view>
+    <view class="section-subtitle">AI知识库为您提供科普参考，非诊疗服务</view>
+    <textarea class="input-field input-textarea" placeholder="描述症状、时长、异常表现…" value="{{symptom}}" bindinput="onInput" data-field="symptom" />
+    <view class="upload-row flex mt-sm">
+      <view class="upload-btn" bindtap="chooseImage"><text>📷 上传检查报告</text></view>
+    </view>
+    <button class="btn btn-primary btn-block mt-lg" bindtap="generateGuide" disabled="{{!symptom}}">生成科普指南</button>
+  </view>
+  <view wx:else>
+    <view class="section-title">新宠购买建议指南</view>
+    <view class="section-subtitle">选择适合你的毛孩子</view>
+    <textarea class="input-field input-textarea" placeholder="描述你的生活情况、偏好…" value="{{symptom}}" bindinput="onInput" data-field="symptom" />
+    <button class="btn btn-primary btn-block mt-lg" bindtap="generateGuide" disabled="{{!symptom}}">获取购买建议</button>
+  </view>
+  <loading visible="{{generating}}" text="AI正在分析…" />
+</view>

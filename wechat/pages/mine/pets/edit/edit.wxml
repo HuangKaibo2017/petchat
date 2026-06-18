@@ -1,0 +1,10 @@
+<nav-bar title="{{isEdit ? '编辑宠物' : '添加宠物'}}" showBack="{{true}}" />
+<view class="page-container section">
+  <view class="input-group"><view class="input-label">名字</view><input class="input-field" value="{{pet.name}}" bindinput="onInput" data-field="name" /></view>
+  <view class="input-group"><view class="input-label">品种</view><input class="input-field" value="{{pet.breed}}" bindinput="onInput" data-field="breed" /></view>
+  <view class="input-group"><view class="input-label">年龄</view><input class="input-field" value="{{pet.age}}" bindinput="onInput" data-field="age" /></view>
+  <view class="input-group"><view class="input-label">病史</view><input class="input-field" value="{{pet.history}}" bindinput="onInput" data-field="history" /></view>
+  <view class="input-group"><view class="input-label">防疫</view><input class="input-field" value="{{pet.vaccine}}" bindinput="onInput" data-field="vaccine" /></view>
+  <button class="btn btn-primary btn-block mt-xl" bindtap="save">保存</button>
+  <button class="btn btn-ghost btn-block mt-md" wx:if="{{isEdit}}" bindtap="deletePet">删除此宠物</button>
+</view>

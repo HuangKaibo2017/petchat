@@ -1,0 +1,109 @@
+<nav-bar title="我的" />
+<view class="page-container">
+  <!-- User Info -->
+  <view class="user-card">
+    <view wx:if="{{isAuthorized}}">
+      <view class="flex items-center">
+        <image class="avatar-lg" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
+        <view class="ml-md">
+          <view class="text-xl font-bold">{{userInfo.nickName || '宠主'}}</view>
+          <view class="text-sm text-hint mt-sm">{{currentPet ? currentPet.name + '的家长' : '暂未添加宠物'}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="flex items-center" bindtap="showAuth">
+      <image class="avatar-lg" src="/images/default-avatar.png" mode="aspectFill" />
+      <view class="ml-md">
+        <view class="text-lg font-bold">点击登录</view>
+        <view class="text-xs text-hint mt-sm">授权后享受完整服务</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Current Pet Quick Switch -->
+  <view class="pet-switch card" wx:if="{{pets.length > 1}}">
+    <scroll-view scroll-x class="pet-scroll">
+      <view class="pet-mini {{currentPet && currentPet.id === item.id ? 'active' : ''}}" wx:for="{{pets}}" wx:key="id" bindtap="switchPet" data-id="{{item.id}}">
+        <image class="avatar-sm" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+        <text class="text-xs mt-sm">{{item.name}}</text>
+      </view>
+      <view class="pet-mini add" bindtap="goAddPet">
+        <text class="text-xl text-hint">+</text>
+        <text class="text-xs text-hint">添加</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Menu Grid -->
+  <view class="menu-section">
+    <view class="menu-grid">
+      <view class="menu-item" bindtap="goPets">
+        <view class="menu-icon">🐾</view>
+        <view class="menu-text text-sm">宠物档案</view>
+      </view>
+      <view class="menu-item" bindtap="goHistory">
+        <view class="menu-icon">📋</view>
+        <view class="menu-text text-sm">历史报告</view>
+      </view>
+      <view class="menu-item" bindtap="goFavorites">
+        <view class="menu-icon">❤️</view>
+        <view class="menu-text text-sm">我的收藏</view>
+      </view>
+      <view class="menu-item" bindtap="goOrders">
+        <view class="menu-icon">📦</view>
+        <view class="menu-text text-sm">我的订单</view>
+        <view class="badge" wx:if="{{pendingOrders}}">{{pendingOrders}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Function List -->
+  <view class="func-list">
+    <view class="func-item" bindtap="goInsurance">
+      <view class="func-left">
+        <text class="func-icon">🛡️</text>
+        <text class="text-md">宠物保险</text>
+      </view>
+      <view class="func-right">
+        <text class="tag tag-success text-xs">新人免费</text>
+        <text class="text-hint ml-sm">›</text>
+      </view>
+    </view>
+    <view class="func-item" bindtap="goDeviceBind">
+      <view class="func-left">
+        <text class="func-icon">📡</text>
+        <text class="text-md">设备绑定</text>
+        <text class="text-xs text-hint ml-sm">AI盒子</text>
+      </view>
+      <text class="text-hint">›</text>
+    </view>
+    <view class="func-item" bindtap="goAgent">
+      <view class="func-left">
+        <text class="func-icon">💎</text>
+        <text class="text-md">成为代理</text>
+      </view>
+      <text class="text-hint">›</text>
+    </view>
+    <view class="func-item" bindtap="contactService">
+      <view class="func-left">
+        <text class="func-icon">💬</text>
+        <text class="text-md">联系客服</text>
+      </view>
+      <text class="text-hint">›</text>
+    </view>
+  </view>
+
+  <!-- Settings -->
+  <view class="func-list mt-md">
+    <view class="func-item" bindtap="goSettings">
+      <view class="func-left">
+        <text class="func-icon">⚙️</text>
+        <text class="text-md">设置</text>
+      </view>
+      <text class="text-hint">›</text>
+    </view>
+  </view>
+
+  <view style="height: 120rpx"></view>
+</view>
+<authorize visible="{{showAuth}}" bind:success="onAuthSuccess" bind:cancel="onAuthCancel" />
