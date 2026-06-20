@@ -1,0 +1,28 @@
+<nav-bar title="宠物保险" showBack="{{true}}" />
+<view class="page-container">
+  <view class="insurance-hero" style="background:linear-gradient(135deg,#F97316,#FB923C)">
+    <view class="text-2xl mb-sm">🛡️</view>
+    <view class="text-xl font-bold text-white">新人专属福利</view>
+    <view class="text-lg text-white mt-sm">免费领取1个月医疗险</view>
+    <button class="btn btn-lg mt-lg" style="background:#FFFFFF;color:#F97316;font-weight:700" bindtap="claimFree">立即领取</button>
+  </view>
+  <view class="section">
+    <view class="section-title">保障方案</view>
+    <view class="plan-card card" wx:for="{{plans}}" wx:key="id">
+      <view class="flex-between">
+        <view class="text-lg font-bold">{{item.name}}</view>
+        <view class="tag tag-primary">{{item.tag}}</view>
+      </view>
+      <view class="text-sm text-muted mt-sm">{{item.desc}}</view>
+      <view class="flex-between mt-md">
+        <view class="text-primary font-bold text-xl">¥{{item.price}}<text class="text-xs text-hint">/年</text></view>
+        <button class="btn btn-primary btn-sm" bindtap="buyPlan" data-id="{{item.id}}">立即投保</button>
+      </view>
+    </view>
+  </view>
+  <view class="func-list mt-md">
+    <view class="func-item" bindtap="goPolicy"><view class="func-left"><text class="text-md">📄 保单查询</text></view><text class="text-hint">›</text></view>
+    <view class="func-item" bindtap="goClaim"><view class="func-left"><text class="text-md">📝 理赔申请</text></view><text class="text-hint">›</text></view>
+    <view class="func-item" bindtap="goService"><view class="func-left"><text class="text-md">💬 保险客服</text></view><text class="text-hint">›</text></view>
+  </view>
+</view>

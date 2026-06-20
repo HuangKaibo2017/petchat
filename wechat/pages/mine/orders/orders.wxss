@@ -1,0 +1,3 @@
+.filter-tabs { padding: 16rpx 32rpx; gap: 16rpx; }
+.filter-tab { display:inline-flex; padding:12rpx 24rpx; background:#FFFFFF; border-radius:9999rpx; font-size:26rpx; color:#6B7280; }
+.filter-tab.active { background:#D8EBE6; color:#2D7D6E; font-weight:600; }

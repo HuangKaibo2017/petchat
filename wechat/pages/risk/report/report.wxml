@@ -1,0 +1,53 @@
+<nav-bar title="人宠双向报告" showBack="{{true}}" />
+<view class="page-container">
+  <view class="report-header">
+    <view class="text-xl font-bold">人宠双向守护报告</view>
+    <view class="text-xs text-hint mt-sm">基于人宠同构 · 气机互通 · 菌群共栖理论</view>
+  </view>
+
+  <!-- Pet Imbalance -->
+  <view class="report-section card">
+    <view class="section-label">🐾 宠物当前失衡状态</view>
+    <view class="text-md">{{report.petImbalance}}</view>
+  </view>
+
+  <!-- Owner Risk -->
+  <view class="report-section card risk-card">
+    <view class="section-label">⚡ 主人联动风险预警</view>
+    <view class="risk-subsection">
+      <view class="risk-subtitle text-md font-bold">气机对应风险</view>
+      <view class="text-sm text-muted">{{report.qiRisk}}</view>
+    </view>
+    <view class="risk-subsection">
+      <view class="risk-subtitle text-md font-bold">菌群共栖相关提示</view>
+      <view class="text-sm text-muted">{{report.microbiomeRisk}}</view>
+    </view>
+    <view class="risk-subsection">
+      <view class="risk-subtitle text-md font-bold">作息/压力/环境关联提醒</view>
+      <view class="text-sm text-muted">{{report.lifestyleRisk}}</view>
+    </view>
+  </view>
+
+  <!-- Joint Care Plan -->
+  <view class="report-section card">
+    <view class="section-label">🌿 人宠共同调理方案</view>
+    <view class="text-md">{{report.jointCarePlan}}</view>
+  </view>
+
+  <!-- Medical Advice -->
+  <view class="report-section card">
+    <view class="section-label">🏥 就医建议</view>
+    <view class="text-md">{{report.medicalAdvice}}</view>
+  </view>
+
+  <!-- Disclaimer -->
+  <view class="disclaimer card bg-primary-light">
+    <view class="text-xs text-hint text-center">⚠️ 本报告仅做预警与失衡提示，不诊断、不替代体检。如有不适请及时就医。</view>
+  </view>
+
+  <view class="report-actions flex-between px-md py-md">
+    <view class="action-btn" bindtap="toggleFavorite"><text class="text-lg">{{favorited ? '❤️' : '🤍'}}</text><text class="text-xs text-hint">收藏</text></view>
+    <view class="action-btn" bindtap="shareReport"><text class="text-lg">📤</text><text class="text-xs text-hint">分享</text></view>
+  </view>
+  <view style="height: 120rpx"></view>
+</view>

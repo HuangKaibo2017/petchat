@@ -1,0 +1,171 @@
+/* Hero Section */
+.hero-section {
+  position: relative;
+  height: 360rpx;
+  margin: 0 32rpx 24rpx;
+  border-radius: 32rpx;
+  overflow: hidden;
+}
+.hero-bg {
+  width: 100%;
+  height: 100%;
+}
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(45,125,110,0.2), rgba(139,92,246,0.3));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.hero-brand {
+  color: #FFFFFF;
+  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.2);
+  letter-spacing: 8rpx;
+}
+.hero-slogan {
+  color: rgba(255,255,255,0.9);
+  margin-top: 8rpx;
+  letter-spacing: 4rpx;
+}
+
+/* Pet Status Card */
+.pet-status-card {
+  margin: -12rpx 32rpx 24rpx;
+  position: relative;
+}
+.nfc-icon {
+  margin-left: 16rpx;
+  padding: 4rpx 16rpx;
+  background: #F3F4F6;
+  border-radius: 9999rpx;
+}
+
+/* Status Tags */
+.tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
+.tag-success { background:#F0FDF4; color:#22C55E; }
+.tag-warning { background:#FFFBEB; color:#F59E0B; }
+.tag-primary { background:#D8EBE6; color:#2D7D6E; }
+
+/* Add Pet Card */
+.add-pet-card {
+  margin: 0 32rpx 24rpx;
+  padding: 48rpx 32rpx;
+}
+
+/* Service Grid */
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  padding: 0 32rpx;
+}
+.service-item {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.service-hover {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 16rpx rgba(249,115,22,0.12);
+}
+.service-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12rpx;
+  font-size: 36rpx;
+}
+.emotion-icon { background: #E8F5F0; }
+.health-icon { background: #DBEAFE; }
+.personality-icon { background: #EDE9FE; }
+.risk-icon { background: #FEE2E2; }
+.medical-icon { background: #D1FAE5; }
+.newpet-icon { background: #FFEDD5; }
+.chat-icon { background: #FCE7F3; }
+.lost-icon { background: #E0E7FF; }
+.rescue-icon { background: #F3F4F6; }
+.service-name {
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 4rpx;
+}
+.service-desc {
+  display: block;
+}
+
+/* Banner */
+.banner-swiper {
+  height: 240rpx;
+  margin: 0 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+.banner-item {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 32rpx;
+  position: relative;
+}
+.banner-content {
+  flex: 1;
+  z-index: 1;
+}
+.banner-tag {
+  margin-bottom: 12rpx;
+}
+.banner-title {
+  color: #FFFFFF;
+  margin-bottom: 8rpx;
+}
+.banner-desc {
+  color: rgba(255,255,255,0.8);
+}
+.banner-img {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 16rpx;
+}
+
+/* Hospital Scroll */
+.hospital-scroll {
+  white-space: nowrap;
+  padding: 0 32rpx;
+}
+.hospital-item {
+  display: inline-block;
+  width: 280rpx;
+  margin-right: 16rpx;
+  white-space: normal;
+  vertical-align: top;
+}
+.hospital-tags { gap: 8rpx; }
+
+/* Product Mini */
+.product-mini {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.product-img {
+  width: 100%;
+  height: 200rpx;
+}
+.product-name {
+  padding: 12rpx 16rpx 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-price {
+  padding: 0 16rpx 16rpx;
+}

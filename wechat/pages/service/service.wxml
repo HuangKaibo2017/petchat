@@ -1,0 +1,35 @@
+<nav-bar title="服务" />
+<view class="page-container">
+  <view class="service-grid section">
+    <view class="service-card card" bindtap="goMedical">
+      <view class="text-2xl mb-sm">📋</view>
+      <view class="text-md font-bold">医疗科普</view>
+      <view class="text-xs text-hint mt-sm">AI知识库·安全用药</view>
+    </view>
+    <view class="service-card card" bindtap="goInsurance">
+      <view class="text-2xl mb-sm">🛡️</view>
+      <view class="text-md font-bold">宠物保险</view>
+      <view class="text-xs text-hint mt-sm">新人免费1个月</view>
+    </view>
+    <view class="service-card card" bindtap="goHospitals">
+      <view class="text-2xl mb-sm">🏥</view>
+      <view class="text-md font-bold">合作医院</view>
+      <view class="text-xs text-hint mt-sm">LBS查找·在线预约</view>
+    </view>
+    <view class="service-card card" bindtap="goLost">
+      <view class="text-2xl mb-sm">🧭</view>
+      <view class="text-md font-bold">丢失方向建议</view>
+      <view class="text-xs text-hint mt-sm">卦象指引方向</view>
+    </view>
+    <view class="service-card card" bindtap="goCommunity">
+      <view class="text-2xl mb-sm">💬</view>
+      <view class="text-md font-bold">社区</view>
+      <view class="text-xs text-hint mt-sm">晒宠·经验分享</view>
+    </view>
+    <view class="service-card card" bindtap="goNewPet">
+      <view class="text-2xl mb-sm">🐣</view>
+      <view class="text-md font-bold">新宠购买指南</view>
+      <view class="text-xs text-hint mt-sm">避坑建议</view>
+    </view>
+  </view>
+</view>

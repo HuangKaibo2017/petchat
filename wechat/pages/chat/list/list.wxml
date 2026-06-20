@@ -1,0 +1,16 @@
+<nav-bar title="{{petName}}" showBack="{{true}}" />
+<scroll-view class="chat-scroll" scroll-y scroll-into-view="{{scrollToId}}" scroll-with-animation>
+  <view class="chat-messages" id="chatMessages">
+    <view wx:for="{{messages}}" wx:key="id" class="msg-wrap {{item.role === 'pet' ? 'left' : 'right'}}" id="msg-{{item.id}}">
+      <image wx:if="{{item.role === 'pet'}}" class="avatar-sm" src="{{petAvatar || '/images/default-pet.png'}}" mode="aspectFill" />
+      <view class="msg-bubble {{item.role === 'pet' ? 'pet' : 'user'}}">
+        {{item.content}}<text wx:if="{{item.streaming}}" class="stream-cursor">▌</text>
+      </view>
+      <image wx:if="{{item.role === 'user'}}" class="avatar-sm" src="{{userAvatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+    </view>
+  </view>
+</scroll-view>
+<view class="chat-input-bar safe-bottom">
+  <input class="chat-input" placeholder="输入消息…" value="{{inputText}}" bindinput="onInput" bindconfirm="sendMessage" confirm-type="send" disabled="{{sending}}" />
+  <view class="send-btn" bindtap="sendMessage">发送</view>
+</view>

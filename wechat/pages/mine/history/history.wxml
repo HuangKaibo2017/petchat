@@ -1,0 +1,11 @@
+<nav-bar title="历史报告" showBack="{{true}}" />
+<view class="page-container">
+  <view class="filter-tabs flex">
+    <view class="filter-tab {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="filter-tab {{activeTab === 'emotion' ? 'active' : ''}}" bindtap="switchTab" data-tab="emotion">情绪解读</view>
+    <view class="filter-tab {{activeTab === 'health' ? 'active' : ''}}" bindtap="switchTab" data-tab="health">健康监测</view>
+    <view class="filter-tab {{activeTab === 'risk' ? 'active' : ''}}" bindtap="switchTab" data-tab="risk">风险预警</view>
+  </view>
+  <report-card wx:for="{{filteredReports}}" wx:key="id" report="{{item}}" bind:tap="goDetail" />
+  <empty-state wx:if="{{!filteredReports.length}}" title="暂无历史报告" desc="生成第一份报告吧" />
+</view>

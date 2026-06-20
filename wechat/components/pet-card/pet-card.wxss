@@ -1,0 +1,53 @@
+.pet-card {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin: 0 32rpx 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.pet-card.selected {
+  border: 3rpx solid #2D7D6E;
+  box-shadow: 0 0 24rpx rgba(249,115,22,0.15);
+}
+.pet-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+.pet-info {
+  flex: 1;
+  min-width: 0;
+}
+.pet-name {
+  font-size: 32rpx;
+  margin-bottom: 4rpx;
+}
+.pet-detail {
+  margin-bottom: 8rpx;
+}
+.pet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  border-radius: 9999rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+.tag-primary {
+  background: #D8EBE6;
+  color: #2D7D6E;
+}
+.pet-arrow {
+  font-size: 40rpx;
+  margin-left: 16rpx;
+}

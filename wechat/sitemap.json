@@ -1,0 +1,48 @@
+{
+  "rules": [
+    {
+      "action": "allow",
+      "page": "pages/index/index"
+    },
+    {
+      "action": "allow",
+      "page": "pages/emotion/emotion"
+    },
+    {
+      "action": "allow",
+      "page": "pages/health/health"
+    },
+    {
+      "action": "allow",
+      "page": "pages/shop/shop"
+    },
+    {
+      "action": "allow",
+      "page": "pages/shop/detail/detail"
+    },
+    {
+      "action": "allow",
+      "page": "pages/hospitals/hospitals"
+    },
+    {
+      "action": "allow",
+      "page": "pages/hospitals/detail/detail"
+    },
+    {
+      "action": "allow",
+      "page": "pages/community/community"
+    },
+    {
+      "action": "allow",
+      "page": "pages/service/service"
+    },
+    {
+      "action": "allow",
+      "page": "pages/insurance/insurance"
+    },
+    {
+      "action": "disallow",
+      "page": "*"
+    }
+  ]
+}

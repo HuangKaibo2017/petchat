@@ -1,0 +1,43 @@
+<nav-bar title="商城" />
+<view class="page-container">
+  <view class="search-bar px-md py-sm">
+    <view class="search-input flex items-center" bindtap="onSearch">
+      <text class="text-hint mr-sm">🔍</text>
+      <text class="text-hint">搜索商品</text>
+    </view>
+  </view>
+
+  <!-- Categories -->
+  <scroll-view scroll-x class="category-scroll px-md">
+    <view class="category-item {{activeCategory === 'all' ? 'active' : ''}}" bindtap="switchCategory" data-cat="all">全部</view>
+    <view class="category-item {{activeCategory === 'nfc' ? 'active' : ''}}" bindtap="switchCategory" data-cat="nfc">NFC灵犀</view>
+    <view class="category-item {{activeCategory === 'beads' ? 'active' : ''}}" bindtap="switchCategory" data-cat="beads">合香香珠</view>
+    <view class="category-item {{activeCategory === 'food' ? 'active' : ''}}" bindtap="switchCategory" data-cat="food">宠粮零食</view>
+    <view class="category-item {{activeCategory === 'supplies' ? 'active' : ''}}" bindtap="switchCategory" data-cat="supplies">猫砂用品</view>
+    <view class="category-item {{activeCategory === 'insurance' ? 'active' : ''}}" bindtap="switchCategory" data-cat="insurance">保险体检</view>
+    <view class="category-item {{activeCategory === '周边' ? 'active' : ''}}" bindtap="switchCategory" data-cat="周边">周边</view>
+  </scroll-view>
+
+  <!-- Product Grid -->
+  <view class="product-grid px-md">
+    <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <image class="product-card-img" src="{{item.image}}" mode="aspectFill" />
+      <view class="product-card-info">
+        <view class="text-sm font-bold">{{item.name}}</view>
+        <view class="text-xs text-hint mt-sm">{{item.desc}}</view>
+        <view class="flex-between mt-sm">
+          <view class="text-primary font-bold text-md">¥{{item.price}}</view>
+          <view class="cart-btn" catchtap="addToCart" data-item="{{item}}">🛒</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Cart Entry -->
+  <view class="cart-float safe-bottom" wx:if="{{cartCount}}" bindtap="goCart">
+    <view class="cart-icon-wrap">
+      <text class="text-xl">🛒</text>
+      <view class="badge">{{cartCount}}</view>
+    </view>
+  </view>
+</view>

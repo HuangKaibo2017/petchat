@@ -1,0 +1,44 @@
+<nav-bar title="人宠风险预警" showBack="{{true}}" />
+<view class="page-container">
+  <!-- Step 1: Select Pet -->
+  <view class="section" wx:if="{{step === 0}}">
+    <view class="section-title">选择宠物</view>
+    <pet-card wx:for="{{pets}}" wx:key="id" pet="{{item}}" selected="{{selectedPet && selectedPet.id === item.id}}" showArrow="{{false}}" bind:select="onSelectPet" />
+    <button class="btn btn-primary btn-block mt-lg" disabled="{{!selectedPet}}" bindtap="nextStep">下一步</button>
+  </view>
+
+  <!-- Step 2: Select Health Report + Owner Info -->
+  <view class="section" wx:if="{{step === 1}}">
+    <view class="section-title">选择健康报告</view>
+    <view class="section-subtitle">选择最近的宠物健康状态报告作为分析依据</view>
+    <view wx:if="{{!healthReports.length}}" class="empty-hint card text-center">
+      <text class="text-hint">暂无健康报告，请先生成健康监测报告</text>
+    </view>
+    <view class="report-select-item {{selectedReport && selectedReport.id === item.id ? 'active' : ''}}" wx:for="{{healthReports}}" wx:key="id" bindtap="selectReport" data-id="{{item.id}}">
+      <view class="text-md font-bold">{{item.petName}} · 健康报告</view>
+      <view class="text-xs text-hint">{{item.createdAt}}</view>
+      <view class="text-sm text-muted mt-sm">{{item.summary}}</view>
+    </view>
+
+    <view class="section-title mt-lg">主人信息</view>
+    <view class="input-group">
+      <view class="input-label">出生日期（用于命理推算）</view>
+      <picker mode="date" value="{{ownerBirthday}}" bindchange="onBirthdayChange">
+        <view class="input-field">{{ownerBirthday || '请选择出生日期'}}</view>
+      </picker>
+    </view>
+    <view class="input-group">
+      <view class="input-label">舌象照片（可选）</view>
+      <view class="upload-btn" bindtap="chooseTongueImage" wx:if="{{!tongueImage}}">
+        <text>📷 上传舌象照片</text>
+      </view>
+      <image class="upload-preview" wx:if="{{tongueImage}}" src="{{tongueImage}}" mode="aspectFill" bindtap="chooseTongueImage" />
+    </view>
+
+    <button class="btn btn-primary btn-block mt-xl" disabled="{{!canGenerate}}" bindtap="generateReport">
+      生成人宠双向报告
+    </button>
+  </view>
+
+  <loading visible="{{generating}}" text="Gengdongta正在联动人宠双档案…" />
+</view>
