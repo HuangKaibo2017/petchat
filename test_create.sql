@@ -1,0 +1,20 @@
+CREATE TABLE public.t_report_health (
+    f_id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    f_user_id             BIGINT       NOT NULL,
+    f_pet_id              BIGINT       NOT NULL,
+    f_lang                VARCHAR(8)   NOT NULL DEFAULT 'zh-CN',
+    f_report_type_id      INTEGER      NOT NULL,
+    f_health_score        NUMERIC(5,2) NOT NULL,
+    f_health_level_id     INTEGER      NOT NULL,
+    f_health_issues       JSONB        NOT NULL DEFAULT '[]'::jsonb,
+    f_health_suggestions  JSONB        NOT NULL DEFAULT '[]'::jsonb,
+    f_status_user         INTEGER      NOT NULL DEFAULT 1,
+    f_created_at          TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_t_report_health_user    FOREIGN KEY (f_user_id)        REFERENCES public.t_user(f_id)         ON DELETE NO ACTION,
+    CONSTRAINT fk_t_report_health_pet     FOREIGN KEY (f_pet_id)         REFERENCES public.t_pet(f_id)         ON DELETE NO ACTION,
+    CONSTRAINT fk_t_report_health_lang    FOREIGN KEY (f_lang)           REFERENCES public.t_lang(f_code)       ON DELETE NO ACTION,
+    CONSTRAINT fk_t_report_health_type    FOREIGN KEY (f_report_type_id) REFERENCES public.t_report_type(f_id) ON DELETE NO ACTION,
+    CONSTRAINT fk_t_report_health_status  FOREIGN KEY (f_status_user)    REFERENCES public.t_status(f_id)       ON DELETE NO ACTION,
+    CONSTRAINT ck_t_report_health_score   CHECK (f_health_score BETWEEN 0 AND 100),
+    CONSTRAINT fk_t_report_health_health  FOREIGN KEY (f_health_level_id) REFERENCES public.t_health_level(f_id) ON DELETE NO ACTION
+);

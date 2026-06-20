@@ -118,7 +118,7 @@ CREATE TABLE public.t_report_health (
     CONSTRAINT fk_t_report_health_type    FOREIGN KEY (f_report_type_id) REFERENCES public.t_report_type(f_id) ON DELETE NO ACTION,
     CONSTRAINT fk_t_report_health_status  FOREIGN KEY (f_status_user)    REFERENCES public.t_status(f_id)       ON DELETE NO ACTION,
     CONSTRAINT ck_t_report_health_score   CHECK (f_health_score BETWEEN 0 AND 100),
-    CONSTRAINT fk_t_report_health_health  FOREIGN KEY (f_health_level_id) REFERENCES public.t_health_level(f_id) ON DELETE NO ACTION,
+    CONSTRAINT fk_t_report_health_health  FOREIGN KEY (f_health_level_id) REFERENCES public.t_health_level(f_id) ON DELETE NO ACTION
 );
 COMMENT ON TABLE  public.t_report_health IS '宠物健康评估报告';
 COMMENT ON COLUMN public.t_report_health.f_id                 IS '主键 | 弱引用: t_share_record.f_report_id, t_interpretation_voice.f_report_id (in 06_share_interpretation.sql, f_report_type=health)';
