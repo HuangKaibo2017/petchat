@@ -9,7 +9,7 @@
   width: 56rpx;
   height: 56rpx;
   border: 4rpx solid #F3F4F6;
-  border-top-color: #F97316;
+  border-top-color: #2D7D6E;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

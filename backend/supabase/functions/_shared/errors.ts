@@ -11,12 +11,16 @@ export class AppError extends Error {
   }
 }
 
+/**
+ * Returns a normalized error response: { code: "ERROR", message: "..." }
+ * Matches the shape the mini-program api.js expects.
+ */
 export function errorResponse(
   code: string,
   message: string,
   status = 400,
 ): Response {
-  return corsResponse({ error: { code, message } }, status);
+  return corsResponse({ code, message }, status);
 }
 
 export const ERR = {

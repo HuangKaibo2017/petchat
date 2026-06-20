@@ -15,7 +15,7 @@
   margin-right: 16rpx;
   font-size: 28rpx;
 }
-.report-icon.emotion { background: #FEF3C7; }
+.report-icon.emotion { background: #E8F5F0; }
 .report-icon.health { background: #DBEAFE; }
 .report-icon.risk { background: #FEE2E2; }
 .report-icon.medical { background: #D1FAE5; }

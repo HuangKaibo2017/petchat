@@ -22,7 +22,7 @@
 }
 .auth-title {
   margin-bottom: 16rpx;
-  color: #F97316;
+  color: #2D7D6E;
 }
 .auth-desc {
   margin-bottom: 32rpx;

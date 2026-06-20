@@ -71,6 +71,6 @@ INSERT INTO public.t_prompt (f_code, f_lang, f_ver, f_content, f_is_active) VALU
 ON CONFLICT (f_code, f_lang, f_ver) DO NOTHING;
 
 -- Anonymous sentinel user (for unregistered visitors)
-INSERT INTO public.t_user (f_public_id, f_nick_name, f_is_anonymous)
-VALUES ('00000000-0000-0000-0000-000000000000', '访客', true)
+INSERT INTO public.t_user (f_public_id, f_nickname, f_meta_info)
+VALUES ('00000000-0000-0000-0000-000000000000', '访客', '{"role":"anonymous"}'::jsonb)
 ON CONFLICT DO NOTHING;

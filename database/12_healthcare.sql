@@ -125,3 +125,8 @@ COMMENT ON COLUMN public.t_appointment.f_symptoms         IS '症状描述';
 COMMENT ON COLUMN public.t_appointment.f_meta_info        IS '扩展元数据';
 COMMENT ON COLUMN public.t_appointment.f_status_user      IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
 COMMENT ON COLUMN public.t_appointment.f_created_at       IS '创建时间 (UTC)';
+
+-- Basic query indexes
+CREATE INDEX IF NOT EXISTS idx_t_appointment_user   ON public.t_appointment(f_user_id, f_appointment_time DESC);
+CREATE INDEX IF NOT EXISTS idx_t_appointment_hosp   ON public.t_appointment(f_hospital_id, f_appointment_time DESC);
+CREATE INDEX IF NOT EXISTS idx_t_doctor_hospital     ON public.t_doctor(f_hospital_id);

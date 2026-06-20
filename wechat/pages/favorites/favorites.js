@@ -4,7 +4,7 @@ const API = require('../../utils/api')
 Page({
   data: {
     favorites: [],
-    loading: false,
+    loading: false
   },
 
   onShow() {
@@ -12,28 +12,41 @@ Page({
   },
 
   async loadFavorites() {
-    if (!app.globalData.isAuthorized) {
-      this.setData({ favorites: wx.getStorageSync('favorites') || [] })
-      return
-    }
-
     this.setData({ loading: true })
     try {
-      const res = await API.Favorite.list()
-      if (res && res.length > 0) {
-        this.setData({ favorites: res })
-      }
+      const result = await API.Favorite.list()
+      const favorites = Array.isArray(result) ? result : (result?.favorites || [])
+      this.setData({ favorites })
     } catch (e) {
-      console.warn('Failed to load favorites:', e)
-      this.setData({ favorites: wx.getStorageSync('favorites') || [] })
+      console.warn('加载收藏失败，使用本地:', e)
+      const localFavs = wx.getStorageSync('favorites') || []
+      this.setData({ favorites: localFavs })
     }
     this.setData({ loading: false })
   },
 
-  goDetail(e) {
-    const report = e.detail?.report || e.currentTarget?.dataset
-    const pageMap = { emotion: 'emotion', health: 'health', risk: 'risk' }
-    const page = pageMap[report.type] || 'emotion'
-    wx.navigateTo({ url: `/pages/${page}/report/report?id=${report.id}` })
+  async removeFavorite(e) {
+    const id = e.currentTarget.dataset.id
+    try {
+      await API.Favorite.toggle(id, '')
+      // 本地移除
+      const favorites = this.data.favorites.filter(f => f.id !== id)
+      this.setData({ favorites })
+      wx.setStorageSync('favorites', favorites)
+      wx.showToast({ title: '已取消收藏', icon: 'none' })
+    } catch (err) {
+      wx.showToast({ title: '操作失败', icon: 'none' })
+    }
   },
+
+  goReport(e) {
+    const { id, type } = e.currentTarget.dataset
+    const pages = {
+      emotion: '/pages/emotion/report/report',
+      health: '/pages/health/report/report',
+      risk: '/pages/risk/report/report'
+    }
+    const url = pages[type] || pages.emotion
+    wx.navigateTo({ url: `${url}?id=${id}` })
+  }
 })

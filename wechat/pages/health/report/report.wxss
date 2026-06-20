@@ -1,9 +1,9 @@
 .report-header {
   text-align: center;
   padding: 48rpx 32rpx 32rpx;
-  background: linear-gradient(180deg, #FFF7ED, #FFFFFF);
+  background: linear-gradient(180deg, #D8EBE6, #FFFFFF);
 }
-.report-pet-name { color: #F97316; }
+.report-pet-name { color: #2D7D6E; }
 
 .risk-banner {
   margin: 16rpx 32rpx;
@@ -19,7 +19,7 @@
 .section-label {
   font-size: 30rpx;
   font-weight: 700;
-  color: #F97316;
+  color: #2D7D6E;
   margin-bottom: 16rpx;
 }
 

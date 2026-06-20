@@ -127,14 +127,6 @@ COMMENT ON COLUMN public.t_user.f_meta_info     IS '扩展元数据, 存 is_anon
 COMMENT ON COLUMN public.t_user.f_created_at    IS '创建时间 (UTC)';
 COMMENT ON COLUMN public.t_user.f_updated_at    IS '更新时间 (UTC), 由 trigger 维护';
 
--- 清理重复手机/邮箱 (保留最早创建的记录)
-DELETE FROM public.t_user a
-USING public.t_user b
-WHERE a.f_id > b.f_id AND a.f_phone = b.f_phone AND a.f_phone <> '';
-DELETE FROM public.t_user a
-USING public.t_user b
-WHERE a.f_id > b.f_id AND a.f_email = b.f_email AND a.f_email <> '';
-
 -- 部分唯一索引 (排除空字符串)
 CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_phone ON public.t_user(f_phone) WHERE f_phone <> '';
 CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_email ON public.t_user(f_email) WHERE f_email <> '';

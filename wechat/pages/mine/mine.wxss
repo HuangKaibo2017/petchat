@@ -1,7 +1,7 @@
 .user-card {
   margin: 24rpx 32rpx;
   padding: 32rpx;
-  background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+  background: linear-gradient(135deg, #D8EBE6, #E8F5F0);
   border-radius: 24rpx;
 }
 .pet-switch { padding: 16rpx; }
@@ -15,7 +15,7 @@
   border: 2rpx solid transparent;
   transition: all 0.2s;
 }
-.pet-mini.active { border-color: #F97316; background: #FFF7ED; }
+.pet-mini.active { border-color: #2D7D6E; background: #D8EBE6; }
 .pet-mini.add { border: 2rpx dashed #D1D5DB; }
 
 .menu-section { padding: 0 32rpx; margin-top: 24rpx; }

@@ -1,9 +1,9 @@
 <view class="auth-mask" wx:if="{{visible}}" bindtap="onMaskTap">
   <view class="auth-dialog" catchtap="noop">
     <image class="auth-logo" src="/images/logo.png" mode="aspectFit" />
-    <view class="auth-title text-xl font-bold">Gengdongta</view>
+    <view class="auth-title text-xl font-bold">更懂它</view>
     <view class="auth-desc text-sm text-muted">授权后可使用完整功能，为您和爱宠提供智能养护服务</view>
-    <button class="btn btn-primary btn-block" bindtap="onAuth" open-type="getUserProfile">
+    <button class="btn btn-primary btn-block" open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
       微信快捷授权
     </button>
     <view class="auth-cancel text-sm text-hint" bindtap="onCancel">暂不授权，仅浏览</view>

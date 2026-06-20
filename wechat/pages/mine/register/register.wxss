@@ -11,9 +11,9 @@
   transition: all 0.2s;
 }
 .gender-btn.active {
-  border-color: #F97316;
-  background: #FFF7ED;
-  color: #F97316;
+  border-color: #2D7D6E;
+  background: #D8EBE6;
+  color: #2D7D6E;
   font-weight: 600;
 }
 .add-pet-btn { padding: 24rpx; }

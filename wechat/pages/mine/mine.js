@@ -19,7 +19,8 @@ Page({
     const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
     const pets = app.globalData.pets || wx.getStorageSync('pets') || []
     const currentPet = app.globalData.currentPet
-    this.setData({ isAuthorized, userInfo, pets, currentPet })
+    const cart = wx.getStorageSync('cart') || []
+    this.setData({ isAuthorized, userInfo, pets, currentPet, pendingOrders: cart.length })
   },
 
   showAuth() {

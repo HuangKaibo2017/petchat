@@ -179,7 +179,6 @@ Page({
           showCancel: false,
         })
       } else if (err.message === 'UNAUTHORIZED') {
-        wx.showToast({ title: '请先登录', icon: 'none' })
         app.requestAuth(() => this.generateReport())
       } else {
         wx.showToast({ title: err.message || '生成失败', icon: 'none' })

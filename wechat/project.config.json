@@ -25,7 +25,7 @@
     "uglifyFileName": false,
     "checkInvalidKey": true,
     "checkSiteMap": true,
-    "uploadWithSourceMap": true,
+    "uploadWithSourceMap": false,
     "compileHotReLoad": false,
     "lazyloadPlaceholderEnable": false,
     "useMultiFrameRuntime": true,
@@ -49,8 +49,8 @@
     "compileWorklet": false,
     "localPlugins": false,
     "condition": false,
-    "swc": false,
-    "disableSWC": true
+    "swc": true,
+    "disableSWC": false
   },
   "compileType": "miniprogram",
   "libVersion": "3.3.4",

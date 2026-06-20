@@ -1,4 +1,5 @@
 const util = require('../../../utils/util')
+const API = require('../../../utils/api')
 const app = getApp()
 
 Page({
@@ -14,12 +15,29 @@ Page({
   },
 
   buildReport(data) {
-    // 如果 API 已返回完整报告数据，直接使用
+    if (data.healthScore !== undefined || data.healthLevel) {
+      const healthScore = data.healthScore ?? 0
+      const healthLevel = data.healthLevel || (healthScore >= 80 ? '健康良好' : healthScore >= 60 ? '亚健康' : '需要关注')
+      const report = {
+        ...data,
+        id: data.reportId || data.id || `rpt_${Date.now()}`,
+        type: data.type || 'health',
+        typeName: data.typeName || '健康监测',
+        time: data.time || new Date().toLocaleString(),
+        healthScore,
+        healthLevel,
+        favorited: false
+      }
+      this.setData({ report })
+      this.saveReport(report)
+      return
+    }
+
     if (data.riskLevel) {
       const riskLevel = util.getRiskLevel(data.riskLevel)
       const report = {
         ...data,
-        id: data.id || `rpt_${Date.now()}`,
+        id: data.reportId || data.id || `rpt_${Date.now()}`,
         type: data.type || 'health',
         typeName: data.typeName || '健康监测',
         time: data.time || new Date().toLocaleString(),
@@ -34,7 +52,7 @@ Page({
       return
     }
 
-    // 兜底：本地 mock
+    // 兜底 mock
     const pet = app.globalData.currentPet || {}
     const level = ['low', 'medium', 'high'][Math.floor(Math.random() * 3)]
     const riskLevel = util.getRiskLevel(level)
@@ -78,9 +96,16 @@ Page({
     wx.setStorageSync('reports', reports)
   },
 
-  toggleFavorite() {
-    this.setData({ favorited: !this.data.favorited })
-    wx.showToast({ title: this.data.favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+  async toggleFavorite() {
+    const { report, favorited } = this.data
+    try {
+      await API.Favorite.toggle(report.id, report.type || 'health')
+      this.setData({ favorited: !favorited })
+      wx.showToast({ title: !favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+    } catch (err) {
+      this.setData({ favorited: !favorited })
+      wx.showToast({ title: !favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+    }
   },
 
   goHospitals() { wx.navigateTo({ url: '/pages/hospitals/hospitals' }) },

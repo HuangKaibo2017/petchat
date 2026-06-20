@@ -11,6 +11,9 @@ const formatTime = (date, fmt = 'YYYY-MM-DD HH:mm') => {
   return fmt.replace(/YYYY|MM|DD|HH|mm|ss/g, m => map[m])
 }
 
+/**
+ * @available — 日期距离文本，当前未使用但保留供未来功能
+ */
 const getDurationText = (days) => {
   if (days < 1) return '今天'
   if (days < 2) return '昨天'
@@ -20,6 +23,9 @@ const getDurationText = (days) => {
   return `${Math.floor(days / 365)}年前`
 }
 
+/**
+ * @available — 防抖工具，当前未使用
+ */
 const debounce = (fn, delay = 300) => {
   let timer = null
   return function (...args) {
@@ -28,6 +34,9 @@ const debounce = (fn, delay = 300) => {
   }
 }
 
+/**
+ * @available — 节流工具，当前未使用
+ */
 const throttle = (fn, delay = 300) => {
   let last = 0
   return function (...args) {
@@ -55,10 +64,32 @@ const breedList = [
   '泰迪', '比熊', '博美', '哈士奇', '萨摩耶', '其他'
 ]
 
+/**
+ * @available — 中医体质标签，当前未使用但保留供报告功能
+ */
 const constitutionTags = [
   '平和质', '气虚质', '阳虚质', '阴虚质', '痰湿质',
   '湿热质', '血瘀质', '气郁质', '特禀质'
 ]
+
+/**
+ * Check current storage usage and warn if approaching limit (10MB).
+ * WeChat mini program: individual key ≤ 1MB, total ≤ 10MB.
+ */
+const checkStorageUsage = () => {
+  try {
+    const info = wx.getStorageInfoSync()
+    const usedMB = (info.currentSize / 1024).toFixed(1)
+    const limitMB = (info.limitSize / 1024).toFixed(0)
+    if (info.currentSize > info.limitSize * 0.8) {
+      console.warn(`[Storage] 使用量 ${usedMB}MB / ${limitMB}MB，接近上限，建议清理缓存`)
+      return { warning: true, usedMB, limitMB }
+    }
+    return { warning: false, usedMB, limitMB }
+  } catch (e) {
+    return null
+  }
+}
 
 module.exports = {
   formatTime,
@@ -67,5 +98,6 @@ module.exports = {
   throttle,
   getRiskLevel,
   breedList,
-  constitutionTags
+  constitutionTags,
+  checkStorageUsage
 }

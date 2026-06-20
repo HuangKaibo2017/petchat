@@ -1,3 +1,4 @@
+const API = require('../../../utils/api')
 const app = getApp()
 
 Page({
@@ -9,11 +10,10 @@ Page({
   },
 
   buildReport(data) {
-    // 如果 API 已返回完整报告，直接使用
     if (data.petImbalance) {
       const report = {
         ...data,
-        id: data.id || `rpt_${Date.now()}`,
+        id: data.reportId || data.id || `rpt_${Date.now()}`,
         type: data.type || 'risk',
         typeName: data.typeName || '风险预警',
         time: data.time || new Date().toLocaleString(),
@@ -24,7 +24,6 @@ Page({
       return
     }
 
-    // 兜底：本地 mock
     const pet = app.globalData.currentPet || {}
     const report = {
       id: `rpt_${Date.now()}`, type: 'risk', typeName: '风险预警',
@@ -49,9 +48,16 @@ Page({
     wx.setStorageSync('reports', reports)
   },
 
-  toggleFavorite() {
-    this.setData({ favorited: !this.data.favorited })
-    wx.showToast({ title: this.data.favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+  async toggleFavorite() {
+    const { report, favorited } = this.data
+    try {
+      await API.Favorite.toggle(report.id, report.type || 'risk')
+      this.setData({ favorited: !favorited })
+      wx.showToast({ title: !favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+    } catch (err) {
+      this.setData({ favorited: !favorited })
+      wx.showToast({ title: !favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+    }
   },
   shareReport() { wx.showShareMenu({ withShareTicket: true }) },
 

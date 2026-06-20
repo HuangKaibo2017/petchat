@@ -1,10 +1,10 @@
 // /functions/risk-report/index.ts
 // POST: Human-pet risk assessment via Coze constitution agent
 
-import { corsResponse } from "../_shared/cors.ts";
+import { okResponse } from "../_shared/cors.ts";
 import { verifyJWT, getServiceClient } from "../_shared/auth.ts";
 import { checkQuota, recordUsage } from "../_shared/db.ts";
-import { cozeChat, parseAIJson } from "../_shared/ai.ts";
+import { cozeChat, checkRateLimit, parseAIJson } from "../_shared/ai.ts";
 import { AppError, errorResponse, ERR } from "../_shared/errors.ts";
 
 interface RiskRequest {
@@ -40,6 +40,9 @@ Deno.serve(async (req: Request) => {
 
   try {
     const user = await verifyJWT(req);
+    if (!checkRateLimit('risk-report:'+user.id, 10, 60000)) {
+      return errorResponse("RATE_LIMITED", "请求太频繁，请稍后再试", 429);
+    }
     const remaining = await checkQuota(user.id, "risk_report");
 
     const body: RiskRequest = await req.json();
@@ -64,6 +67,7 @@ Deno.serve(async (req: Request) => {
         .from("t_report_health")
         .select("f_health_score, f_health_level, f_input_symptoms")
         .eq("f_id", body.reportId)
+        .eq("f_user_id", user.id)
         .single();
       if (hr) healthContext = JSON.stringify(hr.f_input_symptoms);
     }
@@ -115,7 +119,7 @@ Deno.serve(async (req: Request) => {
 
     await recordUsage(user.id, "risk_report", savedReport?.f_id);
 
-    return corsResponse({
+    return okResponse({
       reportId: savedReport?.f_id,
       petName: pet.f_name,
       time: new Date().toLocaleString("zh-CN"),

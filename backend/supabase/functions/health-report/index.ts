@@ -1,10 +1,10 @@
 // /functions/health-report/index.ts
 // POST: Generate pet health assessment via Coze agent
 
-import { corsResponse } from "../_shared/cors.ts";
+import { okResponse, failResponse } from "../_shared/cors.ts";
 import { verifyJWT, getServiceClient } from "../_shared/auth.ts";
 import { checkQuota, recordUsage } from "../_shared/db.ts";
-import { cozeChat, parseAIJson } from "../_shared/ai.ts";
+import { cozeChat, checkRateLimit, parseAIJson } from "../_shared/ai.ts";
 import { AppError, errorResponse, ERR } from "../_shared/errors.ts";
 
 interface HealthRequest {
@@ -40,6 +40,9 @@ Deno.serve(async (req: Request) => {
 
   try {
     const user = await verifyJWT(req);
+    if (!checkRateLimit('health-report:'+user.id, 10, 60000)) {
+      return errorResponse("RATE_LIMITED", "请求太频繁，请稍后再试", 429);
+    }
     const remaining = await checkQuota(user.id, "health_report");
 
     const body: HealthRequest = await req.json();
@@ -117,7 +120,7 @@ Deno.serve(async (req: Request) => {
 
     await recordUsage(user.id, "health_report", savedReport?.f_id);
 
-    return corsResponse({
+    return okResponse({
       reportId: savedReport?.f_id,
       petName: pet.f_name,
       time: new Date().toLocaleString("zh-CN"),

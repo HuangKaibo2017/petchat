@@ -5,4 +5,4 @@
 .func-item:last-child { border-bottom:none; }
 .func-left { display:flex; align-items:center; gap:16rpx; }
 .tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
-.tag-primary { background:#FFF7ED; color:#F97316; }
+.tag-primary { background:#D8EBE6; color:#2D7D6E; }

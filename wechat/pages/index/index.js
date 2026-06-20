@@ -9,7 +9,7 @@ Page({
     banners: [
       {
         id: 1, tag: '新人礼', title: '免费1个月医疗险', desc: '新用户专享，立即领取',
-        bg: 'linear-gradient(135deg, #F97316, #FB923C)',
+        bg: 'linear-gradient(135deg, #2D7D6E, #5BA89A)',
         image: '/images/banner-insurance.png', url: '/pages/insurance/insurance'
       },
       {
@@ -66,9 +66,9 @@ Page({
   checkAuth(callback) {
     if (!app.globalData.isAuthorized) {
       this.setData({ showAuth: true, pendingAction: callback })
-      return false
+      return
     }
-    return true
+    callback()
   },
 
   onAuthSuccess() {
@@ -86,30 +86,24 @@ Page({
   // Navigation
   goRegister() { wx.navigateTo({ url: '/pages/mine/register/register' }) },
   goEmotion() {
-    if (!this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion' }))) return
-    wx.navigateTo({ url: '/pages/emotion/emotion' })
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion' }))
   },
   goHealth() {
-    if (!this.checkAuth(() => wx.navigateTo({ url: '/pages/health/health' }))) return
-    wx.navigateTo({ url: '/pages/health/health' })
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/health/health' }))
   },
   goPersonality() {
-    if (!this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion?type=personality' }))) return
-    wx.navigateTo({ url: '/pages/emotion/emotion?type=personality' })
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion?type=personality' }))
   },
   goRisk() {
-    if (!this.checkAuth(() => wx.navigateTo({ url: '/pages/risk/risk' }))) return
-    wx.navigateTo({ url: '/pages/risk/risk' })
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/risk/risk' }))
   },
   goMedical() { wx.navigateTo({ url: '/pages/medical/medical' }) },
   goNewPet() { wx.navigateTo({ url: '/pages/medical/medical?type=newpet' }) },
   goMimicChat() {
-    if (!this.checkAuth(() => wx.switchTab({ url: '/pages/chat/chat' }))) return
-    wx.switchTab({ url: '/pages/chat/chat' })
+    this.checkAuth(() => wx.switchTab({ url: '/pages/chat/chat' }))
   },
   goLostPet() {
-    if (!this.checkAuth(() => wx.navigateTo({ url: '/pages/service/service?tab=lost' }))) return
-    wx.navigateTo({ url: '/pages/service/service?tab=lost' })
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/service/service?tab=lost' }))
   },
   goRescue() {
     wx.navigateTo({ url: '/pages/community/community?tab=rescue' })
@@ -131,6 +125,6 @@ Page({
 
   // Share
   onShareAppMessage() {
-    return { title: 'Gengdongta - 懂宠物，更懂你', path: '/pages/index/index' }
+    return { title: '更懂它 - 懂宠物，更懂你', path: '/pages/index/index' }
   }
 })

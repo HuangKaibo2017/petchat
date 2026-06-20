@@ -86,14 +86,13 @@ Page({
     const { ownerName, phone, birthday, pets } = this.data
 
     if (!ownerName.trim()) return wx.showToast({ title: '请输入姓名', icon: 'none' })
-    if (!phone || phone.length < 11) return wx.showToast({ title: '请输入正确的手机号', icon: 'none' })
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) return wx.showToast({ title: '请输入正确的11位手机号', icon: 'none' })
 
     for (let i = 0; i < pets.length; i++) {
       if (!pets[i].name.trim()) return wx.showToast({ title: `请输入宠物${i+1}的名字`, icon: 'none' })
       if (!pets[i].breed) return wx.showToast({ title: `请选择宠物${i+1}的品种`, icon: 'none' })
     }
 
-    // Ensure authorized
     if (!app.globalData.isAuthorized) {
       app.requestAuth(() => this.submitRegister())
       return
@@ -103,11 +102,9 @@ Page({
     wx.showLoading({ title: '注册中...' })
 
     try {
-      // Save pets via PostgREST
       for (const pet of pets) {
         let avatarUrl = ''
 
-        // Upload avatar if present
         if (pet.avatar) {
           try {
             const uploadResult = await API.Upload.upload(pet.avatar, 'pet_avatar', 0)
@@ -128,13 +125,13 @@ Page({
           avatar: avatarUrl,
         }
 
-        await API.Pet.create(petPayload)
+        // API.Pet.create is an alias for API.Pet.save
+        await API.Pet.save(petPayload)
       }
 
       wx.hideLoading()
       wx.showToast({ title: '注册成功', icon: 'success' })
 
-      // Refresh pets from backend
       await app.refreshPets()
 
       setTimeout(() => { wx.switchTab({ url: '/pages/index/index' }) }, 1500)

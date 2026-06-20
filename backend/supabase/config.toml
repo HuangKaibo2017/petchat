@@ -26,23 +26,28 @@ enabled = true
 verify_jwt = false
 
 # ============================================================
-# Required Secrets (set via Supabase Dashboard)
+# Required Secrets (set via Supabase Dashboard ONLY)
 # https://supabase.com/dashboard/project/dlvgbwyvxjdggxpddpod/settings/functions
+# ⚠️ NEVER put real values here — this file is tracked by git.
+# ⚠️ If real secrets were previously committed, rotate them immediately.
 # ============================================================
 #
 # WeChat:
 #   WECHAT_APPID  = wx67bdea24d2893ced
-#   WECHAT_SECRET = 6d1968027f3adad629ded6016ca13c75
+#   WECHAT_SECRET = <SET IN SUPABASE DASHBOARD>
 #
 # Coze (扣子):
-#   COZE_API_KEY                = pat_8Znq0CLtYCaK5zuH4UfM9yAAMEvXjGg3o2TVZeVhr2fByfu2EznK1nfrNusJMpmg
-#   COZE_AGENT_URL              = https://7fwvpgbyhs.coze.site/stream_run
-#   COZE_MOOD_PROJECT_ID        = 7646667716480892937
-#   COZE_HEALTH_CHECK_PROJECT_ID = 7644922398785060914
-#   COZE_CONSTITUTION_PROJECT_ID = 7647039739471904804
-#   COZE_PERSONALITY_PROJECT_ID  = 7647040384425590819
-#   COZE_CHAT_PROJECT_ID        = 7648657661621485578
-#   COZE_CONSULTATION_PROJECT_ID = 7647026429758783488
+#   COZE_API_KEY                = <SET IN SUPABASE DASHBOARD>
+#   COZE_AGENT_URL              = <SET IN SUPABASE DASHBOARD>
+#   COZE_MOOD_PROJECT_ID        = <SET IN SUPABASE DASHBOARD>
+#   COZE_HEALTH_CHECK_PROJECT_ID = <SET IN SUPABASE DASHBOARD>
+#   COZE_CONSTITUTION_PROJECT_ID = <SET IN SUPABASE DASHBOARD>
+#   COZE_PERSONALITY_PROJECT_ID  = <SET IN SUPABASE DASHBOARD>
+#   COZE_CHAT_PROJECT_ID        = <SET IN SUPABASE DASHBOARD>
+#   COZE_CONSULTATION_PROJECT_ID = <SET IN SUPABASE DASHBOARD>
+#
+# Auth (for WeChat openid → Supabase user mapping):
+#   JWT_SECRET = <SET IN SUPABASE DASHBOARD — random 64-char string>
 #
 # LLM Fallback:
-#   LLM_API_URL = https://ark.cn-beijing.volces.com/api/v3/chat/completions
+#   LLM_API_URL = <SET IN SUPABASE DASHBOARD>
