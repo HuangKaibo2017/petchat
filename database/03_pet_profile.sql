@@ -1,5 +1,5 @@
 -- ============================================================
--- Gengdongta (更懂它) / 3. 宠物档案 / Pet Profile
+-- PetChat (更懂它) / 3. 宠物档案 / Pet Profile
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -33,6 +33,7 @@
 -- ============================================================
 CREATE TABLE public.t_pet (
     f_id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    f_public_uid    UUID        NOT NULL DEFAULT public.rpc_gen_uuid(),
     f_user_id       BIGINT      NOT NULL,
     f_lang          VARCHAR(8)  NOT NULL DEFAULT 'zh-CN',
     f_pet_type_id   INTEGER     NOT NULL,
@@ -46,27 +47,31 @@ CREATE TABLE public.t_pet (
     f_sterilized    BOOLEAN     NOT NULL DEFAULT false,
     f_vaccinated    BOOLEAN     NOT NULL DEFAULT false,
     f_status_pet    INTEGER     NOT NULL DEFAULT 1,
-    f_status_user   INTEGER     NOT NULL DEFAULT 1,
+    f_status_id     INTEGER     NOT NULL DEFAULT 1,
     f_personality_tags JSONB    NOT NULL DEFAULT '[]'::jsonb,
     f_meta_info     JSONB       NOT NULL DEFAULT '{}'::jsonb,
-    f_created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    f_updated_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    f_deleted       INT2        NOT NULL DEFAULT 0,
+    f_created_at    BIGINT NOT NULL DEFAULT (to_char(clock_timestamp(), 'YYYYMMDDHH24MISS')::bigint),
+    f_updated_at    BIGINT NOT NULL DEFAULT (to_char(clock_timestamp(), 'YYYYMMDDHH24MISS')::bigint),
     CONSTRAINT fk_t_pet_user        FOREIGN KEY (f_user_id)     REFERENCES public.t_user(f_id)      ON DELETE NO ACTION,
     CONSTRAINT fk_t_pet_lang        FOREIGN KEY (f_lang)         REFERENCES public.t_lang(f_code)    ON DELETE NO ACTION,
     CONSTRAINT fk_t_pet_type        FOREIGN KEY (f_pet_type_id)  REFERENCES public.t_pet_type(f_id) ON DELETE NO ACTION,
     CONSTRAINT fk_t_pet_breed       FOREIGN KEY (f_breed_id)     REFERENCES public.t_pet_breed(f_id) ON DELETE NO ACTION,
     CONSTRAINT fk_t_pet_gender      FOREIGN KEY (f_gender_id)    REFERENCES public.t_gender(f_id)    ON DELETE NO ACTION,
     CONSTRAINT fk_t_pet_status_pet  FOREIGN KEY (f_status_pet)   REFERENCES public.t_status(f_id)    ON DELETE NO ACTION,
-    CONSTRAINT fk_t_pet_status_user FOREIGN KEY (f_status_user)  REFERENCES public.t_status(f_id)    ON DELETE NO ACTION,
+    CONSTRAINT fk_t_pet_status_id   FOREIGN KEY (f_status_id)    REFERENCES public.t_status(f_id)    ON DELETE NO ACTION,
+    CONSTRAINT ck_t_pet_del         CHECK (f_deleted IN (0, 1)),
     CONSTRAINT ck_t_pet_name        CHECK (length(f_name) BETWEEN 1 AND 64),
     CONSTRAINT ck_t_pet_birth_info  CHECK (f_birth_date IS NOT NULL OR f_birth_year IS NOT NULL),
     CONSTRAINT ck_t_pet_birth_year  CHECK (f_birth_year  IS NULL OR (f_birth_year  BETWEEN 1980 AND 2100)),
     CONSTRAINT ck_t_pet_birth_month CHECK (f_birth_month IS NULL OR (f_birth_month BETWEEN 1 AND 12)),
     CONSTRAINT ck_t_pet_weight      CHECK (f_weight IS NULL OR (f_weight > 0 AND f_weight < 1000)),
-    CONSTRAINT ck_t_pet_personality_array CHECK (jsonb_typeof(f_personality_tags) = 'array')
+    CONSTRAINT ck_t_pet_personality_array CHECK (jsonb_typeof(f_personality_tags) = 'array'),
+    CONSTRAINT uk_t_pet_public_uid UNIQUE (f_public_uid)
 );
 COMMENT ON TABLE  public.t_pet IS '宠物主表';
 COMMENT ON COLUMN public.t_pet.f_id               IS '主键 | 引用方: t_pet_photo.f_pet_id (本文件) / t_chat_history.f_pet_id (in 05_chat_comments.sql) / t_report_emotion.f_pet_id, t_report_health.f_pet_id, t_report_hpr.f_pet_id, t_report_pers.f_pet_id (in 04_ai_reports.sql) / t_appointment.f_pet_id (in 12_healthcare.sql) / t_adoption.f_pet_id, t_record_lost_pet.f_pet_id (in 13_welfare.sql)';
+COMMENT ON COLUMN public.t_pet.f_public_uid       IS '对外暴露 UUID, 由 public.rpc_gen_uuid() 生成';
 COMMENT ON COLUMN public.t_pet.f_user_id          IS 'FK -> public.t_user(f_id) | defined in 02_rbac_users.sql | 宠物主人';
 COMMENT ON COLUMN public.t_pet.f_lang             IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql | 宠物档案主语言';
 COMMENT ON COLUMN public.t_pet.f_pet_type_id      IS 'FK -> public.t_pet_type(f_id) | defined in 01_enums.sql | 必填, 不可空';
@@ -80,7 +85,7 @@ COMMENT ON COLUMN public.t_pet.f_weight           IS '体重 (kg), 0 < weight < 
 COMMENT ON COLUMN public.t_pet.f_sterilized       IS '是否已绝育';
 COMMENT ON COLUMN public.t_pet.f_vaccinated       IS '是否已接种疫苗';
 COMMENT ON COLUMN public.t_pet.f_status_pet       IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 业务态: 1=在册 2=走失 3=已送养 4=已故 5=已归档';
-COMMENT ON COLUMN public.t_pet.f_status_user      IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 用户态 (软删): 1=active 3=deleted';
+COMMENT ON COLUMN public.t_pet.f_deleted          IS '软删除: 0=正常 1=已删除';
 COMMENT ON COLUMN public.t_pet.f_personality_tags IS '用户自定义性格标签 JSONB 数组 (引用参考 t_personality_tag, defined in 01_enums.sql, 太多无法穷举)';
 COMMENT ON COLUMN public.t_pet.f_meta_info        IS '扩展元数据';
 COMMENT ON COLUMN public.t_pet.f_created_at       IS '创建时间 (UTC)';
@@ -97,13 +102,13 @@ CREATE TABLE public.t_pet_photo (
     f_photo_url     VARCHAR(512) NOT NULL,
     f_thumbnail_url VARCHAR(512) NOT NULL DEFAULT '',
     f_is_primary    BOOLEAN      NOT NULL DEFAULT false,
-    f_status_user   INTEGER      NOT NULL DEFAULT 1,
+    f_deleted       INT2         NOT NULL DEFAULT 0,
     f_meta_info     JSONB        NOT NULL DEFAULT '{}'::jsonb,
-    f_created_at    TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_t_pet_photo_pet   FOREIGN KEY (f_pet_id)        REFERENCES public.t_pet(f_id)       ON DELETE NO ACTION,
+    f_created_at    BIGINT  NOT NULL DEFAULT (to_char(clock_timestamp(), 'YYYYMMDDHH24MISS')::bigint),
+    CONSTRAINT fk_t_pet_photo_pet   FOREIGN KEY (f_pet_id)        REFERENCES public.t_pet(f_id)        ON DELETE NO ACTION,
     CONSTRAINT fk_t_pet_photo_type  FOREIGN KEY (f_photo_type_id) REFERENCES public.t_photo_type(f_id) ON DELETE NO ACTION,
-    CONSTRAINT fk_t_pet_photo_user  FOREIGN KEY (f_status_user)   REFERENCES public.t_status(f_id)     ON DELETE NO ACTION,
-    CONSTRAINT ck_t_pet_photo_url   CHECK (length(f_photo_url) > 0)
+    CONSTRAINT ck_t_pet_photo_url   CHECK (length(f_photo_url) > 0),
+    CONSTRAINT ck_t_pet_photo_del   CHECK (f_deleted IN (0, 1))
 );
 COMMENT ON TABLE  public.t_pet_photo IS '宠物照片 (主表, 替代原 t_pet.f_photo_url/f_photo_urls)';
 COMMENT ON COLUMN public.t_pet_photo.f_id            IS '主键';
@@ -112,6 +117,6 @@ COMMENT ON COLUMN public.t_pet_photo.f_photo_type_id IS 'FK -> public.t_photo_ty
 COMMENT ON COLUMN public.t_pet_photo.f_photo_url     IS '原图 URL (CDN)';
 COMMENT ON COLUMN public.t_pet_photo.f_thumbnail_url IS '缩略图 URL (空 = 客户端按需生成)';
 COMMENT ON COLUMN public.t_pet_photo.f_is_primary    IS '是否主图; 主图唯一性约束见 99_indexes_views.sql: idx_t_pet_photo_primary';
-COMMENT ON COLUMN public.t_pet_photo.f_status_user   IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
+COMMENT ON COLUMN public.t_pet_photo.f_deleted       IS '软删除: 0=正常 1=已删除';
 COMMENT ON COLUMN public.t_pet_photo.f_meta_info     IS '扩展元数据 (宽高/EXIF/...)';
 COMMENT ON COLUMN public.t_pet_photo.f_created_at    IS '上传时间 (UTC)';
