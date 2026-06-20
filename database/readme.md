@@ -1,9 +1,9 @@
-﻿# PetChat 数据库 / Database
+﻿# Gengdongta 数据库 / Database
 
 > PostgreSQL 15+ / Supabase Cloud (pgroonga 可用)
 > Version: 4.0.0  |  Last Refactored: 2026-06-17
 
-本目录为 PetChat (更懂它) 数据库 DDL 入口，按 **业务模块** + **功能分层** 原则拆分为 15 个有序文件，方便增量维护与按需加载。
+本目录为 Gengdongta (更懂它) 数据库 DDL 入口，按 **业务模块** + **功能分层** 原则拆分为 15 个有序文件，方便增量维护与按需加载。
 
 ---
 
@@ -36,7 +36,7 @@
 
 | 文件 | 说明 |
 |---|---|
-| [petchat_db_init.sql](petchat_db_init.sql) | 初始数据 (enum 值 / 系统用户 / 匿名哨兵), 不动 |
+| [gengdongta_db_init.sql](gengdongta_db_init.sql) | 初始数据 (enum 值 / 系统用户 / 匿名哨兵), 不动 |
 | [rpc/rpc_gen_uuid.sql](rpc/rpc_gen_uuid.sql) | UUID 生成函数, t_user.f_public_id DEFAULT 依赖 |
 
 ---
@@ -160,10 +160,10 @@ COMMENT ON COLUMN public.t_pet.f_birth_year IS
 
 ```bash
 # psql 模式
-psql -d petchat -f database/_run_all.sql
+psql -d gengdongta -f database/_run_all.sql
 
 # 或 shell 循环
-for f in database/[0-9]*.sql; do psql -d petchat -f "$f"; done
+for f in database/[0-9]*.sql; do psql -d gengdongta -f "$f"; done
 ```
 
 `_run_all.sql` 内会按 00 → 99 顺序 `\i` 每个文件, 并打印进度。
@@ -172,13 +172,13 @@ for f in database/[0-9]*.sql; do psql -d petchat -f "$f"; done
 
 ```bash
 # 0. (Supabase Cloud 跳过) 启用扩展
-psql -d petchat -c "CREATE EXTENSION IF NOT EXISTS pgroonga WITH SCHEMA extensions;"
+psql -d gengdongta -c "CREATE EXTENSION IF NOT EXISTS pgroonga WITH SCHEMA extensions;"
 
 # 1. 部署 DDL
-psql -d petchat -f database/_run_all.sql
+psql -d gengdongta -f database/_run_all.sql
 
 # 2. 写入初始数据 (enum 值 / 系统用户 / 匿名哨兵)
-psql -d petchat -f database/petchat_db_init.sql
+psql -d gengdongta -f database/gengdongta_db_init.sql
 ```
 
 > **注意**: `rpc/rpc_gen_uuid.sql` 必须在 02_rbac_users.sql 之前手动执行, 用于 `t_user.f_public_id` DEFAULT。
@@ -232,7 +232,7 @@ SELECT conrelid::regclass, conname
 
 - 仅修改 [01_enums.sql](01_enums.sql) 的目标 enum 表
 - 不需要改任何业务表 (业务表用 FK 自动同步)
-- 在 [petchat_db_init.sql](petchat_db_init.sql) 加初始数据
+- 在 [gengdongta_db_init.sql](gengdongta_db_init.sql) 加初始数据
 
 ### 7.2 新增业务表
 
@@ -258,7 +258,7 @@ SELECT conrelid::regclass, conname
 
 ## 八、迁移说明
 
-原 `petchat_database_design.sql` (1100+ 行) + `petchat_ecommerce.sql` (540 行) 已于 2026-06-17 拆分为 15 个模块文件并删除。所有表结构已完整迁移，后续 DDL 变更按本文档 §七 在新文件里追加。
+原 `gengdongta_database_design.sql` (1100+ 行) + `gengdongta_ecommerce.sql` (540 行) 已于 2026-06-17 拆分为 15 个模块文件并删除。所有表结构已完整迁移，后续 DDL 变更按本文档 §七 在新文件里追加。
 
 ---
 
@@ -290,21 +290,21 @@ SELECT conrelid::regclass, conname
 ## 十、设计标准 (Design Standards)
 
 > 遵循 [Supabase Postgres Best Practices](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/SKILL.md) 技能规范。
-> 以下为 PetChat 项目采纳的 Postgres 数据库设计标准清单, 按优先级排列。
+> 以下为 Gengdongta 项目采纳的 Postgres 数据库设计标准清单, 按优先级排列。
 
 ### 10.1 Schema Design (schema-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | S01 | [主键策略](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/schema-primary-keys.md) | BIGINT IDENTITY PK + UUID public_id | `f_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY`; `f_public_id UUID DEFAULT rpc_gen_uuid()` |
 | S02 | [小写标识符 + t_/f_ 前缀](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/schema-lowercase-identifiers.md) | t_ 表前缀, f_ 字段前缀, idx_t_ 索引前缀 | 所有表/字段/索引均遵循 Hungarian 命名 |
-| S03 | [逻辑外键 + -1 默认值](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/schema-foreign-key-indexes.md) | 用逻辑 FK (BIGINT DEFAULT -1) 替代物理 FK; -1 哨兵 = 无关联 | PetChat 全部 FK 为逻辑引用, `DEFAULT -1`, 注释标注目标表 |
+| S03 | [逻辑外键 + -1 默认值](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/schema-foreign-key-indexes.md) | 用逻辑 FK (BIGINT DEFAULT -1) 替代物理 FK; -1 哨兵 = 无关联 | Gengdongta 全部 FK 为逻辑引用, `DEFAULT -1`, 注释标注目标表 |
 | S04 | [合适的数据类型](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/schema-data-types.md) | BIGINT ID, TEXT/VARCHAR(n), BIGINT 时间戳, SMALLINT 状态 | 时间戳: `BIGINT` 格式 YYYYMMDDHHMMSS; 状态: `SMALLINT DEFAULT -1`; 金额: `NUMERIC(10,2)` |
 | S05 | [大表分区](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/schema-partitioning.md) | >100M 行的大表按时间范围分区 | 暂未应用 (预留: t_chat_session, t_usage_record) |
 
 ### 10.2 Query Performance (query-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | Q01 | [保守索引策略](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/query-missing-indexes.md) | **默认不建索引**, 仅在高频 JOIN / 业务关键查询 / 明确性能需求时建 | PK + UNIQUE 自动建索引; 其余按需添加到 99_indexes_views.sql |
 | Q02 | [复合索引](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/query-composite-indexes.md) | 多列查询用复合索引, 等值列在前, 范围列在后 | `idx_t_xxx_f_status_f_created_at` |
@@ -314,7 +314,7 @@ SELECT conrelid::regclass, conname
 
 ### 10.3 Connection Management (conn-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | C01 | [连接池](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/conn-pooling.md) | PgBouncer Transaction mode; pool_size ≈ (CPU * 2) + spindle | Supabase Cloud 自带 PgBouncer |
 | C02 | [连接数限制](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/conn-limits.md) | 避免连接耗尽 | Supabase 项目设置中配置 max_connections |
@@ -323,7 +323,7 @@ SELECT conrelid::regclass, conname
 
 ### 10.4 Concurrency & Locking (lock-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | L01 | [短事务](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/lock-short-transactions.md) | 事务内不做外部 API 调用, 持锁毫秒级 | 所有事务只做 DB 操作 |
 | L02 | [SKIP LOCKED](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/lock-skip-locked.md) | 工作队列并行处理, 跳过已锁定行 | 适用于 t_agent_withdrawal 等队列场景 |
@@ -332,7 +332,7 @@ SELECT conrelid::regclass, conname
 
 ### 10.5 Data Access Patterns (data-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | D01 | [游标分页](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/data-pagination.md) | WHERE f_id > last_id 替代 OFFSET, O(1) 性能 | API 分页使用 Keyset Pagination |
 | D02 | [批量插入](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/data-batch-inserts.md) | INSERT ... SELECT unnest() 替代逐条插入 | 批量导入使用 |
@@ -341,7 +341,7 @@ SELECT conrelid::regclass, conname
 
 ### 10.6 Monitoring & Diagnostics (monitor-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | M01 | [EXPLAIN ANALYZE](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/monitor-explain-analyze.md) | 诊断慢查询瓶颈 | 开发环境性能调试 |
 | M02 | [pg_stat_statements](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/monitor-pg-stat-statements.md) | 追踪 TOP N 慢查询 | Supabase Dashboard 监控 |
@@ -349,7 +349,7 @@ SELECT conrelid::regclass, conname
 
 ### 10.7 Advanced Features (advanced-)
 
-| # | 标准 | 说明 | PetChat 实施 |
+| # | 标准 | 说明 | Gengdongta 实施 |
 |---|---|---|---|
 | A01 | [JSONB i18n](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/jsonb-i18n-pattern.md) | JSONB 存多语言, pgroonga 做 CJK 全文搜索 | 全部 enum 表 `f_name JSONB`; pgroonga 索引 |
 | A02 | [Full-Text Search](file:///D:/prj/trinity_skills/supabase-postgres-best-practices/references/advanced-full-text-search.md) | GIN 索引 + tsvector 全文搜索 | 宠物搜索、商品搜索 |
@@ -380,5 +380,5 @@ v_order_summary / v_user_is_anonymous
 
 ---
 
-**维护**: PetChat Platform Team
+**维护**: Gengdongta Platform Team
 **最后更新**: 2026-06-17

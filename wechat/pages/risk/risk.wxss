@@ -1,0 +1,29 @@
+.report-select-item {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  border: 3rpx solid transparent;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.report-select-item.active {
+  border-color: #2D7D6E;
+  box-shadow: 0 0 24rpx rgba(249,115,22,0.15);
+}
+.empty-hint { padding: 48rpx; }
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+  background: #F3F4F6;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  color: #6B7280;
+}
+.upload-preview {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  margin-top: 16rpx;
+}

@@ -1,0 +1,10 @@
+<nav-bar title="我的订单" showBack="{{true}}" />
+<view class="page-container">
+  <view class="filter-tabs flex">
+    <view class="filter-tab {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="filter-tab {{activeTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">待付款</view>
+    <view class="filter-tab {{activeTab === 'shipped' ? 'active' : ''}}" bindtap="switchTab" data-tab="shipped">待收货</view>
+    <view class="filter-tab {{activeTab === 'done' ? 'active' : ''}}" bindtap="switchTab" data-tab="done">已完成</view>
+  </view>
+  <empty-state title="暂无订单" desc="去商城逛逛吧" actionText="去商城" bind:action="goShop" />
+</view>

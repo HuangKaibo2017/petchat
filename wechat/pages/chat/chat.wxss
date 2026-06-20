@@ -1,0 +1,4 @@
+.chat-hero { padding: 48rpx 32rpx; }
+.chat-pet-item { padding: 24rpx; margin-bottom: 16rpx; cursor: pointer; }
+.chat-arrow { font-size: 28rpx; }
+.chat-history-item { padding: 24rpx 32rpx; border-bottom: 1rpx solid #F3F4F6; background: #FFFFFF; }

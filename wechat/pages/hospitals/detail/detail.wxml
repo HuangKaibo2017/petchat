@@ -1,0 +1,30 @@
+<nav-bar title="医院详情" showBack="{{true}}" />
+<view class="page-container">
+  <view wx:if="{{loading}}" class="flex-center" style="padding-top:200rpx">
+    <text class="text-hint">加载中...</text>
+  </view>
+  <block wx:elif="{{hospital}}">
+    <view class="detail-header card text-center">
+      <view class="text-xl font-bold">{{hospital.name}}</view>
+      <view class="text-warning mt-sm">⭐ {{hospital.rating}} · {{hospital.distance}}</view>
+      <view class="text-sm text-muted mt-sm">{{hospital.address}}</view>
+      <view class="flex-center mt-md" style="gap:16rpx">
+        <view class="tag tag-primary" wx:for="{{hospital.tags}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+    <view class="func-list mt-md">
+      <view class="func-item" bindtap="callPhone">
+        <view class="func-left"><text class="text-md">📞 电话问诊</text></view><text class="text-hint">›</text>
+      </view>
+      <view class="func-item" bindtap="makeAppointment">
+        <view class="func-left"><text class="text-md">📅 在线预约</text></view><text class="text-hint">›</text>
+      </view>
+      <view class="func-item" bindtap="navigate">
+        <view class="func-left"><text class="text-md">🧭 导航前往</text></view><text class="text-hint">›</text>
+      </view>
+      <view class="func-item" bindtap="syncReport">
+        <view class="func-left"><text class="text-md">📋 报告同步</text></view><text class="text-hint">›</text>
+      </view>
+    </view>
+  </block>
+</view>

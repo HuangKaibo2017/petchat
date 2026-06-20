@@ -1,0 +1,45 @@
+<nav-bar title="社区" showBack="{{true}}" />
+<view class="page-container">
+  <!-- Banner -->
+  <swiper class="banner-swiper" indicator-dots autoplay circular>
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <view class="banner-item" style="background:{{item.bg}}">
+        <view class="text-lg font-bold text-white">{{item.title}}</view>
+        <view class="text-sm text-white mt-sm">{{item.desc}}</view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- Activity Cards -->
+  <view class="section">
+    <view class="section-title">精彩活动</view>
+    <view class="activity-card card" wx:for="{{activities}}" wx:key="id">
+      <view class="flex-between">
+        <view class="text-md font-bold">{{item.title}}</view>
+        <view class="tag tag-warning">{{item.status}}</view>
+      </view>
+      <view class="text-xs text-hint mt-sm">{{item.time}}</view>
+      <view class="text-sm text-muted mt-sm">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <!-- Community Feed -->
+  <view class="section">
+    <view class="flex-between mb-sm">
+      <view class="section-title" style="margin-bottom:0">晒宠日常</view>
+      <view class="text-sm text-primary" bindtap="goPost">发布 ›</view>
+    </view>
+    <view class="feed-card card" wx:for="{{feeds}}" wx:key="id">
+      <view class="flex items-center mb-sm">
+        <image class="avatar-sm" src="{{item.avatar}}" mode="aspectFill" />
+        <view class="ml-sm"><view class="text-sm font-bold">{{item.nickname}}</view><view class="text-xs text-hint">{{item.time}}</view></view>
+      </view>
+      <view class="text-md mb-sm">{{item.content}}</view>
+      <image class="feed-img" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" />
+      <view class="flex mt-sm" style="gap:32rpx">
+        <text class="text-xs text-hint">❤️ {{item.likes}}</text>
+        <text class="text-xs text-hint">💬 {{item.comments}}</text>
+      </view>
+    </view>
+  </view>
+</view>

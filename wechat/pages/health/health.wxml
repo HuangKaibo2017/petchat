@@ -1,0 +1,50 @@
+<nav-bar title="宠物健康监测" showBack="{{true}}" />
+<view class="page-container">
+  <!-- Step 1: Select Pet -->
+  <view class="section" wx:if="{{step === 0}}">
+    <view class="section-title">选择宠物</view>
+    <pet-card wx:for="{{pets}}" wx:key="id" pet="{{item}}" selected="{{selectedPet && selectedPet.id === item.id}}" showArrow="{{false}}" bind:select="onSelectPet" />
+    <button class="btn btn-primary btn-block mt-lg" disabled="{{!selectedPet}}" bindtap="nextStep">下一步</button>
+  </view>
+
+  <!-- Step 2: Symptom Input -->
+  <view class="section" wx:if="{{step === 1}}">
+    <view class="section-title">症状描述</view>
+    <view class="section-subtitle">请详细描述宠物的异常表现</view>
+
+    <textarea class="input-field input-textarea" placeholder="例如：猫咪这两天频繁上厕所，尿量少，精神不太好…" value="{{symptom}}" bindinput="onSymptomInput" maxlength="500" />
+
+    <view class="upload-row flex mt-sm">
+      <view class="upload-btn" bindtap="chooseImage"><text>📷 图片</text></view>
+    </view>
+    <image class="upload-preview" wx:if="{{symptomImage}}" src="{{symptomImage}}" mode="aspectFill" />
+
+    <view class="section-title mt-lg">症状持续时长</view>
+    <view class="duration-grid">
+      <view class="duration-item {{duration === '1-3天' ? 'active' : ''}}" bindtap="selectDuration" data-dur="1-3天">1-3天</view>
+      <view class="duration-item {{duration === '4-7天' ? 'active' : ''}}" bindtap="selectDuration" data-dur="4-7天">4-7天</view>
+      <view class="duration-item {{duration === '1-2周' ? 'active' : ''}}" bindtap="selectDuration" data-dur="1-2周">1-2周</view>
+      <view class="duration-item {{duration === '2周以上' ? 'active' : ''}}" bindtap="selectDuration" data-dur="2周以上">2周以上</view>
+    </view>
+
+    <view class="section-title mt-lg">异常表现</view>
+    <textarea class="input-field input-textarea" placeholder="补充其他异常表现…" value="{{abnormal}}" bindinput="onAbnormalInput" maxlength="300" />
+
+    <!-- Dual Divination Info -->
+    <view class="dual-divination card bg-primary-light mt-lg">
+      <view class="text-sm text-muted text-center">
+        <text class="font-bold">双卦复合分析</text>
+        <text> · 时间卦（自动）+ 报数卦</text>
+      </view>
+    </view>
+
+    <view class="section-subtitle mt-md">请输入6个数字（0-9）</view>
+    <view class="number-grid">
+      <input wx:for="{{numbers}}" wx:key="index" class="number-input {{item ? 'filled' : ''}}" type="number" maxlength="1" value="{{item}}" bindinput="onNumberInput" data-index="{{index}}" />
+    </view>
+
+    <button class="btn btn-primary btn-block mt-xl" disabled="{{!canSubmit}}" bindtap="generateReport">生成健康报告</button>
+  </view>
+
+  <loading visible="{{generating}}" text="Gengdongta正在分析中…" />
+</view>

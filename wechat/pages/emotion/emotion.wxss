@@ -1,0 +1,137 @@
+/* Question Area */
+.question-area {
+  position: relative;
+}
+.question-hint-bulb {
+  position: absolute;
+  right: 16rpx;
+  top: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 8rpx 16rpx;
+  background: #FFFBEB;
+  border-radius: 9999rpx;
+  cursor: pointer;
+}
+.bulb-icon { font-size: 28rpx; }
+
+/* Question Hints Panel */
+.hints-panel {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 16rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.hint-item {
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #374151;
+  transition: background 0.2s;
+}
+.hint-item:active { background: #D8EBE6; }
+
+/* Upload */
+.upload-row { gap: 16rpx; }
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx 32rpx;
+  background: #F3F4F6;
+  border-radius: 9999rpx;
+  font-size: 26rpx;
+  color: #6B7280;
+}
+.upload-preview {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  margin-top: 16rpx;
+}
+
+/* Divination Grid */
+.divination-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+.divination-item {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx 12rpx;
+  text-align: center;
+  border: 3rpx solid transparent;
+  transition: all 0.2s;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.divination-item.active {
+  border-color: #2D7D6E;
+  box-shadow: 0 0 24rpx rgba(249,115,22,0.15);
+}
+.div-system-icon { font-size: 40rpx; margin-bottom: 8rpx; }
+.div-name { font-weight: 600; margin-bottom: 4rpx; }
+
+/* Number Input Grid */
+.number-grid {
+  display: flex;
+  gap: 16rpx;
+  justify-content: center;
+  margin-top: 24rpx;
+}
+.number-input {
+  width: 80rpx;
+  height: 80rpx;
+  background: #FFFFFF;
+  border: 3rpx solid #E5E7EB;
+  border-radius: 20rpx;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #2D7D6E;
+  transition: border-color 0.2s;
+}
+.number-input.filled {
+  border-color: #2D7D6E;
+  background: #D8EBE6;
+}
+
+/* Tarot Grid */
+.tarot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+  margin-top: 32rpx;
+}
+.tarot-card {
+  aspect-ratio: 2/3;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+.tarot-card.hidden {
+  background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  box-shadow: 0 4rpx 16rpx rgba(139,92,246,0.3);
+}
+.tarot-card.revealed {
+  background: #FFFFFF;
+  border: 3rpx solid #2D7D6E;
+  box-shadow: 0 0 24rpx rgba(249,115,22,0.2);
+}
+.tarot-back { font-size: 48rpx; }
+.tarot-front {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+.tarot-emoji { font-size: 48rpx; }
+
+/* Add Pet */
+.add-pet-hint { padding: 48rpx 0; }

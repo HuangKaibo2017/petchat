@@ -141,3 +141,15 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+
+# DevTools local config (root level)
+/project.config.json
+/project.private.config.json
+
+# Environment secrets - NEVER commit

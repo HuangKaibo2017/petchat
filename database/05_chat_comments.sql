@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (更懂它) / 5. 聊天与评论 / Chat & Comments
+-- Gengdongta (更懂它) / 5. 聊天与评论 / Chat & Comments
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -35,7 +35,7 @@ CREATE TABLE public.t_chat_history (
     f_meta_info     JSONB       NOT NULL DEFAULT '{}'::jsonb,
     f_started_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     f_ended_at      TIMESTAMPTZ,
-    f_status_user   INTEGER     NOT NULL DEFAULT -1,
+    f_status_user   INTEGER     NOT NULL DEFAULT 1,
     CONSTRAINT fk_t_chat_history_user    FOREIGN KEY (f_user_id)        REFERENCES public.t_user(f_id)            ON DELETE NO ACTION,
     CONSTRAINT fk_t_chat_history_pet     FOREIGN KEY (f_pet_id)         REFERENCES public.t_pet(f_id)             ON DELETE NO ACTION,
     CONSTRAINT fk_t_chat_history_lang    FOREIGN KEY (f_lang)           REFERENCES public.t_lang(f_code)          ON DELETE NO ACTION,

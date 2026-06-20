@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (更懂它) / 11. 代理商 / Agent
+-- Gengdongta (更懂它) / 11. 代理商 / Agent
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -123,3 +123,7 @@ COMMENT ON COLUMN public.t_agent_revenue.f_status_settlement  IS '结算态: 1=�
 COMMENT ON COLUMN public.t_agent_revenue.f_meta_info          IS '扩展元数据';
 COMMENT ON COLUMN public.t_agent_revenue.f_status_user        IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
 COMMENT ON COLUMN public.t_agent_revenue.f_created_at         IS '收益时间 (UTC)';
+
+-- Key query indexes
+CREATE INDEX IF NOT EXISTS idx_t_agent_revenue_user  ON public.t_agent_revenue(f_user_id, f_created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_agent_revenue_status ON public.t_agent_revenue(f_status_settlement) WHERE f_status_settlement = 1;

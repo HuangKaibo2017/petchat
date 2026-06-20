@@ -1,0 +1,8 @@
+.insurance-hero { margin: 0 32rpx; padding: 48rpx 32rpx; border-radius: 24rpx; text-align: center; }
+.plan-card { margin: 16rpx 0; }
+.func-list { margin: 24rpx 32rpx; background:#FFFFFF; border-radius:24rpx; overflow:hidden; box-shadow:0 2rpx 8rpx rgba(0,0,0,0.04); }
+.func-item { display:flex; align-items:center; justify-content:space-between; padding:28rpx 24rpx; border-bottom:1rpx solid #F3F4F6; }
+.func-item:last-child { border-bottom:none; }
+.func-left { display:flex; align-items:center; gap:16rpx; }
+.tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
+.tag-primary { background:#D8EBE6; color:#2D7D6E; }

@@ -1,5 +1,5 @@
 -- ============================================================
--- PetChat (更懂它) / 13. 公益与寻宠 / Welfare & Lost-Pet
+-- Gengdongta (更懂它) / 13. 公益与寻宠 / Welfare & Lost-Pet
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -170,7 +170,7 @@ COMMENT ON COLUMN public.t_donation.f_meta_info      IS '扩展元数据 (支付
 COMMENT ON COLUMN public.t_donation.f_status_user    IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删';
 COMMENT ON COLUMN public.t_donation.f_created_at     IS '捐款时间 (UTC)';
 CREATE INDEX idx_t_donation_user ON public.t_donation(f_user_id);
-CREATE INDEX idx_t_donation_target ON public.t_donation(f_target_type, f_target_id);
+-- idx_t_donation_target moved to 99_indexes_views.sql (with f_created_at DESC)
 
 
 -- ============================================================
