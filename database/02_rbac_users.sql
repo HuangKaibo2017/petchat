@@ -1,5 +1,5 @@
 -- ============================================================
--- Gengdongta (更懂它) / 2. 身份与权限 / RBAC & Users
+-- PetChat (更懂它) / 2. 身份与权限 / RBAC & Users
 -- ============================================================
 -- Version: 4.0.0
 -- Created: 2026-06-17
@@ -34,7 +34,7 @@ CREATE TABLE public.t_sys_role (
     f_name      VARCHAR(64) NOT NULL,
     f_desc      VARCHAR(256) NOT NULL DEFAULT '',
     f_order     INTEGER NOT NULL DEFAULT 0,
-    f_is_active BOOLEAN NOT NULL DEFAULT true,
+    f_deleted   INT2 NOT NULL DEFAULT 0,
     CONSTRAINT uk_t_sys_role_name UNIQUE (f_name)
 );
 COMMENT ON TABLE  public.t_sys_role IS '平台角色 (非 i18n, 系统内部用, e.g. user/agent/admin/ops/super_admin)';
@@ -42,7 +42,7 @@ COMMENT ON COLUMN public.t_sys_role.f_id        IS '主键 | 引用方: t_user_r
 COMMENT ON COLUMN public.t_sys_role.f_name      IS '角色名, e.g. user / agent / admin / super_admin | UNIQUE';
 COMMENT ON COLUMN public.t_sys_role.f_desc      IS '角色说明';
 COMMENT ON COLUMN public.t_sys_role.f_order     IS '排序权重';
-COMMENT ON COLUMN public.t_sys_role.f_is_active IS '启用开关';
+COMMENT ON COLUMN public.t_sys_role.f_deleted IS '启用开关';
 
 
 -- ============================================================
@@ -55,7 +55,7 @@ CREATE TABLE public.t_api (
     f_endpoint  VARCHAR(256) NOT NULL,
     f_desc      VARCHAR(256) NOT NULL DEFAULT '',
     f_order     INTEGER NOT NULL DEFAULT 0,
-    f_is_active BOOLEAN NOT NULL DEFAULT true,
+    f_deleted   INT2 NOT NULL DEFAULT 0,
     CONSTRAINT uk_t_api_method_endpoint UNIQUE (f_method, f_endpoint),
     CONSTRAINT ck_t_api_method CHECK (f_method IN ('GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'))
 );
@@ -66,7 +66,7 @@ COMMENT ON COLUMN public.t_api.f_method    IS 'HTTP 方法, e.g. GET / POST';
 COMMENT ON COLUMN public.t_api.f_endpoint  IS '端点路径, e.g. /api/v1/auth/login';
 COMMENT ON COLUMN public.t_api.f_desc      IS '端点说明';
 COMMENT ON COLUMN public.t_api.f_order     IS '排序权重';
-COMMENT ON COLUMN public.t_api.f_is_active IS '启用开关';
+COMMENT ON COLUMN public.t_api.f_deleted IS '启用开关';
 
 
 -- ============================================================
@@ -93,45 +93,54 @@ COMMENT ON COLUMN public.t_role_api.f_is_enabled IS '是否启用该授权 (fals
 -- ============================================================
 CREATE TABLE public.t_user (
     f_id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    f_public_id       UUID        NOT NULL DEFAULT rpc_gen_uuid(),
+    f_public_uid      UUID        NOT NULL DEFAULT public.rpc_gen_uuid(),
     f_lang            VARCHAR(8)  NOT NULL DEFAULT 'zh-CN',
     f_nickname        VARCHAR(64) NOT NULL,
     f_avatar_url      VARCHAR(512) NOT NULL DEFAULT '',
     f_phone           VARCHAR(32)  NOT NULL DEFAULT '',
     f_email           VARCHAR(128) NOT NULL DEFAULT '',
     f_password_hash   VARCHAR(256) NOT NULL DEFAULT '',
-    f_status_user     INTEGER     NOT NULL DEFAULT 1,
+    f_status_id     INTEGER     NOT NULL DEFAULT 1,
     f_meta_info       JSONB       NOT NULL DEFAULT '{}'::jsonb,
-    f_created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    f_updated_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    f_created_at      BIGINT NOT NULL DEFAULT (to_char(clock_timestamp(), 'YYYYMMDDHH24MISS')::bigint),
+    f_updated_at      BIGINT NOT NULL DEFAULT (to_char(clock_timestamp(), 'YYYYMMDDHH24MISS')::bigint),
     CONSTRAINT fk_t_user_lang       FOREIGN KEY (f_lang)        REFERENCES public.t_lang(f_code)         ON DELETE NO ACTION,
-    CONSTRAINT fk_t_user_status     FOREIGN KEY (f_status_user) REFERENCES public.t_status(f_id)          ON DELETE NO ACTION,
+    CONSTRAINT fk_t_user_status     FOREIGN KEY (f_status_id) REFERENCES public.t_status(f_id)          ON DELETE NO ACTION,
     CONSTRAINT ck_t_user_nickname   CHECK (length(f_nickname) BETWEEN 1 AND 64),
     CONSTRAINT ck_t_user_phone      CHECK (f_phone = '' OR f_phone ~ '^[0-9+\-\s()]{5,32}$'),
     CONSTRAINT ck_t_user_email      CHECK (f_email = '' OR f_email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
-    CONSTRAINT ck_t_user_meta_object CHECK (jsonb_typeof(f_meta_info) = 'object')
+    CONSTRAINT ck_t_user_meta_object CHECK (jsonb_typeof(f_meta_info) = 'object'),
+    CONSTRAINT uk_t_user_public_uid UNIQUE (f_public_uid)
 );
 -- 确保 f_public_id DEFAULT 已设置 (修复旧表无 DEFAULT 问题)
-ALTER TABLE public.t_user ALTER COLUMN f_public_id SET DEFAULT rpc_gen_uuid();
-COMMENT ON TABLE  public.t_user IS '平台用户主表 (f_public_id 对外暴露, BIGINT 仅内部)';
+
+COMMENT ON TABLE  public.t_user IS '平台用户主表 (f_public_uid 对外暴露, BIGINT 仅内部)';
 COMMENT ON COLUMN public.t_user.f_id            IS '主键 (内部使用) | 引用方: 几乎所有业务表 f_user_id';
-COMMENT ON COLUMN public.t_user.f_public_id     IS '对外暴露 UUID, 由 rpc/rpc_gen_uuid.sql 生成';
+COMMENT ON COLUMN public.t_user.f_public_uid    IS '对外暴露 UUID, 由 public.rpc_gen_uuid() 生成';
 COMMENT ON COLUMN public.t_user.f_lang          IS 'FK -> public.t_lang(f_code) | defined in 01_enums.sql | 用户界面默认语言';
 COMMENT ON COLUMN public.t_user.f_nickname      IS '昵称, 1-64 字符';
 COMMENT ON COLUMN public.t_user.f_avatar_url    IS '头像 URL (空 = 默认头像)';
 COMMENT ON COLUMN public.t_user.f_phone         IS '手机号 (空字符串表示未填, 部分唯一索引见 99_indexes_views.sql)';
 COMMENT ON COLUMN public.t_user.f_email         IS '邮箱 (空字符串表示未填, 部分唯一索引见 99_indexes_views.sql)';
 COMMENT ON COLUMN public.t_user.f_password_hash IS '密码哈希 (argon2id / bcrypt, 不存明文)';
-COMMENT ON COLUMN public.t_user.f_status_user   IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 1=active 2=disabled 3=deleted 4=archived 5=pending';
+COMMENT ON COLUMN public.t_user.f_status_id   IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql';
 COMMENT ON COLUMN public.t_user.f_meta_info     IS '扩展元数据, 存 is_anonymous / role / 偏好设置等; 匿名捐款哨兵 f_id=-1 通过 f_meta_info.role=anonymous 标识';
 COMMENT ON COLUMN public.t_user.f_created_at    IS '创建时间 (UTC)';
 COMMENT ON COLUMN public.t_user.f_updated_at    IS '更新时间 (UTC), 由 trigger 维护';
 
+-- 清理重复手机/邮箱 (保留最早创建的记录)
+DELETE FROM public.t_user a
+USING public.t_user b
+WHERE a.f_id > b.f_id AND a.f_phone = b.f_phone AND a.f_phone <> '';
+DELETE FROM public.t_user a
+USING public.t_user b
+WHERE a.f_id > b.f_id AND a.f_email = b.f_email AND a.f_email <> '';
+
 -- 部分唯一索引 (排除空字符串)
 CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_phone ON public.t_user(f_phone) WHERE f_phone <> '';
 CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_email ON public.t_user(f_email) WHERE f_email <> '';
-CREATE INDEX IF NOT EXISTS idx_t_user_phone_active ON public.t_user(f_phone) WHERE f_status_user = 1;
-CREATE INDEX IF NOT EXISTS idx_t_user_email_active ON public.t_user(f_email) WHERE f_status_user = 1;
+CREATE INDEX IF NOT EXISTS idx_t_user_phone_active ON public.t_user(f_phone) WHERE f_status_id = 10;
+CREATE INDEX IF NOT EXISTS idx_t_user_email_active ON public.t_user(f_email) WHERE f_status_id = 10;
 
 
 -- ============================================================
