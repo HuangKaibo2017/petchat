@@ -7,7 +7,7 @@
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 .report-select-item.active {
-  border-color: #F97316;
+  border-color: #2D7D6E;
   box-shadow: 0 0 24rpx rgba(249,115,22,0.15);
 }
 .empty-hint { padding: 48rpx; }

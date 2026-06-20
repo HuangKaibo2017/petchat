@@ -1,3 +1,5 @@
+const API = require('../../utils/api')
+
 Page({
   data: {
     activeCategory: 'all',
@@ -11,9 +13,23 @@ Page({
       { id: 'ins001', name: '宠物医疗险·基础版', desc: '全年保障·直付理赔', price: '299', image: '/images/product-insurance.png', category: 'insurance' }
     ]
   },
+  onLoad() {
+    this.loadProducts()
+  },
   onShow() {
     const cart = wx.getStorageSync('cart') || []
     this.setData({ cartCount: cart.length })
+  },
+  async loadProducts() {
+    try {
+      const res = await API.Product.list()
+      const products = Array.isArray(res) ? res : (res?.data || [])
+      if (products && products.length > 0) {
+        this.setData({ products })
+      }
+    } catch (e) {
+      console.warn('Failed to load products from API, using default')
+    }
   },
   switchCategory(e) { this.setData({ activeCategory: e.currentTarget.dataset.cat }) },
   onSearch() { wx.showToast({ title: '搜索功能开发中', icon: 'none' }) },

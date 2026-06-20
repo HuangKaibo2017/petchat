@@ -12,3 +12,18 @@ export function corsResponse(body: unknown, status = 200): Response {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+/**
+ * Normalized success response: { code: 200, data: payload }
+ * The mini-program api.js expects this shape consistently.
+ */
+export function okResponse(payload: unknown, status = 200): Response {
+  return corsResponse({ code: 200, data: payload }, status);
+}
+
+/**
+ * Normalized error response: { code: "ERROR_CODE", message: "..." }
+ */
+export function failResponse(code: string, message: string, status = 400): Response {
+  return corsResponse({ code, message }, status);
+}

@@ -1,7 +1,7 @@
 Page({
   data: {
     banners: [
-      { id: 1, title: '萌宠打卡挑战', desc: '连续打卡7天赢好礼', bg: 'linear-gradient(135deg,#F97316,#FB923C)' },
+      { id: 1, title: '萌宠打卡挑战', desc: '连续打卡7天赢好礼', bg: 'linear-gradient(135deg,#2D7D6E,#5BA89A)' },
       { id: 2, title: '最美宠物评选', desc: '上传照片参与评选', bg: 'linear-gradient(135deg,#8B5CF6,#A78BFA)' }
     ],
     activities: [

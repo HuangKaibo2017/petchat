@@ -42,7 +42,7 @@ const mockUser = {
 
 // ========== Banner ==========
 const mockBanners = [
-  { id: 1, tag: '新人礼', title: '免费1个月医疗险', desc: '新用户专享，立即领取', bg: 'linear-gradient(135deg, #F97316, #FB923C)', image: '', url: '/pages/insurance/insurance' },
+  { id: 1, tag: '新人礼', title: '免费1个月医疗险', desc: '新用户专享，立即领取', bg: 'linear-gradient(135deg, #2D7D6E, #5BA89A)', image: '', url: '/pages/insurance/insurance' },
   { id: 2, tag: '限时活动', title: '灵犀NFC项圈首发', desc: '限量预售，扫码即达', bg: 'linear-gradient(135deg, #8B5CF6, #A78BFA)', image: '', url: '/pages/shop/detail/detail?id=nfc001' },
   { id: 3, tag: '推荐', title: '24小时宠物医院', desc: '查看附近合作医院', bg: 'linear-gradient(135deg, #22C55E, #4ADE80)', image: '', url: '/pages/hospitals/hospitals' }
 ]

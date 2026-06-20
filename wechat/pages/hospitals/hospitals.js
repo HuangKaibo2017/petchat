@@ -1,3 +1,5 @@
+const API = require('../../utils/api')
+
 Page({
   data: {
     hospitals: [
@@ -6,6 +8,20 @@ Page({
       { id: 3, name: '爱诺动物医院', rating: '4.6', distance: '3.1km', tags: ['急诊','手术'], address: '宝安区新安路300号', image: '' },
       { id: 4, name: '美联众合动物医院', rating: '4.9', distance: '4.0km', tags: ['综合','CT','MRI'], address: '罗湖区深南东路400号', image: '' }
     ]
+  },
+  onLoad() {
+    this.loadHospitals()
+  },
+  async loadHospitals() {
+    try {
+      const res = await API.Hospital.list()
+      const hospitals = Array.isArray(res) ? res : (res?.data || [])
+      if (hospitals && hospitals.length > 0) {
+        this.setData({ hospitals })
+      }
+    } catch (e) {
+      console.warn('Failed to load hospitals from API, using default')
+    }
   },
   onSearch(e) {},
   goDetail(e) {

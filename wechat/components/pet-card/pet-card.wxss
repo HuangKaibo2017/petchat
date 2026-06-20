@@ -9,7 +9,7 @@
   transition: all 0.2s;
 }
 .pet-card.selected {
-  border: 3rpx solid #F97316;
+  border: 3rpx solid #2D7D6E;
   box-shadow: 0 0 24rpx rgba(249,115,22,0.15);
 }
 .pet-avatar {
@@ -44,8 +44,8 @@
   font-weight: 500;
 }
 .tag-primary {
-  background: #FFF7ED;
-  color: #F97316;
+  background: #D8EBE6;
+  color: #2D7D6E;
 }
 .pet-arrow {
   font-size: 40rpx;

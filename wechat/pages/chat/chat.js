@@ -26,12 +26,12 @@ Page({
       if (res && res.sessions && res.sessions.length) {
         const pets = this.data.pets
         const petMap = {}
-        pets.forEach(p => { petMap[p.id] = p })
+        pets.forEach(p => { petMap[String(p.id)] = p })
         this.setData({
           sessions: res.sessions.map(s => ({
             id: s.id || s.f_id,
             petId: s.petId || s.f_pet_id,
-            petName: petMap[s.petId || s.f_pet_id]?.name || '宠物',
+            petName: petMap[String(s.petId || s.f_pet_id)]?.name || '宠物',
             lastMessage: s.lastMessage || '',
             time: s.time || s.f_started_at || ''
           }))

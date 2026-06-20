@@ -33,14 +33,14 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#FFF7ED",
-    "navigationBarTitleText": "Gengdongta",
+    "navigationBarBackgroundColor": "#FAF9F5",
+    "navigationBarTitleText": "更懂它",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#FFF7ED"
+    "backgroundColor": "#FAF9F5"
   },
   "tabBar": {
-    "color": "#9CA3AF",
-    "selectedColor": "#F97316",
+    "color": "#999999",
+    "selectedColor": "#2D7D6E",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [

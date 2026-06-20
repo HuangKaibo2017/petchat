@@ -9,12 +9,13 @@ App({
     favorites: [],
     cart: [],
     nfcEnabled: true,
+    // 本地开发: Express 后端
+    // 线上部署: 替换为 https://api.gengdongta.com
     baseUrl: 'http://localhost:8001',
-    debug: true
+    debug: false
   },
 
   onLaunch() {
-    // 本地调试：首次启动自动注入演示数据
     this.initDemoData()
     this.loadUserData()
     this.checkUpdate()
@@ -26,12 +27,11 @@ App({
     }
   },
 
-  // 首次启动自动注入演示数据
   initDemoData() {
     const hasRun = wx.getStorageSync('_demo_initialized')
     if (hasRun) return
 
-    console.log('[Gengdongta] 首次启动，注入演示数据…')
+    console.log('[更懂它] 首次启动，注入演示数据…')
     wx.setStorageSync('token', 'demo_token_local')
     wx.setStorageSync('userInfo', mockUser)
     wx.setStorageSync('pets', mockPets)
@@ -47,13 +47,17 @@ App({
 
     if (userInfo) {
       this.globalData.userInfo = userInfo
-      this.globalData.isAuthorized = true
     }
     if (pets.length > 0) {
       this.globalData.pets = pets
       this.globalData.currentPet = currentPetId
         ? pets.find(p => p.id === currentPetId) || pets[0]
         : pets[0]
+    }
+
+    const token = wx.getStorageSync('token')
+    if (token) {
+      this.globalData.isAuthorized = true
     }
   },
 
@@ -82,6 +86,11 @@ App({
   },
 
   requestAuth(callback) {
+    if (!wx.getUserProfile) {
+      console.warn('[更懂它] getUserProfile 不可用，请使用 authorize 组件')
+      wx.showToast({ title: '授权后可体验完整功能', icon: 'none' })
+      return
+    }
     wx.getUserProfile({
       desc: '用于完善宠物档案信息',
       success: (res) => {
@@ -94,6 +103,43 @@ App({
         wx.showToast({ title: '授权后可体验完整功能', icon: 'none' })
       }
     })
+  },
+
+  loginWithCode(callback) {
+    wx.login({
+      success: (res) => {
+        if (res.code) {
+          wx.setStorageSync('_wx_code', res.code)
+          this.globalData.isAuthorized = true
+          if (callback) callback({ code: res.code })
+        } else {
+          wx.showToast({ title: '登录失败，请重试', icon: 'none' })
+        }
+      },
+      fail: () => {
+        wx.showToast({ title: '授权后可体验完整功能', icon: 'none' })
+      }
+    })
+  },
+
+  async refreshPets() {
+    try {
+      const API = require('./utils/api')
+      const pets = await API.Pet.list()
+      if (pets && pets.length > 0) {
+        this.globalData.pets = pets
+        wx.setStorageSync('pets', pets)
+        const currentId = wx.getStorageSync('currentPetId')
+        const stillExists = pets.find(p => p.id === currentId)
+        if (!stillExists && pets.length > 0) {
+          this.globalData.currentPet = pets[0]
+          wx.setStorageSync('currentPetId', pets[0].id)
+        }
+        console.log('[更懂它] 宠物列表已刷新:', pets.length, '只')
+      }
+    } catch (err) {
+      console.warn('[更懂它] 刷新宠物列表失败:', err.message)
+    }
   },
 
   switchPet(petId) {

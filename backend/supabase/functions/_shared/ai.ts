@@ -37,15 +37,6 @@ interface CozeRequest {
 
 /**
  * Call a Coze agent (non-streaming).
- *
- * Coze agents are identified by project_id.
- * Each report type maps to a different Coze project:
- *   COZE_MOOD_PROJECT_ID          → emotion report
- *   COZE_HEALTH_CHECK_PROJECT_ID   → health report
- *   COZE_CONSTITUTION_PROJECT_ID   → risk report
- *   COZE_PERSONALITY_PROJECT_ID    → personality report
- *   COZE_CHAT_PROJECT_ID           → chat
- *   COZE_CONSULTATION_PROJECT_ID   → health consultation
  */
 export async function cozeChat(
   projectId: string,
@@ -75,8 +66,6 @@ export async function cozeChat(
 
   const data = await res.json();
 
-  // Coze response format: { code: 0, data: { content: "..." } }
-  // Adjust based on actual Coze response structure
   if (data.code !== 0) {
     throw new Error(`Coze error: ${data.msg || JSON.stringify(data)}`);
   }
@@ -86,6 +75,7 @@ export async function cozeChat(
 
 /**
  * Call Coze with streaming (for chat).
+ * Uses a buffer to handle SSE lines that span chunk boundaries.
  */
 export async function cozeChatStream(
   projectId: string,
@@ -119,35 +109,43 @@ export async function cozeChatStream(
 
   const decoder = new TextDecoder();
   let fullContent = "";
+  let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-    const chunk = decoder.decode(value, { stream: true });
-    const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      // Keep the last (potentially incomplete) line in the buffer
+      buffer = lines.pop() || "";
 
-    for (const line of lines) {
-      const data = line.slice(6).trim();
-      if (!data || data === "[DONE]") continue;
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (!data || data === "[DONE]") continue;
 
-      try {
-        const parsed = JSON.parse(data);
-        // Coze SSE format may vary; extract content delta
-        const token =
-          parsed.data?.content ??
-          parsed.choices?.[0]?.delta?.content ??
-          parsed.content ??
-          "";
+        try {
+          const parsed = JSON.parse(data);
+          const token =
+            parsed.data?.content ??
+            parsed.choices?.[0]?.delta?.content ??
+            parsed.content ??
+            "";
 
-        if (token && typeof token === "string") {
-          fullContent += token;
-          if (callbacks.onToken) callbacks.onToken(token);
+          if (token && typeof token === "string") {
+            fullContent += token;
+            if (callbacks.onToken) callbacks.onToken(token);
+          }
+        } catch {
+          // skip parse errors on malformed lines
         }
-      } catch {
-        // skip parse errors
       }
     }
+  } finally {
+    // Ensure reader is released
+    try { reader.releaseLock(); } catch { /* already released */ }
   }
 
   return fullContent;
@@ -157,9 +155,6 @@ export async function cozeChatStream(
 // OpenAI-compatible API (LLM fallback)
 // ============================================================
 
-/**
- * Non-streaming chat completion (OpenAI-compatible).
- */
 export async function aiChat(
   messages: AIMessage[],
   options?: {
@@ -198,9 +193,6 @@ export async function aiChat(
   return data.choices?.[0]?.message?.content ?? "";
 }
 
-/**
- * Streaming chat completion (OpenAI-compatible).
- */
 export async function aiChatStream(
   messages: AIMessage[],
   callbacks: AIStreamCallbacks,
@@ -235,26 +227,33 @@ export async function aiChatStream(
 
   const decoder = new TextDecoder();
   let fullContent = "";
+  let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-    const chunk = decoder.decode(value, { stream: true });
-    const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
 
-    for (const line of lines) {
-      const data = line.slice(6).trim();
-      if (data === "[DONE]") continue;
-      try {
-        const parsed = JSON.parse(data);
-        const token = parsed.choices?.[0]?.delta?.content ?? "";
-        if (token) {
-          fullContent += token;
-          if (callbacks.onToken) callbacks.onToken(token);
-        }
-      } catch { /* skip */ }
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(data);
+          const token = parsed.choices?.[0]?.delta?.content ?? "";
+          if (token) {
+            fullContent += token;
+            if (callbacks.onToken) callbacks.onToken(token);
+          }
+        } catch { /* skip */ }
+      }
     }
+  } finally {
+    try { reader.releaseLock(); } catch { /* already released */ }
   }
 
   return fullContent;
@@ -264,13 +263,41 @@ export async function aiChatStream(
 // JSON parsing helper
 // ============================================================
 
-/**
- * Parse AI JSON response safely (strips markdown fences).
- */
 export function parseAIJson<T>(raw: string): T {
   let cleaned = raw.trim();
   if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
   else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
   if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
   return JSON.parse(cleaned.trim()) as T;
+}
+
+// ============================================================
+// Simple in-memory rate limiter
+// NOTE: Works correctly for single-isolate deployments (Supabase/Deno Deploy).
+// For multi-region deployments, migrate to a database-backed counter or Redis.
+// ============================================================
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+/**
+ * Check if a user has exceeded the rate limit for an action.
+ * Returns true if allowed, false if rate limited.
+ */
+export function checkRateLimit(
+  key: string,
+  maxRequests: number = 10,
+  windowMs: number = 60000,
+): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (entry.count >= maxRequests) return false;
+
+  entry.count++;
+  return true;
 }

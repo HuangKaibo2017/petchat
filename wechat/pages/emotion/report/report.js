@@ -1,4 +1,5 @@
 const app = getApp()
+const API = require('../../../utils/api')
 
 Page({
   data: {
@@ -19,7 +20,7 @@ Page({
     if (data.coreAnswer) {
       const report = {
         ...data,
-        id: data.id || `rpt_${Date.now()}`,
+        id: data.reportId || data.id || `rpt_${Date.now()}`,
         type: data.type || 'emotion',
         typeName: data.typeName || '情绪解读',
         time: data.time || new Date().toLocaleString(),
@@ -67,9 +68,17 @@ Page({
     wx.setStorageSync('reports', reports)
   },
 
-  toggleFavorite() {
-    this.setData({ favorited: !this.data.favorited })
-    wx.showToast({ title: this.data.favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+  async toggleFavorite() {
+    const { report, favorited } = this.data
+    try {
+      await API.Favorite.toggle(report.id, report.type || 'emotion')
+      this.setData({ favorited: !favorited })
+      wx.showToast({ title: !favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+    } catch (err) {
+      // 兜底：本地切换
+      this.setData({ favorited: !favorited })
+      wx.showToast({ title: !favorited ? '已收藏' : '已取消收藏', icon: 'none' })
+    }
   },
 
   downloadReport() { wx.showToast({ title: '报告已保存', icon: 'success' }) },

@@ -8,4 +8,4 @@
   color: #6B7280;
   white-space: nowrap;
 }
-.filter-tab.active { background: #FFF7ED; color: #F97316; font-weight: 600; }
+.filter-tab.active { background: #D8EBE6; color: #2D7D6E; font-weight: 600; }

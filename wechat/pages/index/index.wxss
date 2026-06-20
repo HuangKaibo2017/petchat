@@ -13,7 +13,7 @@
 .hero-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(139,92,246,0.3));
+  background: linear-gradient(135deg, rgba(45,125,110,0.2), rgba(139,92,246,0.3));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,7 +46,7 @@
 .tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
 .tag-success { background:#F0FDF4; color:#22C55E; }
 .tag-warning { background:#FFFBEB; color:#F59E0B; }
-.tag-primary { background:#FFF7ED; color:#F97316; }
+.tag-primary { background:#D8EBE6; color:#2D7D6E; }
 
 /* Add Pet Card */
 .add-pet-card {
@@ -83,7 +83,7 @@
   margin: 0 auto 12rpx;
   font-size: 36rpx;
 }
-.emotion-icon { background: #FEF3C7; }
+.emotion-icon { background: #E8F5F0; }
 .health-icon { background: #DBEAFE; }
 .personality-icon { background: #EDE9FE; }
 .risk-icon { background: #FEE2E2; }

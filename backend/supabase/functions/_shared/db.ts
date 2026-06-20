@@ -5,6 +5,9 @@ import { AppError, ERR } from "./errors.ts";
  * Check and deduct user quota for a given feature.
  * Returns the remaining quota, or throws QUOTA_EXCEEDED.
  */
+// NOTE: Quota check and recordUsage are separate calls — a race condition
+// could allow slightly exceeding limits under concurrent requests.
+// For production, use a DB-level unique constraint or serializable transaction.
 export async function checkQuota(
   userId: number,
   featureCode: string,

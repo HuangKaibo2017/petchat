@@ -15,9 +15,9 @@
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 .duration-item.active {
-  border-color: #F97316;
-  background: #FFF7ED;
-  color: #F97316;
+  border-color: #2D7D6E;
+  background: #D8EBE6;
+  color: #2D7D6E;
   font-weight: 600;
 }
 
@@ -60,9 +60,9 @@
   text-align: center;
   font-size: 36rpx;
   font-weight: 700;
-  color: #F97316;
+  color: #2D7D6E;
 }
 .number-input.filled {
-  border-color: #F97316;
-  background: #FFF7ED;
+  border-color: #2D7D6E;
+  background: #D8EBE6;
 }
