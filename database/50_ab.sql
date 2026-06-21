@@ -216,11 +216,9 @@ COMMENT ON COLUMN public.t_ab_assignment.f_user_id       IS 'FK -> public.t_user
 COMMENT ON COLUMN public.t_ab_assignment.f_anonymous_id  IS '匿名 UUID, 可空 (登录后置 NULL); 由前端 generateAnonymousId() 生成 (见 v0.7 §7.4)';
 COMMENT ON COLUMN public.t_ab_assignment.f_assigned_at   IS '分配时间 (UTC)';
 COMMENT ON COLUMN public.t_ab_assignment.f_status_id     IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删除';
--- 部分唯一索引: 同一实验内, 登录用户唯一 / 匿名用户唯一
-CREATE UNIQUE INDEX uk_t_assign_ab_user ON public.t_ab_assignment(f_ab_id, f_user_id)      WHERE f_user_id      IS NOT NULL;
-CREATE UNIQUE INDEX uk_t_assign_ab_anon ON public.t_ab_assignment(f_ab_id, f_anonymous_id) WHERE f_anonymous_id IS NOT NULL;
-CREATE INDEX idx_t_assign_user ON public.t_ab_assignment(f_user_id, f_ab_id)      WHERE f_user_id      IS NOT NULL;
-CREATE INDEX idx_t_assign_anon ON public.t_ab_assignment(f_anonymous_id, f_ab_id) WHERE f_anonymous_id IS NOT NULL;
+-- 注: uk_t_assign_ab_user / uk_t_assign_ab_anon / idx_t_assign_user / idx_t_assign_anon
+--     (部分唯一/索引: 同一实验内, 登录用户唯一 / 匿名用户唯一)
+--     已统一移至 99_indexes_views.sql
 
 
 -- ============================================================
@@ -292,7 +290,7 @@ COMMENT ON COLUMN public.t_user_tag.f_expires_at IS '过期时间 (可空)';
 COMMENT ON COLUMN public.t_user_tag.f_status_id  IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql | 软删除';
 COMMENT ON COLUMN public.t_user_tag.f_created_at IS '创建时间 (UTC)';
 COMMENT ON COLUMN public.t_user_tag.f_updated_at IS '更新时间 (UTC)';
-CREATE INDEX idx_t_user_tag_tag ON public.t_user_tag(f_tag);
+-- 注: idx_t_user_tag_tag 已统一移至 99_indexes_views.sql
 
 
 -- ============================================================

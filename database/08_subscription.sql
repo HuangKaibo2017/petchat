@@ -176,9 +176,7 @@ COMMENT ON COLUMN public.t_user_subscription.f_status_payment    IS 'FK -> publi
 COMMENT ON COLUMN public.t_user_subscription.f_meta_info         IS '扩展元数据';
 COMMENT ON COLUMN public.t_user_subscription.f_created_at        IS '创建时间 (UTC)';
 COMMENT ON COLUMN public.t_user_subscription.f_updated_at        IS '更新时间 (UTC)';
-CREATE INDEX idx_t_us_user        ON public.t_user_subscription(f_user_id);
-CREATE INDEX idx_t_us_expire      ON public.t_user_subscription(f_expire_at);
-CREATE INDEX idx_t_us_user_active ON public.t_user_subscription(f_user_id, f_expire_at DESC) WHERE f_status_payment > 0;
+-- 注: idx_t_us_user / idx_t_us_expire / idx_t_us_user_active 已统一移至 99_indexes_views.sql
 
 
 -- ============================================================
@@ -222,7 +220,7 @@ COMMENT ON COLUMN public.t_user_quota.f_meta_info    IS '扩展元数据';
 COMMENT ON COLUMN public.t_user_quota.f_deleted      IS '软删除: 0=正常 1=已删除';
 COMMENT ON COLUMN public.t_user_quota.f_created_at   IS '创建时间 (UTC)';
 COMMENT ON COLUMN public.t_user_quota.f_updated_at   IS '更新时间 (UTC)';
-CREATE INDEX idx_t_uq_user_feature ON public.t_user_quota(f_user_id, f_feature_id, f_period_start DESC);
+-- 注: idx_t_uq_user_feature 已统一移至 99_indexes_views.sql
 
 
 -- ============================================================
@@ -255,5 +253,4 @@ COMMENT ON COLUMN public.t_usage_record.f_usage_count       IS '使用量 (默�
 COMMENT ON COLUMN public.t_usage_record.f_related_report_id IS '弱引用: 报告 ID (如本次使用生成了报告) | 实际表: t_report_emotion/health/hpr/pers (in 04_ai_reports.sql)';
 COMMENT ON COLUMN public.t_usage_record.f_meta_info         IS '扩展元数据';
 COMMENT ON COLUMN public.t_usage_record.f_created_at        IS '使用时间 (UTC)';
-CREATE INDEX idx_t_usage_record_user_time ON public.t_usage_record(f_user_id, f_created_at DESC);
-CREATE INDEX idx_t_usage_record_feature   ON public.t_usage_record(f_feature_id, f_created_at DESC);
+-- 注: idx_t_usage_record_user_time / idx_t_usage_record_feature 已统一移至 99_indexes_views.sql

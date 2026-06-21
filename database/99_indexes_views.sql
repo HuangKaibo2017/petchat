@@ -141,6 +141,119 @@ CREATE INDEX IF NOT EXISTS idx_t_comment_pgroonga
 
 
 -- ============================================================
+-- 99.2.5 各模块内联索引汇总 (从 0x_*.sql 抽出, 集中维护)
+-- ============================================================
+-- 原则: 模块文件 (0x_*.sql) 只声明表结构 + 注释, 索引统一在 99_indexes_views.sql
+--       维护. 便于一次评估/重建全套索引.
+-- 注: 此段是单表内联索引的"集中地", 跨模块/跨表的索引继续放在 99.3 段.
+
+-- 99.2.5.1 用户表 (02_rbac_users.sql: t_user)
+-- partial unique: 排除空字符串
+CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_phone
+    ON public.t_user(f_phone) WHERE f_phone <> '';
+CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_email
+    ON public.t_user(f_email) WHERE f_email <> '';
+-- active 状态过滤 (status_id = 10 表示 active)
+CREATE INDEX IF NOT EXISTS idx_t_user_phone_active
+    ON public.t_user(f_phone) WHERE f_status_id = 10;
+CREATE INDEX IF NOT EXISTS idx_t_user_email_active
+    ON public.t_user(f_email) WHERE f_status_id = 10;
+
+-- 99.2.5.2 评论表 (05_chat_comments.sql: t_comment)
+CREATE INDEX IF NOT EXISTS idx_t_comment_target
+    ON public.t_comment(f_target_type, f_target_id);
+CREATE INDEX IF NOT EXISTS idx_t_comment_user
+    ON public.t_comment(f_user_id);
+
+-- 99.2.5.3 订阅表 (08_subscription.sql: t_user_subscription / t_user_quota / t_usage_record)
+CREATE INDEX IF NOT EXISTS idx_t_us_user
+    ON public.t_user_subscription(f_user_id);
+CREATE INDEX IF NOT EXISTS idx_t_us_expire
+    ON public.t_user_subscription(f_expire_at);
+CREATE INDEX IF NOT EXISTS idx_t_us_user_active
+    ON public.t_user_subscription(f_user_id, f_expire_at DESC) WHERE f_status_payment > 0;
+CREATE INDEX IF NOT EXISTS idx_t_uq_user_feature
+    ON public.t_user_quota(f_user_id, f_feature_id, f_period_start DESC);
+CREATE INDEX IF NOT EXISTS idx_t_usage_record_user_time
+    ON public.t_usage_record(f_user_id, f_created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_usage_record_feature
+    ON public.t_usage_record(f_feature_id, f_created_at DESC);
+
+-- 99.2.5.4 电商表 (09_ecommerce.sql: t_product_category / t_order / t_order_item / t_product_spu / t_product_sku / t_inventory_* / t_cart / t_shipment)
+CREATE INDEX IF NOT EXISTS idx_t_product_category_parent
+    ON public.t_product_category(f_parent_id);
+CREATE INDEX IF NOT EXISTS idx_t_product_category_active
+    ON public.t_product_category(f_deleted) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_order_user_created
+    ON public.t_order(f_user_id, f_created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_order_pay_status
+    ON public.t_order(f_status_payment, f_created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_order_ship_status
+    ON public.t_order(f_status_shipping, f_created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_order_item_order
+    ON public.t_order_item(f_order_id);
+CREATE INDEX IF NOT EXISTS idx_t_order_item_sku
+    ON public.t_order_item(f_sku_id);
+CREATE INDEX IF NOT EXISTS idx_t_product_spu_name_en
+    ON public.t_product_spu ((f_name->>'en-US'));
+CREATE INDEX IF NOT EXISTS idx_t_product_spu_name_zh
+    ON public.t_product_spu ((f_name->>'zh-CN'));
+-- pgroonga 索引: idx_t_product_spu_pgroonga 已在 09_ecommerce.sql: 见该文件
+CREATE INDEX IF NOT EXISTS idx_t_product_spu_brand
+    ON public.t_product_spu(f_brand);
+CREATE INDEX IF NOT EXISTS idx_t_product_sku_spu
+    ON public.t_product_sku(f_spu_id);
+CREATE INDEX IF NOT EXISTS idx_t_inventory_lot_supplier
+    ON public.t_inventory_lot(f_supplier);
+CREATE INDEX IF NOT EXISTS idx_t_inventory_balance_sku
+    ON public.t_inventory_balance(f_sku_id);
+CREATE INDEX IF NOT EXISTS idx_t_inventory_movement_created
+    ON public.t_inventory_movement(f_created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_t_inventory_serial_sku
+    ON public.t_inventory_serial(f_sku_id);
+CREATE INDEX IF NOT EXISTS idx_t_cart_user
+    ON public.t_cart(f_user_id);
+CREATE INDEX IF NOT EXISTS idx_t_shipment_order
+    ON public.t_shipment(f_order_id);
+CREATE INDEX IF NOT EXISTS idx_t_shipment_tracking
+    ON public.t_shipment(f_tracking_number) WHERE f_tracking_number <> '';
+
+-- 99.2.5.5 IoT 设备同步 (10_iot.sql: t_device_sync)
+CREATE INDEX IF NOT EXISTS idx_t_device_sync_device
+    ON public.t_device_sync(f_device_id, f_created_at DESC);
+
+-- 99.2.5.6 代理商 (11_agent.sql: t_agent / t_agent_application / t_agent_withdrawal / t_agent_revenue)
+CREATE INDEX IF NOT EXISTS idx_t_agent_user
+    ON public.t_agent(f_user_id) WHERE f_user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_t_agent_active
+    ON public.t_agent(f_agent_type) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_agent_app_agent
+    ON public.t_agent_application(f_agent_id);
+CREATE INDEX IF NOT EXISTS idx_t_agent_app_user
+    ON public.t_agent_application(f_user_id);
+CREATE INDEX IF NOT EXISTS idx_t_agent_app_status
+    ON public.t_agent_application(f_status_apply) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_agent_wd_agent
+    ON public.t_agent_withdrawal(f_agent_id);
+CREATE INDEX IF NOT EXISTS idx_t_agent_rev_agent
+    ON public.t_agent_revenue(f_agent_id, f_revenue_month);
+
+-- 99.2.5.7 医院 (12_healthcare.sql: t_hospital)
+CREATE INDEX IF NOT EXISTS idx_t_hospital_rating
+    ON public.t_hospital(f_rating DESC);
+
+-- 99.2.5.8 捐款 (13_welfare.sql: t_donation)
+-- 注: idx_t_donation_user / idx_t_donation_target 已在 99.3 段 (跨模块)
+-- 此处省略
+
+-- 99.2.5.9 AB 实验 (50_ab.sql: t_ab_assignment / t_user_tag)
+-- 跨表高频索引 (按 user/anon 复合) — 已在 99.3 段
+-- 此处补: t_user_tag 按 tag 过滤
+CREATE INDEX IF NOT EXISTS idx_t_user_tag_tag
+    ON public.t_user_tag(f_tag);
+
+
+-- ============================================================
 -- 99.3 跨模块高频查询索引 (跨表)
 -- ============================================================
 

@@ -62,7 +62,7 @@ COMMENT ON COLUMN public.t_hospital.f_rating         IS '综合评分 0-5 (由 t
 COMMENT ON COLUMN public.t_hospital.f_meta_info      IS '扩展元数据 (坐标/资质/...)';
 COMMENT ON COLUMN public.t_hospital.f_deleted        IS '软删除: 0=正常 1=已删除';
 COMMENT ON COLUMN public.t_hospital.f_created_at     IS '入驻时间 (UTC)';
-CREATE INDEX idx_t_hospital_rating ON public.t_hospital(f_rating DESC);
+-- 注: idx_t_hospital_rating 已统一移至 99_indexes_views.sql
 
 
 -- ============================================================
