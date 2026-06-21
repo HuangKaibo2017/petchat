@@ -67,6 +67,8 @@ page {
   background-color: var(--color-bg);
   line-height: 1.6;
   box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100vw;
 }
 
 /* Utility Classes */
@@ -245,6 +247,7 @@ page {
   min-height: 100vh;
   background: var(--color-bg);
   padding-bottom: var(--safe-bottom);
+  overflow-x: hidden;
 }
 
 /* Section */

@@ -1,5 +1,6 @@
 <nav-bar title="商城" />
 <view class="page-container">
+  <!-- 搜索栏 -->
   <view class="search-bar px-md py-sm">
     <view class="search-input flex items-center" bindtap="onSearch">
       <text class="text-hint mr-sm">🔍</text>
@@ -7,7 +8,35 @@
     </view>
   </view>
 
-  <!-- Categories -->
+  <!-- 营销入口：秒杀 / 拼团 / 优惠券 -->
+  <view class="promo-strip px-md">
+    <view class="promo-item promo-flash" bindtap="goFlash">
+      <view class="promo-icon">⚡</view>
+      <view class="promo-text">
+        <view class="text-sm font-bold">限时秒杀</view>
+        <view class="text-xs text-hint">低至5折</view>
+      </view>
+      <view class="promo-countdown text-xs text-primary">进行中</view>
+    </view>
+    <view class="promo-item promo-group" bindtap="goGroup">
+      <view class="promo-icon">👥</view>
+      <view class="promo-text">
+        <view class="text-sm font-bold">拼团</view>
+        <view class="text-xs text-hint">2人成团</view>
+      </view>
+      <view class="promo-badge text-xs tag tag-warning">热</view>
+    </view>
+    <view class="promo-item promo-coupon" bindtap="goCoupon">
+      <view class="promo-icon">🎫</view>
+      <view class="promo-text">
+        <view class="text-sm font-bold">领券</view>
+        <view class="text-xs text-hint">满减优惠</view>
+      </view>
+      <view class="text-xs text-primary">3张可用</view>
+    </view>
+  </view>
+
+  <!-- 品类导航 -->
   <scroll-view scroll-x class="category-scroll px-md">
     <view class="category-item {{activeCategory === 'all' ? 'active' : ''}}" bindtap="switchCategory" data-cat="all">全部</view>
     <view class="category-item {{activeCategory === 'nfc' ? 'active' : ''}}" bindtap="switchCategory" data-cat="nfc">NFC灵犀</view>
@@ -15,17 +44,32 @@
     <view class="category-item {{activeCategory === 'food' ? 'active' : ''}}" bindtap="switchCategory" data-cat="food">宠粮零食</view>
     <view class="category-item {{activeCategory === 'supplies' ? 'active' : ''}}" bindtap="switchCategory" data-cat="supplies">猫砂用品</view>
     <view class="category-item {{activeCategory === 'insurance' ? 'active' : ''}}" bindtap="switchCategory" data-cat="insurance">保险体检</view>
+    <view class="category-item {{activeCategory === 'blindbox' ? 'active' : ''}}" bindtap="switchCategory" data-cat="blindbox">盲盒玩具</view>
     <view class="category-item {{activeCategory === '周边' ? 'active' : ''}}" bindtap="switchCategory" data-cat="周边">周边</view>
   </scroll-view>
 
-  <!-- Product Grid -->
+  <!-- 商品网格 -->
   <view class="product-grid px-md">
     <view class="product-card" wx:for="{{products}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
-      <image class="product-card-img" src="{{item.image}}" mode="aspectFill" />
+      <view class="product-img-wrap">
+        <image class="product-card-img" src="{{item.image}}" mode="aspectFill" />
+        <!-- 自营 vs 入驻标识 -->
+        <view class="shop-badge {{item.shopType === 'self' ? 'badge-self' : 'badge-merchant'}}">{{item.shopType === 'self' ? '自营' : '商家'}}</view>
+        <!-- 秒杀标识 -->
+        <view class="flash-tag" wx:if="{{item.isFlash}}">⚡秒杀</view>
+        <!-- 拼团标识 -->
+        <view class="group-tag" wx:if="{{item.isGroup}}">👥拼团</view>
+      </view>
       <view class="product-card-info">
         <view class="text-sm font-bold">{{item.name}}</view>
-        <view class="text-xs text-hint mt-sm">{{item.desc}}</view>
-        <view class="flex-between mt-sm">
+        <view class="text-xs text-hint mt-xs">{{item.desc}}</view>
+        <!-- 拼团价 -->
+        <view class="flex items-center mt-sm" wx:if="{{item.groupPrice}}">
+          <view class="text-xs text-hint" style="text-decoration:line-through;margin-right:8rpx">¥{{item.price}}</view>
+          <view class="text-md font-bold text-primary">¥{{item.groupPrice}}</view>
+          <view class="text-xs text-primary ml-xs">拼团价</view>
+        </view>
+        <view class="flex-between mt-sm" wx:else>
           <view class="text-primary font-bold text-md">¥{{item.price}}</view>
           <view class="cart-btn" catchtap="addToCart" data-item="{{item}}">🛒</view>
         </view>
@@ -33,7 +77,7 @@
     </view>
   </view>
 
-  <!-- Cart Entry -->
+  <!-- 购物车浮动入口 -->
   <view class="cart-float safe-bottom" wx:if="{{cartCount}}" bindtap="goCart">
     <view class="cart-icon-wrap">
       <text class="text-xl">🛒</text>

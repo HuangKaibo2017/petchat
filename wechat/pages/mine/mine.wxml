@@ -1,13 +1,24 @@
 <nav-bar title="我的" />
 <view class="page-container">
-  <!-- User Info -->
+  <!-- User Info with owner profile entry -->
   <view class="user-card">
     <view wx:if="{{isAuthorized}}">
       <view class="flex items-center">
         <image class="avatar-lg" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
-        <view class="ml-md">
-          <view class="text-xl font-bold">{{userInfo.nickName || '宠主'}}</view>
-          <view class="text-sm text-hint mt-sm">{{currentPet ? currentPet.name + '的家长' : '暂未添加宠物'}}</view>
+        <view class="ml-md" style="flex:1">
+          <view class="flex-between items-center">
+            <view class="text-xl font-bold">{{userInfo.nickName || '宠主'}}</view>
+            <view class="tag tag-primary text-xs" bindtap="goOwnerProfile">主人档案 ›</view>
+          </view>
+          <view class="text-sm text-hint mt-xs">{{currentPet ? currentPet.name + '的家长' : '暂未添加宠物'}}</view>
+          <!-- 季度提醒 -->
+          <view class="reminder-bar mt-sm" wx:if="{{seasonReminder}}" bindtap="goHealth">
+            <text class="text-xs">📅 {{seasonReminder}}</text>
+          </view>
+          <!-- 硬件免费次数 -->
+          <view class="hardware-badge mt-xs" wx:if="{{hardwareFreeCount > 0}}">
+            <text class="text-xs">🎁 硬件权益：医疗科普 {{hardwareFreeCount}}次 · 风险预警 {{hardwareFreeCount}}次免费</text>
+          </view>
         </view>
       </view>
     </view>
@@ -41,6 +52,10 @@
         <view class="menu-icon">🐾</view>
         <view class="menu-text text-sm">宠物档案</view>
       </view>
+      <view class="menu-item" bindtap="goOwnerProfile">
+        <view class="menu-icon">👤</view>
+        <view class="menu-text text-sm">主人档案</view>
+      </view>
       <view class="menu-item" bindtap="goHistory">
         <view class="menu-icon">📋</view>
         <view class="menu-text text-sm">历史报告</view>
@@ -53,6 +68,38 @@
         <view class="menu-icon">📦</view>
         <view class="menu-text text-sm">我的订单</view>
         <view class="badge" wx:if="{{pendingOrders}}">{{pendingOrders}}</view>
+      </view>
+      <view class="menu-item" bindtap="goHardware">
+        <view class="menu-icon">🔗</view>
+        <view class="menu-text text-sm">硬件绑定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 季度体质提醒卡片 -->
+  <view class="section" wx:if="{{constitutionReminder}}">
+    <view class="reminder-card card" bindtap="goHealth">
+      <view class="flex items-center">
+        <view class="reminder-icon">⏰</view>
+        <view class="ml-md" style="flex:1">
+          <view class="text-md font-bold">季度体质提醒</view>
+          <view class="text-xs text-hint mt-xs">{{constitutionReminder}}</view>
+        </view>
+        <view class="btn btn-primary btn-sm">去生成</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 硬件购买推广 -->
+  <view class="section" wx:if="{{!hasHardware}}">
+    <view class="hardware-card card" bindtap="goShop">
+      <view class="flex items-center">
+        <view class="hardware-icon">📡</view>
+        <view class="ml-md" style="flex:1">
+          <view class="text-md font-bold">购买灵犀NFC项圈</view>
+          <view class="text-xs text-hint mt-xs">购买硬件即赠：疾病科普3次 + 风险预警3次 · 体质分析1次 · 性格分析1次</view>
+        </view>
+        <view class="text-lg text-primary">›</view>
       </view>
     </view>
   </view>
@@ -72,8 +119,8 @@
     <view class="func-item" bindtap="goDeviceBind">
       <view class="func-left">
         <text class="func-icon">📡</text>
-        <text class="text-md">设备绑定</text>
-        <text class="text-xs text-hint ml-sm">AI盒子</text>
+        <text class="text-md">智能设备管理</text>
+        <text class="text-xs text-hint ml-sm">灵犀NFC · MCP IoT</text>
       </view>
       <text class="text-hint">›</text>
     </view>

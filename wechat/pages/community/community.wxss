@@ -1,7 +1,27 @@
-.banner-swiper { height:200rpx; margin:16rpx 32rpx; border-radius:24rpx; overflow:hidden; }
-.banner-item { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 32rpx; }
-.activity-card { margin-bottom: 16rpx; }
+.page-container { padding-bottom: 48rpx; }
+
+.nav-actions { gap: 16rpx; }
+.nav-msg-btn { position: relative; }
+.msg-badge { position: absolute; top: -6rpx; right: -8rpx; min-width: 28rpx; height: 28rpx; background: #EF4444; border-radius: 50%; color: #fff; font-size: 18rpx; display: flex; align-items: center; justify-content: center; padding: 0 6rpx; }
+
+.banner-swiper { height: 240rpx; margin: 0 32rpx 24rpx; border-radius: 24rpx; overflow: hidden; }
+.banner-item { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 48rpx; }
+
+/* 同城圈子 */
+.circle-scroll { white-space: nowrap; padding: 0 32rpx; }
+.circle-item { display: inline-block; padding: 12rpx 24rpx; margin-right: 12rpx; background: #F3F4F6; border-radius: 9999rpx; font-size: 24rpx; color: #6B7280; }
+.circle-active { background: #D8EBE6; color: #2D7D6E; font-weight: 600; }
+
+.section-header { padding: 0 32rpx; }
+
 .tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
 .tag-warning { background:#FFFBEB; color:#F59E0B; }
-.feed-card { margin-bottom: 16rpx; }
-.feed-img { width:100%; height:320rpx; border-radius:16rpx; }
+
+.circle-tag { padding: 2rpx 12rpx; border-radius: 8rpx; background: #EDE9FE; color: #7C3AED; }
+
+.activity-card { margin: 0 32rpx 16rpx; padding: 24rpx; }
+.feed-card { margin: 0 32rpx 16rpx; padding: 24rpx; }
+.feed-img { width: 100%; height: 360rpx; border-radius: 12rpx; }
+
+.section { margin-bottom: 32rpx; }
+.section-title { font-size: 30rpx; font-weight: 700; color: #1F2937; margin: 0 32rpx 16rpx; }

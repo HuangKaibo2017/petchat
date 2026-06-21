@@ -42,6 +42,9 @@ const LANG = 'zh-CN'
  * Coze 非流式调用 — 等待完整结果返回
  */
 async function cozeChat(projectId, userId, parameters) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30000)
+  try {
   const res = await fetch(COZE_AGENT_URL, {
     method: 'POST',
     headers: {
@@ -63,6 +66,7 @@ async function cozeChat(projectId, userId, parameters) {
   }
 
   const raw = await res.text()
+  clearTimeout(timeout)
 
   // Coze 有时返回 SSE 格式即使 stream:false，先尝试 JSON
   try { return JSON.parse(raw) } catch {}
@@ -103,6 +107,9 @@ async function cozeChat(projectId, userId, parameters) {
   // 最后尝试把整个 raw 当 JSON
   try { return JSON.parse(raw) } catch {}
   return raw
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 /**
@@ -413,11 +420,21 @@ app.post('/api/health/report', auth, async (req, res) => {
     try { reportJson = parseAIJson(rawContent) }
     catch {
       const textContent = typeof rawContent === 'string' ? rawContent : JSON.stringify(rawContent)
+      console.log('[Health] Coze 返回非 JSON，作为摘要展示，长度:', textContent.length)
       reportJson = {
-        healthScore: 0, healthLevel: '未知',
-        constitutionLabel: '', summary: textContent,
-        currentSymptoms: '', warning: [],
-        carePlan: [], recommendProducts: [], followUp: '',
+        healthScore: null, healthLevel: 'Coze 分析结果',
+        constitutionLabel: '',
+        summary: textContent.slice(0, 2000),
+        currentSymptoms: symptom || '',
+        symptomMapping: [],
+        potentialDeficiencies: '',
+        deficiencyDetails: [],
+        emergency: '',
+        futureRisk: '',
+        warning: [],
+        carePlan: [],
+        recommendProducts: [],
+        followUp: '',
       }
     }
 

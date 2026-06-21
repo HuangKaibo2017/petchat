@@ -25,6 +25,16 @@
     <view class="section-title">宠物状态问题</view>
     <view class="section-subtitle">描述您想了解的宠物状态</view>
 
+    <!-- 模式切换：多维度 / 一事一问 -->
+    <view class="mode-switch flex mt-md">
+      <view class="mode-switch-item {{emotionMode==='multi'?'mode-active':''}}" bindtap="switchEmotionMode" data-mode="multi">
+        <text>🔮 多维度</text>
+      </view>
+      <view class="mode-switch-item {{emotionMode==='single'?'mode-active':''}}" bindtap="switchEmotionMode" data-mode="single">
+        <text>💬 一事一问</text>
+      </view>
+    </view>
+
     <!-- Question Input with Hint Bulb -->
     <view class="question-area">
       <textarea
@@ -58,7 +68,8 @@
     </view>
     <image class="upload-preview" wx:if="{{uploadImage}}" src="{{uploadImage}}" mode="aspectFill" />
 
-    <!-- Divination System Selection -->
+    <!-- Divination System Selection (多维度模式) -->
+    <block wx:if="{{emotionMode==='multi'}}">
     <view class="section-title mt-lg">起卦体系</view>
     <view class="divination-grid">
       <view class="divination-item {{divSystem === 'liuyao' ? 'active' : ''}}" bindtap="selectDivSystem" data-system="liuyao">
@@ -102,6 +113,15 @@
       <view class="text-xs text-hint mt-sm">起卦时间：后台自动获取当前时间</view>
     </view>
 
+    </block>
+    <!-- 一事一问：单个数字输入 -->
+    <block wx:if="{{emotionMode==='single'}}">
+      <view class="section-subtitle mt-md">请输入1个数字（0-9），作为感应数</view>
+      <view class="single-number-input flex items-center justify-center mt-md">
+        <input class="number-input large filled" type="number" maxlength="1" value="{{singleNum}}" bindinput="onSingleNumInput" />
+      </view>
+    </block>
+
     <view class="text-xs text-hint text-center mt-md" wx:if="{{divSystem === 'tarot'}}">
       塔罗模式下，提交后将自动跳转至选牌页面
     </view>
@@ -111,7 +131,7 @@
       disabled="{{!canSubmit}}"
       bindtap="submitEmotion"
     >
-      {{divSystem === 'tarot' ? '开始选牌' : '生成报告'}}
+      {{divSystem === 'tarot' ? '开始选牌' : emotionMode === 'single' ? '一问便知' : '生成报告'}}
     </button>
   </view>
 
