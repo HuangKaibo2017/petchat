@@ -22,15 +22,12 @@ Page({
     divSystem: 'liuyao',
     numberInputs: ['', '', '', '', '', ''],
     canSubmit: false,
-    generating: false,
+    emotionMode: 'multi', singleNum: '', generating: false,
     selectedCards: [],
     tarotCards: ['🌟', '🌙', '☀️', '🌈', '🔥', '💧', '🌿', '⚡', '🦋', '🐉', '🔮', '💎']
   },
 
   onLoad(options) {
-    if (options.type === 'personality') {
-      this.setData({ pageTitle: '宠物性格分析', type: 'personality' })
-    }
     this.loadPets()
   },
 
@@ -100,10 +97,23 @@ Page({
     this.checkCanSubmit()
   },
 
+  switchEmotionMode(e) {
+    const mode = e.currentTarget.dataset.mode
+    this.setData({ emotionMode: mode })
+    this.checkCanSubmit()
+  },
+
+  onSingleNumInput(e) {
+    this.setData({ singleNum: e.detail.value.slice(-1) })
+    this.checkCanSubmit()
+  },
+
   checkCanSubmit() {
-    const { question, divSystem, numberInputs } = this.data
+    const { question, divSystem, numberInputs, emotionMode, singleNum } = this.data
     let canSubmit = !!question.trim()
-    if (divSystem !== 'tarot') {
+    if (emotionMode === 'single') {
+      canSubmit = canSubmit && !!singleNum
+    } else if (divSystem !== 'tarot') {
       canSubmit = canSubmit && numberInputs.every(n => n !== '')
     }
     this.setData({ canSubmit })

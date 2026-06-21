@@ -15,6 +15,12 @@
     </view>
   </view>
 
+  <!-- AI 综合总结 -->
+  <view class="report-section card" wx:if="{{report.summary}}">
+    <view class="section-label">📋 综合总结</view>
+    <view class="text-md">{{report.summary}}</view>
+  </view>
+
   <!-- Current Symptoms (实症) -->
   <view class="report-section card">
     <view class="section-label">🔴 已发实症</view>

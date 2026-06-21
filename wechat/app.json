@@ -1,6 +1,11 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/personality/personality",
+    "pages/lostpet/lostpet",
+    "pages/newpet/newpet",
+    "pages/photo/photo",
+    "pages/rescue/rescue",
     "pages/emotion/emotion",
     "pages/emotion/report/report",
     "pages/health/health",

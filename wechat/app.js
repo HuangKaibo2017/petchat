@@ -9,9 +9,9 @@ App({
     favorites: [],
     cart: [],
     nfcEnabled: true,
-    // 本地开发: Express 后端
-    // 线上部署: 替换为 https://api.gengdongta.com
-    baseUrl: 'http://localhost:8001',
+    // 本地开发: Express 后端 http://localhost:8001
+    // 线上部署: https://petchat.life
+    baseUrl: 'http://localhost:8003',
     debug: false
   },
 

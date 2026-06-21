@@ -1,4 +1,8 @@
-/* Hero Section */
+/* ═══════════════════════════════════════════
+   Index Page Styles — 更懂它 首页
+   ═══════════════════════════════════════════ */
+
+/* ─── Hero Section ─── */
 .hero-section {
   position: relative;
   height: 360rpx;
@@ -30,7 +34,7 @@
   letter-spacing: 4rpx;
 }
 
-/* Pet Status Card */
+/* ─── Pet Status Card ─── */
 .pet-status-card {
   margin: -12rpx 32rpx 24rpx;
   position: relative;
@@ -42,66 +46,21 @@
   border-radius: 9999rpx;
 }
 
-/* Status Tags */
+/* ─── Tags ─── */
 .tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
 .tag-success { background:#F0FDF4; color:#22C55E; }
 .tag-warning { background:#FFFBEB; color:#F59E0B; }
 .tag-primary { background:#D8EBE6; color:#2D7D6E; }
 
-/* Add Pet Card */
+/* ─── Add Pet Card ─── */
 .add-pet-card {
   margin: 0 32rpx 24rpx;
   padding: 48rpx 32rpx;
 }
 
-/* Service Grid */
-.service-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
-  padding: 0 32rpx;
-}
-.service-item {
-  background: #FFFFFF;
-  border-radius: 20rpx;
-  padding: 24rpx 16rpx;
-  text-align: center;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
-  transition: all 0.2s;
-}
-.service-hover {
-  transform: scale(0.96);
-  box-shadow: 0 4rpx 16rpx rgba(249,115,22,0.12);
-}
-.service-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 20rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 12rpx;
-  font-size: 36rpx;
-}
-.emotion-icon { background: #E8F5F0; }
-.health-icon { background: #DBEAFE; }
-.personality-icon { background: #EDE9FE; }
-.risk-icon { background: #FEE2E2; }
-.medical-icon { background: #D1FAE5; }
-.newpet-icon { background: #FFEDD5; }
-.chat-icon { background: #FCE7F3; }
-.lost-icon { background: #E0E7FF; }
-.rescue-icon { background: #F3F4F6; }
-.service-name {
-  font-weight: 600;
-  color: #1F2937;
-  margin-bottom: 4rpx;
-}
-.service-desc {
-  display: block;
-}
-
-/* Banner */
+/* ═══════════════════════════════════════════
+   1. Banner 分区
+   ═══════════════════════════════════════════ */
 .banner-swiper {
   height: 240rpx;
   margin: 0 32rpx;
@@ -135,7 +94,233 @@
   border-radius: 16rpx;
 }
 
-/* Hospital Scroll */
+/* 次要 Banner：救助专区公益入口 */
+.rescue-banner-mini {
+  margin: 16rpx 32rpx 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20rpx;
+}
+.rescue-banner-bg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+}
+.rescue-banner-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 14rpx;
+  background: rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+}
+.rescue-banner-arrow {
+  color: rgba(255,255,255,0.8);
+  font-size: 36rpx;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════
+   2. 7 项核心工具网格 （3列，2-3-2）
+   ═══════════════════════════════════════════ */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  padding: 0 32rpx;
+}
+.tool-item {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx 12rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.tool-hover {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 16rpx rgba(249,115,22,0.12);
+}
+.tool-icon {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10rpx;
+  font-size: 34rpx;
+}
+.tool-icon-health { background: #DBEAFE; }
+.tool-icon-emotion { background: #E8F5F0; }
+.tool-icon-personality { background: #EDE9FE; }
+.tool-icon-risk { background: #FEE2E2; }
+.tool-icon-medical { background: #D1FAE5; }
+.tool-icon-newpet { background: #FFEDD5; }
+.tool-icon-lost { background: #E0E7FF; }
+.tool-name {
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 4rpx;
+}
+.tool-desc {
+  display: block;
+}
+
+/* ═══════════════════════════════════════════
+   3. 照片区
+   ═══════════════════════════════════════════ */
+.photo-zone {
+  display: flex;
+  gap: 16rpx;
+  padding: 0 32rpx;
+}
+.photo-card {
+  flex: 1;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.photo-card:active {
+  transform: scale(0.97);
+}
+.photo-card-inner {
+  padding: 28rpx 16rpx 20rpx;
+  text-align: center;
+}
+.photo-emoji {
+  font-size: 40rpx;
+  margin-bottom: 10rpx;
+}
+.photo-label {
+  color: #1F2937;
+  margin-bottom: 4rpx;
+}
+.photo-hint {
+  display: block;
+}
+.photo-watermark { background: linear-gradient(180deg, #FEF3C7 0%, #FFFFFF 100%); }
+.photo-comic { background: linear-gradient(180deg, #E0E7FF 0%, #FFFFFF 100%); }
+.photo-series { background: linear-gradient(180deg, #FCE7F3 0%, #FFFFFF 100%); }
+
+/* ═══════════════════════════════════════════
+   4. 救助专区入口
+   ═══════════════════════════════════════════ */
+.rescue-entry {
+  margin: 0 32rpx;
+  padding: 24rpx;
+}
+.rescue-entry-icon {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+}
+.rescue-sub-actions {
+  gap: 16rpx;
+}
+.rescue-sub-btn {
+  flex: 1;
+  text-align: center;
+  padding: 14rpx 0;
+  border-radius: 14rpx;
+  background: #F9FAFB;
+  color: #374151;
+  transition: all 0.15s;
+}
+.rescue-sub-btn:active {
+  background: #F3F4F6;
+}
+
+/* ═══════════════════════════════════════════
+   5. 内容联动：养护知识 + 宠友圈热帖
+   ═══════════════════════════════════════════ */
+.article-scroll {
+  white-space: nowrap;
+  padding: 0 32rpx;
+}
+.article-card {
+  display: inline-block;
+  width: 280rpx;
+  margin-right: 16rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  white-space: normal;
+  vertical-align: top;
+}
+.article-cover {
+  width: 100%;
+  height: 160rpx;
+}
+.article-cover-placeholder {
+  width: 100%;
+  height: 160rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.article-body {
+  padding: 16rpx;
+}
+.article-tag {
+  margin-bottom: 8rpx;
+}
+.article-title {
+  color: #1F2937;
+  margin-bottom: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.article-desc {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── 宠友圈热帖 ─── */
+.section-header {
+  padding: 0 32rpx;
+  margin-bottom: 16rpx;
+}
+.feed-card {
+  margin: 0 32rpx 16rpx;
+  padding: 24rpx;
+}
+.feed-content {
+  color: #374151;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+.feed-image {
+  width: 100%;
+  height: 320rpx;
+  border-radius: 12rpx;
+  margin-top: 16rpx;
+}
+.feed-stats {
+  gap: 24rpx;
+}
+.feed-stat {
+  font-size: 22rpx;
+  color: #9CA3AF;
+}
+
+/* ─── Hospital Scroll ─── */
 .hospital-scroll {
   white-space: nowrap;
   padding: 0 32rpx;
@@ -149,7 +334,7 @@
 }
 .hospital-tags { gap: 8rpx; }
 
-/* Product Mini */
+/* ─── Product Mini ─── */
 .product-mini {
   background: #FFFFFF;
   border-radius: 20rpx;
@@ -168,4 +353,21 @@
 }
 .product-price {
   padding: 0 16rpx 16rpx;
+}
+
+/* ─── Shared ─── */
+.section {
+  margin-bottom: 32rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 32rpx 16rpx;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  padding: 0 32rpx;
 }
