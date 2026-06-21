@@ -175,8 +175,7 @@ COMMENT ON COLUMN public.t_donation.f_message        IS '留言';
 COMMENT ON COLUMN public.t_donation.f_meta_info      IS '扩展元数据 (支付回执)';
 COMMENT ON COLUMN public.t_donation.f_deleted        IS '软删除: 0=正常 1=已删除';
 COMMENT ON COLUMN public.t_donation.f_created_at     IS '捐款时间 (UTC)';
-CREATE INDEX idx_t_donation_user ON public.t_donation(f_user_id);
-CREATE INDEX idx_t_donation_target ON public.t_donation(f_target_type, f_target_id);
+-- 注: idx_t_donation_user / idx_t_donation_target 已统一移至 99_indexes_views.sql
 
 
 -- ============================================================
