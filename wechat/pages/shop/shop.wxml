@@ -65,7 +65,7 @@
         <view class="text-xs text-hint mt-xs">{{item.desc}}</view>
         <!-- 拼团价 -->
         <view class="flex items-center mt-sm" wx:if="{{item.groupPrice}}">
-          <view class="text-xs text-hint" style="text-decoration:line-through;margin-right:8rpx">¥{{item.price}}</view>
+          <view class="text-xs text-hint" class="line-through mr-sm">¥{{item.price}}</view>
           <view class="text-md font-bold text-primary">¥{{item.groupPrice}}</view>
           <view class="text-xs text-primary ml-xs">拼团价</view>
         </view>

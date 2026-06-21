@@ -5,7 +5,7 @@
     <view wx:if="{{isAuthorized}}">
       <view class="flex items-center">
         <image class="avatar-lg" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
-        <view class="ml-md" style="flex:1">
+        <view class="ml-md" class="flex-1">
           <view class="flex-between items-center">
             <view class="text-xl font-bold">{{userInfo.nickName || '宠主'}}</view>
             <view class="tag tag-primary text-xs" bindtap="goOwnerProfile">主人档案 ›</view>
@@ -81,7 +81,7 @@
     <view class="reminder-card card" bindtap="goHealth">
       <view class="flex items-center">
         <view class="reminder-icon">⏰</view>
-        <view class="ml-md" style="flex:1">
+        <view class="ml-md" class="flex-1">
           <view class="text-md font-bold">季度体质提醒</view>
           <view class="text-xs text-hint mt-xs">{{constitutionReminder}}</view>
         </view>
@@ -95,7 +95,7 @@
     <view class="hardware-card card" bindtap="goShop">
       <view class="flex items-center">
         <view class="hardware-icon">📡</view>
-        <view class="ml-md" style="flex:1">
+        <view class="ml-md" class="flex-1">
           <view class="text-md font-bold">购买灵犀NFC项圈</view>
           <view class="text-xs text-hint mt-xs">购买硬件即赠：疾病科普3次 + 风险预警3次 · 体质分析1次 · 性格分析1次</view>
         </view>

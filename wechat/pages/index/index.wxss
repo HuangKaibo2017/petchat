@@ -47,10 +47,6 @@
 }
 
 /* ─── Tags ─── */
-.tag { display:inline-flex; align-items:center; padding:4rpx 16rpx; border-radius:9999rpx; font-size:22rpx; font-weight:500; }
-.tag-success { background:#F0FDF4; color:#22C55E; }
-.tag-warning { background:#FFFBEB; color:#F59E0B; }
-.tag-primary { background:#D8EBE6; color:#2D7D6E; }
 
 /* ─── Add Pet Card ─── */
 .add-pet-card {

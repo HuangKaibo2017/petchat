@@ -32,7 +32,7 @@
   <view class="add-pet-card card text-center" wx:if="{{!currentPet && !pets.length}}">
     <view class="text-lg text-hint mb-sm">🐾 还未添加宠物</view>
     <view class="text-sm text-muted">添加宠物档案，开启智能养护之旅</view>
-    <view class="btn btn-primary btn-sm mt-md" style="display:inline-flex" bindtap="goRegister">立即添加</view>
+    <view class="btn btn-primary btn-sm mt-md" class="inline-flex" bindtap="goRegister">立即添加</view>
   </view>
 
   <!-- ===== 1. Banner 分区 ===== -->
@@ -55,8 +55,8 @@
         <view class="flex items-center">
           <view class="rescue-banner-icon">🏠</view>
           <view class="ml-md">
-            <view class="text-md font-bold" style="color:#fff">{{rescueBanner.title}}</view>
-            <view class="text-xs" style="color:rgba(255,255,255,0.85)">{{rescueBanner.desc}}</view>
+            <view class="text-md font-bold" class="text-white">{{rescueBanner.title}}</view>
+            <view class="text-xs" class="text-white-85">{{rescueBanner.desc}}</view>
           </view>
         </view>
         <view class="rescue-banner-arrow">›</view>
@@ -187,7 +187,7 @@
   <!-- 宠友圈热帖 -->
   <view class="section" wx:if="{{hotFeeds.length}}">
     <view class="flex-between items-center section-header">
-      <view class="section-title" style="margin-bottom:0">宠友圈 <text class="text-xs text-hint">· 精选动态</text></view>
+      <view class="section-title" class="mb-0">宠友圈 <text class="text-xs text-hint">· 精选动态</text></view>
       <view class="text-xs text-primary" bindtap="goCommunity">查看全部 ›</view>
     </view>
     <view class="feed-card card" wx:for="{{hotFeeds}}" wx:key="id" bindtap="goFeedDetail" data-id="{{item.id}}">
