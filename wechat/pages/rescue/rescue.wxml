@@ -26,7 +26,7 @@
   <!-- 流浪求助列表 -->
   <view class="section" wx:if="{{activeTab==='help'}}">
     <view class="flex-between items-center section-header">
-      <view class="section-title" style="margin-bottom:0">流浪求助</view>
+      <view class="section-title" class="mb-0">流浪求助</view>
       <view class="btn btn-primary btn-sm" bindtap="goPublishHelp">发布求助</view>
     </view>
     <view class="empty-state" wx:if="{{helpList.length===0}}">
@@ -53,7 +53,7 @@
   <!-- 宠物领养列表 -->
   <view class="section" wx:if="{{activeTab==='adopt'}}">
     <view class="flex-between items-center section-header">
-      <view class="section-title" style="margin-bottom:0">待领养宠物</view>
+      <view class="section-title" class="mb-0">待领养宠物</view>
       <view class="btn btn-primary btn-sm" bindtap="goPublishAdopt">发布领养</view>
     </view>
     <view class="empty-state" wx:if="{{adoptList.length===0}}">
@@ -63,7 +63,7 @@
     <view class="adopt-card card" wx:for="{{adoptList}}" wx:key="id">
       <view class="flex items-center mb-sm">
         <image class="avatar-lg" src="{{item.image || '/images/default-pet.png'}}" mode="aspectFill" />
-        <view class="ml-md" style="flex:1">
+        <view class="ml-md" class="flex-1">
           <view class="flex-between items-center">
             <view class="text-md font-bold">{{item.petName}}</view>
             <view class="tag tag-success">{{item.adoptionType}}</view>
@@ -84,7 +84,7 @@
     <view class="donate-banner card" bindtap="goDonate">
       <view class="flex items-center">
         <view class="donate-icon">🎁</view>
-        <view class="ml-md" style="flex:1">
+        <view class="ml-md" class="flex-1">
           <view class="text-md font-bold">捐赠积分，为流浪动物献爱心</view>
           <view class="text-xs text-hint mt-xs">捐赠可获平台权益兑换，每100积分 = 1份口粮</view>
         </view>

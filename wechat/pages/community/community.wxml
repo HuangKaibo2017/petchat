@@ -49,13 +49,13 @@
   <!-- Community Feed -->
   <view class="section">
     <view class="flex-between mb-sm section-header">
-      <view class="section-title" style="margin-bottom:0">晒宠日常</view>
+      <view class="section-title" class="mb-0">晒宠日常</view>
       <view class="text-sm text-primary" bindtap="goPost">发布 ›</view>
     </view>
     <view class="feed-card card" wx:for="{{feeds}}" wx:key="id">
       <view class="flex items-center mb-sm">
         <image class="avatar-sm" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
-        <view class="ml-sm" style="flex:1">
+        <view class="ml-sm" class="flex-1">
           <view class="flex-between items-center">
             <view class="text-sm font-bold">{{item.nickname}}</view>
             <view class="flex items-center">
@@ -68,7 +68,7 @@
       <view class="text-md mb-sm">{{item.content}}</view>
       <image class="feed-img" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" />
       <view class="flex-between mt-sm">
-        <view class="flex" style="gap:32rpx">
+        <view class="flex" class="gap-lg">
           <text class="text-xs text-hint">❤️ {{item.likes}}</text>
           <text class="text-xs text-hint">💬 {{item.comments}}</text>
         </view>
