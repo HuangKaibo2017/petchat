@@ -38,10 +38,9 @@ Page({
     })
   },
 
-  openDoc(e) {
+  openDoc(e) { var t=e.currentTarget.dataset.type; wx.navigateTo({ url: "/pages/mine/agreement/agreement?type="+t })
     const type = e.currentTarget.dataset.type
     const titles = { privacy: '隐私政策', agreement: '用户协议', disclaimer: '免责声明' }
-    wx.showToast({ title: `查看${titles[type] || '文档'}`, icon: 'none' })
   },
 
   logout() {

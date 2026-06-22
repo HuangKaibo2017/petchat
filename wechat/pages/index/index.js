@@ -6,35 +6,19 @@ Page({
     pets: [],
     nfcEnabled: true,
     showAuth: false,
-    banners: [
-      {
-        id: 1, tag: '新人礼', title: '免费1个月医疗险', desc: '新用户专享，立即领取',
-        bg: 'linear-gradient(135deg, #2D7D6E, #5BA89A)',
-        image: '/images/banner-insurance.png', url: '/pages/insurance/insurance'
-      },
-      {
-        id: 2, tag: '限时活动', title: '灵犀NFC项圈首发', desc: '限量预售，扫码即达',
-        bg: 'linear-gradient(135deg, #8B5CF6, #A78BFA)',
-        image: '/images/banner-nfc.png', url: '/pages/shop/detail/detail?id=nfc001'
-      },
-      {
-        id: 3, tag: '推荐', title: '24小时宠物医院', desc: '查看附近合作医院',
-        bg: 'linear-gradient(135deg, #22C55E, #4ADE80)',
-        image: '/images/banner-hospital.png', url: '/pages/hospitals/hospitals'
-      }
-    ],
-    nearHospitals: [
-      { id: 1, name: '瑞鹏宠物医院(南山店)', rating: '4.8', distance: '1.2km', tags: ['24小时', '直付'] },
-      { id: 2, name: '芭比堂动物医院', rating: '4.7', distance: '2.5km', tags: ['中医', '康复'] },
-      { id: 3, name: '爱诺动物医院', rating: '4.6', distance: '3.1km', tags: ['急诊', '手术'] }
-    ],
-    recommendProducts: [
-      { id: 1, name: '灵犀NFC项圈', price: '299', image: '/images/product-nfc.png' },
-      { id: 2, name: '合香香珠·安神款', price: '168', image: '/images/product-bead.png' }
-    ]
+    watermarkText: '',
+    statusBarHeight: 44,
+    capsuleRight: 180
   },
 
   onLoad(options) {
+    // 获取系统信息适配安全区域
+    const sys = wx.getSystemInfoSync()
+    const menu = wx.getMenuButtonBoundingClientRect()
+    this.setData({
+      statusBarHeight: sys.statusBarHeight || 44,
+      capsuleRight: sys.windowWidth - menu.left + 16
+    })
     this.loadPetData()
     if (options.nfcPetId) {
       this.handleNfcScan(options.nfcPetId)
@@ -42,89 +26,95 @@ Page({
   },
 
   onShow() {
-    this.loadPetData()
-    if (!app.globalData.isAuthorized) {
-      // Only show auth when user clicks a feature
+    if (app.globalData._nfcWelcome) {
+      app.globalData._nfcWelcome = false
+      const pet = app.globalData.currentPet
+      if (pet) {
+        wx.showToast({ title: 'NFC识别成功！欢迎' + pet.name, icon: 'none', duration: 2000 })
+      }
     }
+    this.loadPetData()
   },
 
   loadPetData() {
-    const pets = app.globalData.pets || wx.getStorageSync('pets') || []
-    const currentPet = app.globalData.currentPet
-    this.setData({ pets, currentPet, currentPetId: currentPet ? currentPet.id : null })
+    const { MockAPI } = require('../../utils/mock')
+    MockAPI.getPets().then(res => {
+      const pets = (res && res.data) ? res.data : []
+      this.setData({
+        pets,
+        currentPet: pets.length > 0 ? pets[0] : null
+      })
+    }).catch(() => {})
   },
 
   handleNfcScan(petId) {
-    const pet = this.data.pets.find(p => p.id === petId)
+    const pets = this.data.pets
+    const pet = pets.find(p => p.id === petId)
     if (pet) {
-      app.switchPet(petId)
-      this.loadPetData()
-      wx.showToast({ title: `已识别 ${pet.name}`, icon: 'none' })
+      this.setData({ currentPet: pet })
+      wx.showToast({ title: 'NFC识别成功！欢迎' + pet.name, icon: 'none', duration: 2000 })
     }
   },
 
   checkAuth(callback) {
-    if (!app.globalData.isAuthorized) {
-      this.setData({ showAuth: true, pendingAction: callback })
-      return
+    if (app.globalData.isAuthorized) {
+      callback()
+    } else {
+      this.setData({ showAuth: true, _pendingAuth: callback })
     }
-    callback()
   },
-
   onAuthSuccess() {
     this.setData({ showAuth: false })
-    if (this.data.pendingAction) {
-      this.data.pendingAction()
-      this.data.pendingAction = null
-    }
+    const cb = this._pendingAuth
+    if (cb) { this._pendingAuth = null; cb() }
   },
 
-  onAuthCancel() {
-    this.setData({ showAuth: false, pendingAction: null })
+  // ─── 水印文字 ───
+  onWatermarkInput(e) {
+    this.setData({ watermarkText: e.detail.value })
   },
 
-  // Navigation
-  goRegister() { wx.navigateTo({ url: '/pages/mine/register/register' }) },
-  goEmotion() {
-    this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion' }))
-  },
+  // ─── 核心工具 ───
   goHealth() {
     this.checkAuth(() => wx.navigateTo({ url: '/pages/health/health' }))
   },
+  goEmotion() {
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion' }))
+  },
   goPersonality() {
-    this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion?type=personality' }))
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/personality/personality' }))
   },
   goRisk() {
     this.checkAuth(() => wx.navigateTo({ url: '/pages/risk/risk' }))
   },
   goMedical() { wx.navigateTo({ url: '/pages/medical/medical' }) },
-  goNewPet() { wx.navigateTo({ url: '/pages/medical/medical?type=newpet' }) },
-  goMimicChat() {
-    this.checkAuth(() => wx.switchTab({ url: '/pages/chat/chat' }))
-  },
+  goNewPet() { wx.navigateTo({ url: '/pages/newpet/newpet' }) },
   goLostPet() {
-    this.checkAuth(() => wx.navigateTo({ url: '/pages/service/service?tab=lost' }))
-  },
-  goRescue() {
-    wx.navigateTo({ url: '/pages/community/community?tab=rescue' })
-  },
-  goHospitals() { wx.navigateTo({ url: '/pages/hospitals/hospitals' }) },
-  goHospitalDetail(e) {
-    const id = e.currentTarget.dataset.id
-    wx.navigateTo({ url: `/pages/hospitals/detail/detail?id=${id}` })
-  },
-  goShop() { wx.switchTab({ url: '/pages/shop/shop' }) },
-  goProductDetail(e) {
-    const id = e.currentTarget.dataset.id
-    wx.navigateTo({ url: `/pages/shop/detail/detail?id=${id}` })
-  },
-  onBannerTap(e) {
-    const url = e.currentTarget.dataset.url
-    if (url) wx.navigateTo({ url })
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/lostpet/lostpet' }))
   },
 
-  // Share
+  // ─── 救助 ───
+  goRescue() { wx.navigateTo({ url: '/pages/rescue/rescue' }) },
+  goRescueHelp() { wx.navigateTo({ url: '/pages/rescue/rescue?tab=help' }) },
+  goRescueAdopt() { wx.navigateTo({ url: '/pages/rescue/rescue?tab=adopt' }) },
+
+  // ─── 照片 ───
+  goPhoto() {
+    this.checkAuth(() => {
+      const text = this.data.watermarkText
+      const url = text ? '/pages/photo/photo?text=' + encodeURIComponent(text) : '/pages/photo/photo'
+      wx.navigateTo({ url })
+    })
+  },
+
+  // ─── 医院 / 商城 ───
+  goHospitals() { wx.navigateTo({ url: '/pages/hospitals/hospitals' }) },
+  goShop() { wx.switchTab({ url: '/pages/shop/shop' }) },
+  goRegister() {
+    this.checkAuth(() => wx.navigateTo({ url: '/pages/mine/register/register' }))
+  },
+
   onShareAppMessage() {
-    return { title: '更懂它 - 懂宠物，更懂你', path: '/pages/index/index' }
+    return { title: '更懂它 - 更懂它的心，陪它一生长久', path: '/pages/index/index' }
   }
 })

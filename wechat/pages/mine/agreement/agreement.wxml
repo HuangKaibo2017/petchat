@@ -1,0 +1,6 @@
+<nav-bar title="{{title}}" showBack="{{true}}" />
+<view class="page-container px-md py-md">
+  <view class="text-lg font-bold mb-md">{{title}}</view>
+  <view class="text-xs text-hint mb-md">生效日期：2026年1月1日</view>
+  <view class="text-sm text-muted" style="line-height:1.8;white-space:pre-wrap">{{content}}</view>
+</view>

@@ -9,9 +9,10 @@ App({
     favorites: [],
     cart: [],
     nfcEnabled: true,
-    // 本地开发: Express 后端
-    // 线上部署: 替换为 https://api.gengdongta.com
-    baseUrl: 'http://localhost:8001',
+    isGuest: false,
+    // 本地开发: Express 后端 http://localhost:8001
+    // 线上部署: https://petchat.life
+    baseUrl: 'http://localhost:9005',
     debug: false
   },
 
@@ -22,6 +23,15 @@ App({
   },
 
   onShow(options) {
+    // 非首次启动：跳过欢迎页，直接到首页
+    const welcomeShown = wx.getStorageSync('_welcome_shown')
+    if (welcomeShown && getCurrentPages().length === 1) {
+      const currentPage = getCurrentPages()[0]
+      if (currentPage && currentPage.route === 'pages/welcome/welcome') {
+        wx.switchTab({ url: '/pages/index/index' })
+        return
+      }
+    }
     if (options.query && options.query.scene) {
       this.handleScene(options.query.scene)
     }
@@ -62,9 +72,12 @@ App({
   },
 
   handleScene(scene) {
+    // 标记已通过欢迎页
+    wx.setStorageSync('_welcome_shown', true)
     if (scene && scene.startsWith('nfc_')) {
       const petId = scene.replace('nfc_', '')
-      wx.navigateTo({ url: `/pages/index/index?nfcPetId=${petId}` })
+      this.globalData.nfcTriggered = true
+      this.globalData.nfcPetId = petId
     }
   },
 

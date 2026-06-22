@@ -9,7 +9,7 @@ Page({
   },
 
   onLoad(options) {
-    const rawData = options.data ? JSON.parse(decodeURIComponent(options.data)) : {}
+    const rawData = app.globalData._reportData || {}; app.globalData._reportData = null
     this.buildReport(rawData)
   },
 
