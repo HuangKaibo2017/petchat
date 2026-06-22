@@ -98,6 +98,14 @@ Page({
   },
 
   onShow() {
+    // NFC 欢迎语
+    if (app.globalData._nfcWelcome) {
+      app.globalData._nfcWelcome = false
+      const pet = app.globalData.currentPet
+      if (pet) {
+        wx.showToast({ title: 'NFC识别成功！欢迎' + pet.name, icon: 'none', duration: 2000 })
+      }
+    }
     this.loadPetData()
   },
 

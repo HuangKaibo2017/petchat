@@ -1,43 +1,10 @@
 /* ═══════════════════════════════════════════
-   Index Page Styles — 更懂它 首页
+   Index Page — 更懂它 首页（重构版）
    ═══════════════════════════════════════════ */
 
-/* ─── Hero Section ─── */
-.hero-section {
-  position: relative;
-  height: 360rpx;
-  margin: 0 32rpx 24rpx;
-  border-radius: 32rpx;
-  overflow: hidden;
-}
-.hero-bg {
-  width: 100%;
-  height: 100%;
-}
-.hero-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, rgba(45,125,110,0.2), rgba(139,92,246,0.3));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.hero-brand {
-  color: #FFFFFF;
-  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.2);
-  letter-spacing: 8rpx;
-}
-.hero-slogan {
-  color: rgba(255,255,255,0.9);
-  margin-top: 8rpx;
-  letter-spacing: 4rpx;
-}
-
-/* ─── Pet Status Card ─── */
+/* ─── 宠物状态卡 ─── */
 .pet-status-card {
-  margin: -12rpx 32rpx 24rpx;
-  position: relative;
+  margin: 16rpx 32rpx 8rpx;
 }
 .nfc-icon {
   margin-left: 16rpx;
@@ -45,12 +12,8 @@
   background: #F3F4F6;
   border-radius: 9999rpx;
 }
-
-/* ─── Tags ─── */
-
-/* ─── Add Pet Card ─── */
 .add-pet-card {
-  margin: 0 32rpx 24rpx;
+  margin: 16rpx 32rpx;
   padding: 48rpx 32rpx;
 }
 
@@ -70,57 +33,18 @@
   padding: 0 32rpx;
   position: relative;
 }
-.banner-content {
-  flex: 1;
-  z-index: 1;
-}
-.banner-tag {
-  margin-bottom: 12rpx;
-}
-.banner-title {
-  color: #FFFFFF;
-  margin-bottom: 8rpx;
-}
-.banner-desc {
-  color: rgba(255,255,255,0.8);
-}
+.banner-content { flex: 1; z-index: 1; }
+.banner-tag { margin-bottom: 12rpx; }
+.banner-title { color: #FFFFFF; margin-bottom: 8rpx; }
+.banner-desc { color: rgba(255,255,255,0.8); }
 .banner-img {
   width: 160rpx;
   height: 160rpx;
   border-radius: 16rpx;
 }
 
-/* 次要 Banner：救助专区公益入口 */
-.rescue-banner-mini {
-  margin: 16rpx 32rpx 0;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 20rpx;
-}
-.rescue-banner-bg {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20rpx 24rpx;
-}
-.rescue-banner-icon {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 14rpx;
-  background: rgba(255,255,255,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28rpx;
-}
-.rescue-banner-arrow {
-  color: rgba(255,255,255,0.8);
-  font-size: 36rpx;
-  font-weight: 300;
-}
-
 /* ═══════════════════════════════════════════
-   2. 7 项核心工具网格 （3列，2-3-2）
+   2. 核心工具网格（3 列）
    ═══════════════════════════════════════════ */
 .tool-grid {
   display: grid;
@@ -141,33 +65,18 @@
   box-shadow: 0 4rpx 16rpx rgba(249,115,22,0.12);
 }
 .tool-icon {
-  width: 68rpx;
-  height: 68rpx;
-  border-radius: 18rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 10rpx;
-  font-size: 34rpx;
+  font-size: 40rpx;
+  margin-bottom: 10rpx;
 }
-.tool-icon-health { background: #DBEAFE; }
-.tool-icon-emotion { background: #E8F5F0; }
-.tool-icon-personality { background: #EDE9FE; }
-.tool-icon-risk { background: #FEE2E2; }
-.tool-icon-medical { background: #D1FAE5; }
-.tool-icon-newpet { background: #FFEDD5; }
-.tool-icon-lost { background: #E0E7FF; }
 .tool-name {
   font-weight: 600;
   color: #1F2937;
   margin-bottom: 4rpx;
 }
-.tool-desc {
-  display: block;
-}
+.tool-desc { display: block; }
 
 /* ═══════════════════════════════════════════
-   3. 照片区
+   3. 水印照片
    ═══════════════════════════════════════════ */
 .photo-zone {
   display: flex;
@@ -181,30 +90,20 @@
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
   transition: all 0.2s;
 }
-.photo-card:active {
-  transform: scale(0.97);
-}
+.photo-card:active { transform: scale(0.97); }
 .photo-card-inner {
   padding: 28rpx 16rpx 20rpx;
   text-align: center;
 }
-.photo-emoji {
-  font-size: 40rpx;
-  margin-bottom: 10rpx;
-}
-.photo-label {
-  color: #1F2937;
-  margin-bottom: 4rpx;
-}
-.photo-hint {
-  display: block;
-}
+.photo-emoji { font-size: 40rpx; margin-bottom: 10rpx; }
+.photo-label { color: #1F2937; margin-bottom: 4rpx; }
+.photo-hint { display: block; }
 .photo-watermark { background: linear-gradient(180deg, #FEF3C7 0%, #FFFFFF 100%); }
 .photo-comic { background: linear-gradient(180deg, #E0E7FF 0%, #FFFFFF 100%); }
 .photo-series { background: linear-gradient(180deg, #FCE7F3 0%, #FFFFFF 100%); }
 
 /* ═══════════════════════════════════════════
-   4. 救助专区入口
+   4. 救助专区
    ═══════════════════════════════════════════ */
 .rescue-entry {
   margin: 0 32rpx;
@@ -220,9 +119,7 @@
   justify-content: center;
   font-size: 36rpx;
 }
-.rescue-sub-actions {
-  gap: 16rpx;
-}
+.rescue-sub-actions { gap: 16rpx; }
 .rescue-sub-btn {
   flex: 1;
   text-align: center;
@@ -232,138 +129,17 @@
   color: #374151;
   transition: all 0.15s;
 }
-.rescue-sub-btn:active {
-  background: #F3F4F6;
-}
+.rescue-sub-btn:active { background: #F3F4F6; }
 
-/* ═══════════════════════════════════════════
-   5. 内容联动：养护知识 + 宠友圈热帖
-   ═══════════════════════════════════════════ */
-.article-scroll {
-  white-space: nowrap;
-  padding: 0 32rpx;
-}
-.article-card {
-  display: inline-block;
-  width: 280rpx;
-  margin-right: 16rpx;
-  border-radius: 20rpx;
-  overflow: hidden;
-  background: #FFFFFF;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
-  white-space: normal;
-  vertical-align: top;
-}
-.article-cover {
-  width: 100%;
-  height: 160rpx;
-}
-.article-cover-placeholder {
-  width: 100%;
-  height: 160rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.article-body {
-  padding: 16rpx;
-}
-.article-tag {
-  margin-bottom: 8rpx;
-}
-.article-title {
-  color: #1F2937;
-  margin-bottom: 4rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.article-desc {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ─── 宠友圈热帖 ─── */
-.section-header {
-  padding: 0 32rpx;
-  margin-bottom: 16rpx;
-}
-.feed-card {
-  margin: 0 32rpx 16rpx;
-  padding: 24rpx;
-}
-.feed-content {
-  color: #374151;
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-}
-.feed-image {
-  width: 100%;
-  height: 320rpx;
-  border-radius: 12rpx;
-  margin-top: 16rpx;
-}
-.feed-stats {
-  gap: 24rpx;
-}
-.feed-stat {
-  font-size: 22rpx;
-  color: #9CA3AF;
-}
-
-/* ─── Hospital Scroll ─── */
-.hospital-scroll {
-  white-space: nowrap;
-  padding: 0 32rpx;
-}
-.hospital-item {
-  display: inline-block;
-  width: 280rpx;
-  margin-right: 16rpx;
-  white-space: normal;
-  vertical-align: top;
-}
-.hospital-tags { gap: 8rpx; }
-
-/* ─── Product Mini ─── */
-.product-mini {
-  background: #FFFFFF;
-  border-radius: 20rpx;
-  overflow: hidden;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
-}
-.product-img {
-  width: 100%;
-  height: 200rpx;
-}
-.product-name {
-  padding: 12rpx 16rpx 4rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.product-price {
-  padding: 0 16rpx 16rpx;
-}
-
-/* ─── Shared ─── */
-.section {
-  margin-bottom: 32rpx;
-}
+/* ─── 公用 ─── */
+.section { margin-bottom: 32rpx; }
 .section-title {
   font-size: 30rpx;
   font-weight: 700;
   color: #1F2937;
   margin: 0 32rpx 16rpx;
 }
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16rpx;
+.section-header {
   padding: 0 32rpx;
+  margin-bottom: 16rpx;
 }

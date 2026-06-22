@@ -1,0 +1,59 @@
+<nav-bar title="硬件权益" showBack="{{true}}" />
+<view class="page-container">
+  <view class="section px-md">
+    <view class="section-title">已绑定设备</view>
+    <view class="card text-center" wx:if="{{!devices.length}}">
+      <view class="text-4xl mb-sm">📡</view>
+      <view class="text-md text-hint">暂无绑定设备</view>
+      <view class="text-xs text-muted mt-sm">购买灵犀NFC项圈后自动绑定</view>
+    </view>
+    <view class="device-item card" wx:for="{{devices}}" wx:key="id">
+      <view class="flex-between items-center">
+        <view class="flex items-center">
+          <view class="device-icon">📡</view>
+          <view class="ml-md">
+            <view class="text-md font-bold">{{item.name}}</view>
+            <view class="text-xs text-hint">{{item.sn}}</view>
+          </view>
+        </view>
+        <view class="tag tag-success text-xs">已绑定</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section px-md mt-md">
+    <view class="section-title">我的免费次数</view>
+    <view class="quota-grid mt-sm">
+      <view class="quota-item card">
+        <view class="quota-num text-2xl font-bold text-primary">{{freeCounts.medical || 0}}</view>
+        <view class="quota-label text-xs text-hint">临床用药科普</view>
+      </view>
+      <view class="quota-item card">
+        <view class="quota-num text-2xl font-bold text-primary">{{freeCounts.risk || 0}}</view>
+        <view class="quota-label text-xs text-hint">人宠风险预警</view>
+      </view>
+      <view class="quota-item card">
+        <view class="quota-num text-2xl font-bold text-primary">{{freeCounts.emotion || 0}}</view>
+        <view class="quota-label text-xs text-hint">宠物心声解读</view>
+      </view>
+    </view>
+    <view class="quota-grid" style="grid-template-columns: 1fr 1fr">
+      <view class="quota-item card">
+        <view class="quota-num text-2xl font-bold text-primary">{{freeCounts.health || 0}}</view>
+        <view class="quota-label text-xs text-hint">宠物体质分析</view>
+      </view>
+      <view class="quota-item card">
+        <view class="quota-num text-2xl font-bold text-primary">{{freeCounts.personality || 0}}</view>
+        <view class="quota-label text-xs text-hint">宠物性格分析</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section px-md mt-md">
+    <view class="card bg-primary-light text-center">
+      <view class="text-sm text-muted">购买灵犀NFC项圈即赠：</view>
+      <view class="text-sm text-primary mt-xs">心声解读30次 · 疾病科普3次 · 风险预警3次 · 体质分析1次 · 性格分析1次</view>
+      <view class="btn btn-primary btn-sm mt-md" bindtap="goShop">立即购买</view>
+    </view>
+  </view>
+</view>

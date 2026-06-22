@@ -20,6 +20,10 @@
     </view>
     <view class="risk-subsection">
       <view class="risk-subtitle text-md font-bold">菌群共栖相关提示</view>
+    <view class="risk-subsection">
+      <view class="risk-subtitle text-md font-bold">😤 情绪同频分析</view>
+      <view class="text-sm text-muted">{{report.emotionSync || '人宠情绪存在共振：宠物近期焦躁/萎靡状态与主人压力水平高度相关。建议自查：近期是否容易暴躁？睡眠质量是否下降？'}}</view>
+    </view>
       <view class="text-sm text-muted">{{report.microbiomeRisk}}</view>
     </view>
     <view class="risk-subsection">

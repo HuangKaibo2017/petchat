@@ -1,15 +1,6 @@
 <nav-bar title="更懂它" />
 <view class="page-container">
-  <!-- Brand Hero -->
-  <view class="hero-section">
-    <image class="hero-bg" src="/images/hero-bg.png" mode="aspectFill" />
-    <view class="hero-overlay">
-      <view class="hero-brand text-3xl font-bold">更懂它</view>
-      <view class="hero-slogan text-md">懂宠物，更懂你</view>
-    </view>
-  </view>
-
-  <!-- Current Pet Status (NFC quick glance) -->
+  <!-- ===== 0. 宠物状态卡 ===== -->
   <view class="pet-status-card card" wx:if="{{currentPet}}">
     <view class="flex-between">
       <view class="flex items-center">
@@ -28,16 +19,15 @@
     </view>
   </view>
 
-  <!-- Quick Add Pet if no pet -->
+  <!-- 未添加宠物引导 -->
   <view class="add-pet-card card text-center" wx:if="{{!currentPet && !pets.length}}">
     <view class="text-lg text-hint mb-sm">🐾 还未添加宠物</view>
     <view class="text-sm text-muted">添加宠物档案，开启智能养护之旅</view>
-    <view class="btn btn-primary btn-sm mt-md" class="inline-flex" bindtap="goRegister">立即添加</view>
+    <view class="btn btn-primary btn-sm mt-md inline-flex" bindtap="goRegister">立即添加</view>
   </view>
 
-  <!-- ===== 1. Banner 分区 ===== -->
+  <!-- ===== 1. Banner (3:1 比例) ===== -->
   <view class="section">
-    <view class="section-title">热门活动</view>
     <swiper class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#F97316" autoplay circular interval="4000">
       <swiper-item wx:for="{{majorBanners}}" wx:key="id">
         <view class="banner-item" style="background: {{item.bg}}" bindtap="onBannerTap" data-url="{{item.url}}">
@@ -50,91 +40,82 @@
         </view>
       </swiper-item>
     </swiper>
-    <view class="rescue-banner-mini card" wx:if="{{rescueBanner}}" bindtap="goRescue">
-      <view class="rescue-banner-bg" style="background: {{rescueBanner.bg}}">
-        <view class="flex items-center">
-          <view class="rescue-banner-icon">🏠</view>
-          <view class="ml-md">
-            <view class="text-md font-bold" class="text-white">{{rescueBanner.title}}</view>
-            <view class="text-xs" class="text-white-85">{{rescueBanner.desc}}</view>
-          </view>
-        </view>
-        <view class="rescue-banner-arrow">›</view>
-      </view>
-    </view>
   </view>
 
-  <!-- ===== 2. 7 项核心工具直达入口 ===== -->
+  <!-- ===== 2. 核心工具 (7 项) ===== -->
   <view class="section">
     <view class="section-title">核心工具</view>
     <view class="tool-grid">
       <view class="tool-item" bindtap="goHealth" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-health">💊</view>
+        <view class="tool-icon">💊</view>
         <view class="tool-name text-sm">宠物体质分析</view>
         <view class="tool-desc text-xs text-hint">五运六气综合</view>
       </view>
       <view class="tool-item" bindtap="goEmotion" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-emotion">🔮</view>
+        <view class="tool-icon">🔮</view>
         <view class="tool-name text-sm">宠物心声解读</view>
         <view class="tool-desc text-xs text-hint">多维度·一事一问</view>
       </view>
       <view class="tool-item" bindtap="goPersonality" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-personality">🧬</view>
+        <view class="tool-icon">🧬</view>
         <view class="tool-name text-sm">宠物性格分析</view>
         <view class="tool-desc text-xs text-hint">雷达画像盲盒</view>
       </view>
       <view class="tool-item" bindtap="goRisk" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-risk">⚡</view>
+        <view class="tool-icon">⚡</view>
         <view class="tool-name text-sm">人宠风险预警</view>
         <view class="tool-desc text-xs text-hint">情绪同频·菌群</view>
       </view>
       <view class="tool-item" bindtap="goMedical" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-medical">📋</view>
+        <view class="tool-icon">📋</view>
         <view class="tool-name text-sm">临床用药科普</view>
         <view class="tool-desc text-xs text-hint">Coze智能体</view>
       </view>
       <view class="tool-item" bindtap="goNewPet" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-newpet">🐣</view>
+        <view class="tool-icon">🐣</view>
         <view class="tool-name text-sm">新宠购买指南</view>
         <view class="tool-desc text-xs text-hint">成本测算避坑</view>
       </view>
       <view class="tool-item" bindtap="goLostPet" hover-class="tool-hover">
-        <view class="tool-icon tool-icon-lost">🧭</view>
+        <view class="tool-icon">🧭</view>
         <view class="tool-name text-sm">丢失方向建议</view>
-        <view class="tool-desc text-xs text-hint">AI预判寻宠</view>
+        <view class="tool-desc text-xs text-hint">数字卦寻宠</view>
       </view>
     </view>
   </view>
 
-  <!-- ===== 3. 照片区：水印照片 / 日记漫画 / 漫剧 ===== -->
+  <!-- ===== 3. 水印照片 ===== -->
   <view class="section">
-    <view class="section-title">宠物影像 <text class="text-xs text-hint">· 记录美好瞬间</text></view>
+    <view class="flex-between items-center section-header">
+      <view class="section-title mb-0">水印照片</view>
+      <view class="text-xs text-primary" bindtap="goPhoto">制作 ›</view>
+    </view>
     <view class="photo-zone">
-      <view class="photo-card photo-watermark" bindtap="goPhotoWatermark">
+      <view class="photo-card photo-watermark" bindtap="goPhoto">
+        <view class="photo-card-inner">
+          <view class="photo-emoji">📸</view>
+          <view class="photo-label text-sm font-bold">文字水印</view>
+          <view class="photo-hint text-xs text-hint">一句话+日期</view>
+        </view>
+      </view>
+      <view class="photo-card photo-comic" bindtap="goPhoto">
+        <view class="photo-card-inner">
+          <view class="photo-emoji">🎨</view>
+          <view class="photo-label text-sm font-bold">漫画风格</view>
+          <view class="photo-hint text-xs text-hint">宠物插画风</view>
+        </view>
+      </view>
+      <view class="photo-card photo-series" bindtap="goPhoto">
         <view class="photo-card-inner">
           <view class="photo-emoji">🖼️</view>
-          <view class="photo-label text-sm font-bold">水印照片</view>
-          <view class="photo-hint text-xs text-hint">一句心声·定格日期</view>
-        </view>
-      </view>
-      <view class="photo-card photo-comic" bindtap="goPhotoComic">
-        <view class="photo-card-inner">
-          <view class="photo-emoji">📖</view>
-          <view class="photo-label text-sm font-bold">日记漫画</view>
-          <view class="photo-hint text-xs text-hint">6张以上·生成漫画</view>
-        </view>
-      </view>
-      <view class="photo-card photo-series" bindtap="goPhotoSeries">
-        <view class="photo-card-inner">
-          <view class="photo-emoji">🎬</view>
-          <view class="photo-label text-sm font-bold">漫剧</view>
-          <view class="photo-hint text-xs text-hint">多格叙事短片</view>
+          <view class="photo-label text-sm font-bold">系列模板</view>
+          <view class="photo-hint text-xs text-hint">多款可选</view>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- ===== 4. 救助专区入口卡片 ===== -->
+  <!-- ===== 4. 救助专区 ===== -->
   <view class="section">
     <view class="rescue-entry card" bindtap="goRescue">
       <view class="flex-between items-center">
@@ -166,77 +147,8 @@
     </view>
   </view>
 
-  <!-- ===== 5. 内容联动流式卡片 ===== -->
-  <view class="section">
-    <view class="section-title">养护知识 <text class="text-xs text-hint">· 推荐阅读</text></view>
-    <scroll-view class="article-scroll" scroll-x enable-flex>
-      <view class="article-card" wx:for="{{knowledgeArticles}}" wx:key="id" bindtap="goArticle" data-id="{{item.id}}">
-        <image class="article-cover" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}" />
-        <view class="article-cover-placeholder" wx:else style="background: {{item.bg}}">
-          <text class="text-4xl">{{item.emoji || '📝'}}</text>
-        </view>
-        <view class="article-body">
-          <view class="article-tag tag" wx:if="{{item.tag}}">{{item.tag}}</view>
-          <view class="article-title text-sm font-bold">{{item.title}}</view>
-          <view class="article-desc text-xs text-hint">{{item.desc}}</view>
-        </view>
-      </view>
-    </scroll-view>
-  </view>
-
-  <!-- 宠友圈热帖 -->
-  <view class="section" wx:if="{{hotFeeds.length}}">
-    <view class="flex-between items-center section-header">
-      <view class="section-title" class="mb-0">宠友圈 <text class="text-xs text-hint">· 精选动态</text></view>
-      <view class="text-xs text-primary" bindtap="goCommunity">查看全部 ›</view>
-    </view>
-    <view class="feed-card card" wx:for="{{hotFeeds}}" wx:key="id" bindtap="goFeedDetail" data-id="{{item.id}}">
-      <view class="flex items-center mb-sm">
-        <image class="avatar-sm" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
-        <view class="ml-sm">
-          <view class="text-sm font-bold">{{item.nickname}}</view>
-          <view class="text-xs text-hint">{{item.time}}</view>
-        </view>
-      </view>
-      <view class="feed-content text-sm">{{item.content}}</view>
-      <image class="feed-image" src="{{item.image}}" mode="aspectFill" wx:if="{{item.image}}" />
-      <view class="feed-stats flex mt-sm">
-        <view class="feed-stat">❤️ {{item.likes || 0}}</view>
-        <view class="feed-stat ml-lg">💬 {{item.comments || 0}}</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- Nearby Hospitals -->
-  <view class="section" wx:if="{{nearHospitals.length}}">
-    <view class="section-title">附近医院 <text class="text-xs text-hint">· 合作直付</text></view>
-    <scroll-view class="hospital-scroll" scroll-x enable-flex>
-      <view class="hospital-item card" wx:for="{{nearHospitals}}" wx:key="id" bindtap="goHospitalDetail" data-id="{{item.id}}">
-        <view class="font-bold text-md">{{item.name}}</view>
-        <view class="flex-between mt-sm">
-          <view class="flex items-center">
-            <text class="text-xs text-warning">⭐ {{item.rating}}</text>
-            <text class="text-xs text-hint ml-sm">{{item.distance}}</text>
-          </view>
-          <view class="hospital-tags flex">
-            <view class="tag tag-primary" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="t">{{t}}</view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
-  </view>
-
-  <!-- Hot Products -->
-  <view class="section" wx:if="{{recommendProducts.length}}">
-    <view class="section-title">好物推荐 <text class="text-xs text-hint">· 精选甄品</text></view>
-    <view class="product-grid">
-      <view class="product-mini" wx:for="{{recommendProducts}}" wx:key="id" bindtap="goProductDetail" data-id="{{item.id}}">
-        <image class="product-img" src="{{item.image}}" mode="aspectFill" />
-        <view class="product-name text-sm font-medium">{{item.name}}</view>
-        <view class="product-price text-sm text-primary">¥{{item.price}}</view>
-      </view>
-    </view>
-  </view>
+  <!-- 底部间距 -->
+  <view style="height: 40rpx"></view>
 </view>
 
 <authorize wx:if="{{showAuth}}" bind:success="onAuthSuccess" />
