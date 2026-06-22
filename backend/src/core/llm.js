@@ -39,7 +39,7 @@ async function ping() {
 /**
  * 非流式调用
  */
-async function chat({ model = LLM_MODEL_DEFAULT, messages, temperature = 0.7, maxTokens = 2048, timeoutMs = 30000 }) {
+async function chat({ model = LLM_MODEL_DEFAULT, messages, temperature = 0.7, maxTokens = 8192, timeoutMs = 120000 }) {
   if (!LLM_API_KEY) {
     throw new Error('LLM_API_KEY 未配置')
   }
@@ -82,7 +82,7 @@ async function chat({ model = LLM_MODEL_DEFAULT, messages, temperature = 0.7, ma
  * onToken(token): 每收到一个 token 触发
  * 返回完整文本
  */
-async function stream({ model = LLM_MODEL_DEFAULT, messages, temperature = 0.7, maxTokens = 2048, onToken, onDone }) {
+async function stream({ model = LLM_MODEL_DEFAULT, messages, temperature = 0.7, maxTokens = 8192, onToken, onDone }) {
   if (!LLM_API_KEY) {
     throw new Error('LLM_API_KEY 未配置')
   }

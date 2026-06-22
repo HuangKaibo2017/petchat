@@ -18,6 +18,7 @@ const request = (url, options = {}) => {
       method,
       data,
       header,
+      timeout: 120000,
       success: (res) => {
         if (res.statusCode === 200) {
           const body = res.data
