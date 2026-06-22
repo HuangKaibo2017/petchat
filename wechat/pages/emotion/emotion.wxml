@@ -4,6 +4,7 @@
   <view class="section" wx:if="{{step === 0}}">
     <view class="section-title">选择宠物</view>
     <view class="section-subtitle">请选择需要解读的宠物</view>
+    <view class="section-subtitle text-warning">¥0.9 / 次 · 每次扣费后生成报告
     <pet-card
       wx:for="{{pets}}"
       wx:key="id"

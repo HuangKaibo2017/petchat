@@ -177,9 +177,8 @@ Page({
 
       this.setData({ generating: false })
 
-      wx.navigateTo({
-        url: `/pages/emotion/report/report?data=${encodeURIComponent(JSON.stringify(result))}`
-      })
+      app.globalData._reportData = result
+        wx.navigateTo({ url: '/pages/emotion/report/report' })
     } catch (err) {
       this.setData({ generating: false })
       if (err.message === 'QUOTA_EXCEEDED') {

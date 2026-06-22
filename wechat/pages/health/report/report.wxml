@@ -6,6 +6,19 @@
     <view class="report-time text-xs text-hint">{{report.time}}</view>
   </view>
 
+  <!-- 整体分析：雷达图 -->
+  <view class="report-section card" wx:if="{{report.mode === 'overall'}}">
+    <view class="section-label">📊 五运六气雷达图</view>
+    <view class="radar-info text-xs text-hint mb-sm">{{report.wuyunInfo || ''}}</view>
+    <canvas type="2d" id="radarCanvas" class="radar-canvas"></canvas>
+    <view class="radar-legend flex flex-wrap mt-sm">
+      <view class="radar-legend-item" wx:for="{{radarDimensions}}" wx:key="label">
+        <view class="legend-dot" style="background:{{item.color}}"></view>
+        <text class="text-xs text-hint">{{item.label}}: {{item.value}}</text>
+      </view>
+    </view>
+  </view>
+
   <!-- Risk Level -->
   <view class="risk-banner" style="background: {{riskLevel.bg}}">
     <view class="risk-icon text-2xl">{{riskLevel.icon}}</view>

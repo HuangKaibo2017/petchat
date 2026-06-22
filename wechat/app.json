@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/welcome/welcome",
     "pages/index/index",
     "pages/personality/personality",
     "pages/lostpet/lostpet",
@@ -34,7 +35,9 @@
     "pages/hospitals/detail/detail",
     "pages/community/community",
     "pages/community/post/post",
-    "pages/favorites/favorites"
+    "pages/favorites/favorites",
+    "pages/mine/agreement/agreement",
+    "pages/mine/hardware/hardware"
   ],
   "window": {
     "backgroundTextStyle": "light",
