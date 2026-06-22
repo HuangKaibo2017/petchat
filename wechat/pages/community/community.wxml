@@ -1,4 +1,11 @@
-<nav-bar title="社区" showBack="{{true}}" />
+<nav-bar title="宠友圈" showBack="{{true}}">
+  <view slot="right" class="nav-actions flex items-center">
+    <view class="nav-msg-btn" bindtap="goMessages">
+      <text class="text-lg">💬</text>
+      <view class="msg-badge" wx:if="{{unreadMessages}}">{{unreadMessages}}</view>
+    </view>
+  </view>
+</nav-bar>
 <view class="page-container">
   <!-- Banner -->
   <swiper class="banner-swiper" indicator-dots autoplay circular>
@@ -9,6 +16,22 @@
       </view>
     </swiper-item>
   </swiper>
+
+  <!-- 同城圈子 Tabs -->
+  <view class="section">
+    <view class="section-title">同城圈子</view>
+    <scroll-view scroll-x class="circle-scroll">
+      <view class="circle-item {{activeCircle==='all'?'circle-active':''}}" bindtap="switchCircle" data-circle="all">🌍 全部</view>
+      <view class="circle-item {{activeCircle==='shenzhen'?'circle-active':''}}" bindtap="switchCircle" data-circle="shenzhen">📍 深圳</view>
+      <view class="circle-item {{activeCircle==='guangzhou'?'circle-active':''}}" bindtap="switchCircle" data-circle="guangzhou">📍 广州</view>
+      <view class="circle-item {{activeCircle==='beijing'?'circle-active':''}}" bindtap="switchCircle" data-circle="beijing">📍 北京</view>
+      <view class="circle-item {{activeCircle==='shanghai'?'circle-active':''}}" bindtap="switchCircle" data-circle="shanghai">📍 上海</view>
+      <view class="circle-item {{activeCircle==='cat'?'circle-active':''}}" bindtap="switchCircle" data-circle="cat">🐱 猫咪圈</view>
+      <view class="circle-item {{activeCircle==='dog'?'circle-active':''}}" bindtap="switchCircle" data-circle="dog">🐕 狗狗圈</view>
+      <view class="circle-item {{activeCircle==='tips'?'circle-active':''}}" bindtap="switchCircle" data-circle="tips">💡 养宠妙招</view>
+      <view class="circle-item {{activeCircle==='complain'?'circle-active':''}}" bindtap="switchCircle" data-circle="complain">😤 吐槽专区</view>
+    </scroll-view>
+  </view>
 
   <!-- Activity Cards -->
   <view class="section">
@@ -25,20 +48,33 @@
 
   <!-- Community Feed -->
   <view class="section">
-    <view class="flex-between mb-sm">
-      <view class="section-title" style="margin-bottom:0">晒宠日常</view>
+    <view class="flex-between mb-sm section-header">
+      <view class="section-title" class="mb-0">晒宠日常</view>
       <view class="text-sm text-primary" bindtap="goPost">发布 ›</view>
     </view>
     <view class="feed-card card" wx:for="{{feeds}}" wx:key="id">
       <view class="flex items-center mb-sm">
-        <image class="avatar-sm" src="{{item.avatar}}" mode="aspectFill" />
-        <view class="ml-sm"><view class="text-sm font-bold">{{item.nickname}}</view><view class="text-xs text-hint">{{item.time}}</view></view>
+        <image class="avatar-sm" src="{{item.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+        <view class="ml-sm" class="flex-1">
+          <view class="flex-between items-center">
+            <view class="text-sm font-bold">{{item.nickname}}</view>
+            <view class="flex items-center">
+              <view class="circle-tag text-xs" wx:if="{{item.circle}}">{{item.circle}}</view>
+              <text class="text-xs text-hint ml-sm">{{item.time}}</text>
+            </view>
+          </view>
+        </view>
       </view>
       <view class="text-md mb-sm">{{item.content}}</view>
       <image class="feed-img" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" />
-      <view class="flex mt-sm" style="gap:32rpx">
-        <text class="text-xs text-hint">❤️ {{item.likes}}</text>
-        <text class="text-xs text-hint">💬 {{item.comments}}</text>
+      <view class="flex-between mt-sm">
+        <view class="flex" class="gap-lg">
+          <text class="text-xs text-hint">❤️ {{item.likes}}</text>
+          <text class="text-xs text-hint">💬 {{item.comments}}</text>
+        </view>
+        <view class="flex items-center" catchtap="reportFeed" data-id="{{item.id}}">
+          <text class="text-xs text-hint">🚩 举报</text>
+        </view>
       </view>
     </view>
   </view>

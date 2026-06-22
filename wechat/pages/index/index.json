@@ -1,8 +1,6 @@
 {
+  "navigationStyle": "custom",
   "usingComponents": {
-    "nav-bar": "/components/nav-bar/nav-bar",
-    "authorize": "/components/authorize/authorize",
-    "pet-card": "/components/pet-card/pet-card"
-  },
-  "navigationStyle": "custom"
+    "authorize": "/components/authorize/authorize"
+  }
 }

@@ -135,3 +135,38 @@
 
 /* Add Pet */
 .add-pet-hint { padding: 48rpx 0; }
+
+/* ─── 模式切换 ─── */
+.mode-switch {
+  background: #F3F4F6;
+  border-radius: 16rpx;
+  padding: 6rpx;
+  gap: 6rpx;
+}
+.mode-switch-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #6B7280;
+  transition: all 0.2s;
+}
+.mode-active {
+  background: #FFFFFF;
+  color: #2D7D6E;
+  font-weight: 700;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.08);
+}
+
+/* ─── 一事一问 ─── */
+.single-number-input {
+  padding: 24rpx 0;
+}
+.number-input.large {
+  width: 120rpx;
+  height: 120rpx;
+  font-size: 48rpx;
+  text-align: center;
+  line-height: 120rpx;
+}

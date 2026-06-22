@@ -1,0 +1,33 @@
+<view class="welcome-page">
+  <!-- 背景渐变 -->
+  <view class="welcome-bg"></view>
+
+  <!-- 主体内容 -->
+  <view class="welcome-body">
+    <!-- Logo & 品牌 -->
+    <view class="welcome-logo-area">
+      <view class="welcome-logo">🐾</view>
+      <view class="welcome-brand">更懂它</view>
+      <view class="welcome-slogan">懂宠物，更懂你</view>
+    </view>
+
+    <!-- NFC 提示区 -->
+    <view class="welcome-nfc-area" wx:if="{{nfcSupported}}">
+      <view class="nfc-glow"></view>
+      <view class="nfc-icon">📱</view>
+      <view class="nfc-text">将手机靠近 NFC 标签</view>
+      <view class="nfc-sub">快速进入，查看宠物档案</view>
+    </view>
+
+    <!-- 游客入口 -->
+    <view class="welcome-actions">
+      <button class="welcome-btn-primary" bindtap="goHome">立即体验</button>
+      <view class="welcome-guest" bindtap="goHomeGuest">游客模式浏览 ›</view>
+    </view>
+  </view>
+
+  <!-- 底部版本 -->
+  <view class="welcome-footer">
+    <text class="text-xs text-hint">v1.0 · AI 驱动的宠物智能养护平台</text>
+  </view>
+</view>

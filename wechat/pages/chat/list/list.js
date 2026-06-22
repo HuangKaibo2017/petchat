@@ -12,7 +12,8 @@ Page({
     inputText: '',
     sending: false,
     streaming: false,
-    scrollToId: ''
+    scrollToId: '',
+    keyboardHeight: 0, petReaction: '', reactionAnim: null
   },
 
   onLoad(options) {
@@ -63,7 +64,49 @@ Page({
     this.scrollToBottom()
   },
 
+  petPetting() {
+    this.setData({ petReaction: '❤️' })
+    setTimeout(() => this.setData({ petReaction: '' }), 1500)
+    const userMsg = { id: Date.now(), role: 'user', content: '（轻轻抚摸了一下）', at: new Date().toISOString(), isAction: true }
+    const petMsg = { id: Date.now() + 1, role: 'pet', content: '呜呜~好舒服！再摸摸~', at: new Date().toISOString() }
+    this.setData({ messages: [...this.data.messages, userMsg, petMsg] })
+    this.scrollToBottom()
+  },
+
+  petFeeding() {
+    this.setData({ petReaction: '🍖' })
+    setTimeout(() => this.setData({ petReaction: '' }), 1500)
+    const feedItems = ['太好吃啦！再来一个！', '嗷呜~这是我最喜欢的零食！', '谢谢主人！我会更乖的~', '吧唧吧唧...满足！']
+    const reply = feedItems[Math.floor(Math.random() * feedItems.length)]
+    const userMsg = { id: Date.now(), role: 'user', content: '（投喂了零食）', at: new Date().toISOString(), isAction: true }
+    const petMsg = { id: Date.now() + 1, role: 'pet', content: reply, at: new Date().toISOString() }
+    this.setData({ messages: [...this.data.messages, userMsg, petMsg] })
+    this.scrollToBottom()
+  },
+
+  goIoTBind() {
+    wx.showModal({
+      title: '智能家居绑定',
+      content: '即将支持绑定MCP物联网智能家居设备（智能喂食器、饮水机、猫砂盆等），实现远程操控与数据监测。\n\n敬请期待！',
+      showCancel: true,
+      confirmText: '了解硬件',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateTo({ url: '/pages/shop/shop' })
+        }
+      }
+    })
+  },
+
   onInput(e) { this.setData({ inputText: e.detail.value }) },
+
+  onKeyboardHeightChange(e) {
+    const h = e.detail.height
+    this.setData({ keyboardHeight: h })
+    if (h > 0) {
+      setTimeout(() => this.scrollToBottom(), 150)
+    }
+  },
 
   async sendMessage() {
     const text = this.data.inputText.trim()
