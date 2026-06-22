@@ -1,55 +1,163 @@
-<nav-bar title="人宠双向报告" showBack="{{true}}" />
+<nav-bar title="人宠共生报告" showBack="{{true}}" />
 <view class="page-container">
-  <view class="report-header">
-    <view class="text-xl font-bold">人宠双向守护报告</view>
-    <view class="text-xs text-hint mt-sm">基于人宠同构 · 气机互通 · 菌群共栖理论</view>
-  </view>
 
-  <!-- Pet Imbalance -->
-  <view class="report-section card">
-    <view class="section-label">🐾 宠物当前失衡状态</view>
-    <view class="text-md">{{report.petImbalance}}</view>
-  </view>
-
-  <!-- Owner Risk -->
-  <view class="report-section card risk-card">
-    <view class="section-label">⚡ 主人联动风险预警</view>
-    <view class="risk-subsection">
-      <view class="risk-subtitle text-md font-bold">气机对应风险</view>
-      <view class="text-sm text-muted">{{report.qiRisk}}</view>
-    </view>
-    <view class="risk-subsection">
-      <view class="risk-subtitle text-md font-bold">菌群共栖相关提示</view>
-    <view class="risk-subsection">
-      <view class="risk-subtitle text-md font-bold">😤 情绪同频分析</view>
-      <view class="text-sm text-muted">{{report.emotionSync || '人宠情绪存在共振：宠物近期焦躁/萎靡状态与主人压力水平高度相关。建议自查：近期是否容易暴躁？睡眠质量是否下降？'}}</view>
-    </view>
-      <view class="text-sm text-muted">{{report.microbiomeRisk}}</view>
-    </view>
-    <view class="risk-subsection">
-      <view class="risk-subtitle text-md font-bold">作息/压力/环境关联提醒</view>
-      <view class="text-sm text-muted">{{report.lifestyleRisk}}</view>
+  <!-- Header -->
+  <view class="rp-header">
+    <view class="rp-header-bg"></view>
+    <view class="rp-header-content">
+      <view class="rp-badge"><text class="rp-badge-icon">🪞</text><text class="rp-badge-text">爱宠如照镜 · 人宠共生</text></view>
+      <view class="rp-title">人宠共生</view>
+      <view class="rp-title-sub">体质报告</view>
+      <view class="rp-subtitle">菌群共栖 · 表观遗传 · 趋同进化</view>
+      <view class="rp-time">{{time}}</view>
     </view>
   </view>
 
-  <!-- Joint Care Plan -->
-  <view class="report-section card">
-    <view class="section-label">🌿 人宠共同调理方案</view>
-    <view class="text-md">{{report.jointCarePlan}}</view>
+  <!-- Pet info card -->
+  <view wx:if="{{pet}}" class="pet-card card">
+    <view class="pet-card-avatar"><image class="avatar-lg pet-avatar-img" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" /></view>
+    <view class="pet-card-info">
+      <view class="pet-card-name">{{pet.name}}</view>
+      <view class="pet-card-meta">
+        <text class="meta-tag">{{pet.breed}}</text><text class="meta-tag">{{pet.age}}</text>
+        <text class="meta-tag">{{pet.gender === 'male' ? '♂ 公' : '♀ 母'}}{{pet.neutered ? '·绝育' : ''}}</text>
+      </view>
+    </view>
   </view>
 
-  <!-- Medical Advice -->
-  <view class="report-section card">
-    <view class="section-label">🏥 就医建议</view>
-    <view class="text-md">{{report.medicalAdvice}}</view>
+  <!-- 1. Pet Constitution -->
+  <view wx:if="{{report.petConstitution}}" class="rp-section card">
+    <view class="rp-section-label">🐾 宠物体质鉴定</view>
+    <view class="rp-const-type">{{report.petConstitution}}</view>
+    <view wx:if="{{report.petCoreState}}" class="rp-core-state text-md mt-sm">{{report.petCoreState}}</view>
+    <view wx:if="{{report.petIssues && report.petIssues.length}}" class="rp-tags mt-md">
+      <text wx:for="{{report.petIssues}}" wx:key="*this" class="rp-tag">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 2. Owner Mirror -->
+  <view wx:if="{{report.ownerMirrorAnalysis}}" class="rp-section card mirror-card">
+    <view class="rp-section-label">🪞 {{report.ownerMirrorAnalysis.title}}</view>
+    <view class="text-sm text-muted mb-md">{{report.ownerMirrorAnalysis.description}}</view>
+    <view wx:for="{{report.ownerMirrorAnalysis.items}}" wx:key="petIssue" wx:for-item="mirror" class="mirror-item">
+      <view class="mirror-chain">
+        <text class="mirror-from">{{mirror.petIssue}}</text>
+        <text class="mirror-arrow">→</text>
+        <text class="mirror-to">{{mirror.ownerLikelyIssue}}</text>
+      </view>
+      <view wx:if="{{mirror.reasoning}}" class="mirror-reason text-xs text-hint mt-xs">{{mirror.reasoning}}</view>
+      <view wx:if="{{mirror.adjustmentDirection}}" class="mirror-adjust text-xs mt-xs">
+        <text class="rp-dot">🌿</text>{{mirror.adjustmentDirection}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 3. Owner Warnings -->
+  <view wx:if="{{report.ownerWarnings && report.ownerWarnings.length}}" class="rp-section card">
+    <view class="rp-section-label">⚡ 主人身体警示</view>
+    <view wx:for="{{report.ownerWarnings}}" wx:key="label" wx:for-item="warn" class="warning-item">
+      <view class="warning-label">{{warn.label}}</view>
+      <view class="warning-content text-sm">{{warn.content}}</view>
+    </view>
+  </view>
+
+  <!-- 4. Bad Habits -->
+  <view wx:if="{{report.ownerBadHabits && report.ownerBadHabits.length}}" class="rp-section card habits-card">
+    <view class="rp-section-label">🔍 生活习惯映照</view>
+    <view class="rp-section-subtitle">通过宠物表现推测的主人生活习惯</view>
+    <view wx:for="{{report.ownerBadHabits}}" wx:key="*this" class="habit-item">
+      <text class="rp-dot warning">!</text><text class="text-sm">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 5. Scientific Explanation -->
+  <view wx:if="{{report.microbeExplanation || report.epigeneticsExplanation}}" class="rp-section card science-card">
+    <view class="rp-section-label">🔬 科学原理解读</view>
+    <view wx:if="{{report.microbeExplanation}}" class="science-item">
+      <view class="science-title">🦠 菌群共栖</view>
+      <view class="text-sm text-muted">{{report.microbeExplanation}}</view>
+    </view>
+    <view wx:if="{{report.epigeneticsExplanation}}" class="science-item mt-md">
+      <view class="science-title">🧬 表观遗传</view>
+      <view class="text-sm text-muted">{{report.epigeneticsExplanation}}</view>
+    </view>
+  </view>
+
+  <!-- 6. Convergence -->
+  <view wx:if="{{report.convergenceChanges}}" class="rp-section card">
+    <view class="rp-section-label">🔄 趋同性变化</view>
+    <view class="text-sm text-muted mb-md">{{report.convergenceChanges.description}}</view>
+    <view wx:if="{{report.convergenceChanges.recommendations && report.convergenceChanges.recommendations.length}}" class="convergence-list">
+      <view wx:for="{{report.convergenceChanges.recommendations}}" wx:key="*this" wx:for-item="rec" class="habit-item">
+        <text class="rp-dot">✨</text><text class="text-sm">{{rec}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 7. Shared Points -->
+  <view wx:if="{{report.sharedPoints}}" class="rp-section card">
+    <view class="rp-section-label">🤝 人宠同频点</view>
+    <view wx:if="{{report.sharedPoints.sleep}}" class="shared-item">
+      <view class="shared-emoji">🌙</view>
+      <view class="shared-text text-sm">{{report.sharedPoints.sleep}}</view>
+    </view>
+    <view wx:if="{{report.sharedPoints.diet}}" class="shared-item">
+      <view class="shared-emoji">🍽️</view>
+      <view class="shared-text text-sm">{{report.sharedPoints.diet}}</view>
+    </view>
+    <view wx:if="{{report.sharedPoints.emotion}}" class="shared-item">
+      <view class="shared-emoji">💕</view>
+      <view class="shared-text text-sm">{{report.sharedPoints.emotion}}</view>
+    </view>
+  </view>
+
+  <!-- 8. Owner Influence -->
+  <view wx:if="{{report.ownerInfluence}}" class="rp-section card">
+    <view class="rp-section-label">👤 主人影响总结</view>
+    <view class="text-md">{{report.ownerInfluence}}</view>
+  </view>
+
+  <!-- 9. Pet Risks -->
+  <view wx:if="{{report.petRisks && report.petRisks.length}}" class="rp-section card">
+    <view class="rp-section-label">⚠️ 宠物专属风险</view>
+    <view wx:for="{{report.petRisks}}" wx:key="*this" class="habit-item">
+      <text class="rp-dot danger">•</text><text class="text-sm">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- 10. Care Plan -->
+  <view wx:if="{{report.carePlan}}" class="rp-section card">
+    <view class="rp-section-label">🌿 人宠共同调理</view>
+    <view wx:if="{{report.carePlan.pet && report.carePlan.pet.length}}">
+      <view class="care-group-title">🐾 爱宠养护</view>
+      <view wx:for="{{report.carePlan.pet}}" wx:key="*this" class="habit-item">
+        <text class="rp-dot">•</text><text class="text-sm">{{item}}</text>
+      </view>
+    </view>
+    <view wx:if="{{report.carePlan.owner && report.carePlan.owner.length}}" class="mt-md">
+      <view class="care-group-title">👤 主人调理</view>
+      <view wx:for="{{report.carePlan.owner}}" wx:key="*this" class="habit-item">
+        <text class="rp-dot">•</text><text class="text-sm">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 11. Conclusion -->
+  <view wx:if="{{report.conclusion}}" class="rp-section card conclusion-card">
+    <view class="rp-section-label">💝 温馨结语</view>
+    <view class="conclusion-text text-md">{{report.conclusion}}</view>
   </view>
 
   <!-- Disclaimer -->
-  <view class="disclaimer card bg-primary-light">
-    <view class="text-xs text-hint text-center">⚠️ 本报告仅做预警与失衡提示，不诊断、不替代体检。如有不适请及时就医。</view>
+  <view class="disclaimer card">
+    <view class="disclaimer-icon">⚠️</view>
+    <view class="disclaimer-text">
+      <view class="text-sm font-bold">免责声明</view>
+      <view class="text-xs text-hint mt-xs">本报告基于宠物体质分析生成，提供健康养护参考，不构成医疗诊断。如有不适请及时就医。</view>
+    </view>
   </view>
 
-  <view class="report-actions flex-between px-md py-md">
+  <view class="report-actions flex-between">
     <view class="action-btn" bindtap="toggleFavorite"><text class="text-lg">{{favorited ? '❤️' : '🤍'}}</text><text class="text-xs text-hint">收藏</text></view>
     <view class="action-btn" bindtap="shareReport"><text class="text-lg">📤</text><text class="text-xs text-hint">分享</text></view>
   </view>
