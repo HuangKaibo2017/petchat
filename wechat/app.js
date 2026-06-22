@@ -12,7 +12,7 @@ App({
     isGuest: false,
     // 本地开发: Express 后端 http://localhost:8001
     // 线上部署: https://petchat.life
-    baseUrl: 'http://localhost:9005',
+    baseUrl: 'https://petchat.life',
     debug: false
   },
 
