@@ -5,12 +5,10 @@
 .idx-page {
   min-height: 100vh;
   background: #FBF9F2;
-  padding-top: 0;
 }
 
 /* ─── 品牌头部 ─── */
 .idx-brand {
-  padding-top: calc(88rpx + env(safe-area-inset-top));
   padding-right: 32rpx;
   padding-bottom: 40rpx;
   padding-left: 32rpx;
