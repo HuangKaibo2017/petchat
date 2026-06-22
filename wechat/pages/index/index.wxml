@@ -1,6 +1,6 @@
 <view class="idx-page">
   <!-- ═══ 品牌头部 ═══ -->
-  <view class="idx-brand">
+  <view class="idx-brand" style="padding-top:{{statusBarHeight + 44}}rpx">
     <view class="idx-brand-title">更懂它</view>
     <view class="idx-brand-slogan">更懂它的心，陪它一生长久</view>
   </view>
@@ -65,7 +65,7 @@
   </view>
 
   <!-- ═══ 底部间距 ═══ -->
-  <view style="height:80rpx"></view>
+  <view style="height:calc(20rpx + env(safe-area-inset-bottom))"></view>
 </view>
 
 <authorize wx:if="{{showAuth}}" bind:success="onAuthSuccess" />

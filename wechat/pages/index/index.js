@@ -6,10 +6,19 @@ Page({
     pets: [],
     nfcEnabled: true,
     showAuth: false,
-    watermarkText: ''
+    watermarkText: '',
+    statusBarHeight: 44,
+    capsuleRight: 180
   },
 
   onLoad(options) {
+    // 获取系统信息适配安全区域
+    const sys = wx.getSystemInfoSync()
+    const menu = wx.getMenuButtonBoundingClientRect()
+    this.setData({
+      statusBarHeight: sys.statusBarHeight || 44,
+      capsuleRight: sys.windowWidth - menu.left + 16
+    })
     this.loadPetData()
     if (options.nfcPetId) {
       this.handleNfcScan(options.nfcPetId)
