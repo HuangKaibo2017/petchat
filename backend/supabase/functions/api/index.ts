@@ -1,12 +1,12 @@
 // /functions/api/index.ts
-// Unified API proxy — handles pets, products, hospitals, favorites, orders, reports
+// Unified API proxy — handles pets, products, hospitals, favorites, orders, reports, newpet, medical
 
 import { okResponse, failResponse } from "../_shared/cors.ts";
 import { verifyJWT, getServiceClient } from "../_shared/auth.ts";
+import { aiChat, type AIMessage } from "../_shared/ai.ts";
 import { AppError, errorResponse, ERR } from "../_shared/errors.ts";
 
 function getRoute(path: string): string {
-  // Strip /api prefix if present
   let route = path;
   if (route.startsWith("/api/")) route = route.slice(4);
   if (route.startsWith("/")) route = route.slice(1);
@@ -35,7 +35,6 @@ Deno.serve(async (req: Request) => {
       const user = await verifyJWT(req);
       userId = user.id;
     } catch {
-      // Some endpoints may be public (products, hospitals)
       if (!["products", "hospitals"].includes(resource) || req.method !== "GET") {
         throw new AppError("UNAUTHORIZED", "请先登录", 401);
       }
@@ -49,6 +48,8 @@ Deno.serve(async (req: Request) => {
       case "favorites": return handleFavorites(req, userId);
       case "reports": return handleReports(req, userId, id);
       case "upload": return handleUpload(req, userId);
+      case "newpet": return handleNewpetGuide(req, userId);
+      case "medical": return handleMedicalGuide(req, userId);
       default:
         return errorResponse("NOT_FOUND", `未知接口: ${resource}`, 404);
     }
@@ -181,7 +182,6 @@ async function handleOrders(req: Request, userId: number): Promise<Response> {
       f_lang: "zh-CN",
     }).select("*").single();
 
-    // Insert order items if provided
     if (body.items && order) {
       const items = body.items.map((item: any) => ({
         f_order_id: order.f_id,
@@ -215,7 +215,6 @@ async function handleFavorites(req: Request, userId: number): Promise<Response> 
     const body = await req.json();
     const { reportId, type } = body;
 
-    // Check if already favorited
     const { data: existing } = await supabase
       .from("t_user_tag")
       .select("f_id")
@@ -247,7 +246,6 @@ async function handleReports(req: Request, userId: number, id?: string): Promise
   const url = new URL(req.url);
 
   if (req.method === "GET" && id) {
-    // Try each report table
     const tables = ["t_report_emotion", "t_report_health", "t_report_human_pet_risk", "t_report_personality"];
     for (const table of tables) {
       const { data: report } = await supabase.from(table).select("*").eq("f_id", parseInt(id)).eq("f_user_id", userId).single();
@@ -321,5 +319,81 @@ async function handleUpload(req: Request, userId: number): Promise<Response> {
   } catch (err) {
     console.error("Upload error:", err);
     return errorResponse("UPLOAD_FAILED", "上传失败", 500);
+  }
+}
+
+// ─── New Pet Guide (AI) ────────────────────────────────
+
+async function handleNewpetGuide(req: Request, userId: number): Promise<Response> {
+  if (req.method !== "POST") {
+    return errorResponse("INVALID_PARAMS", "仅支持 POST", 400);
+  }
+  const body = await req.json();
+
+  const context = [
+    body.lifestyle ? `生活习惯：${body.lifestyle}` : '',
+    body.space ? `居住空间：${body.space}` : '',
+    body.family ? `家庭成员：${body.family}` : '',
+    body.budget ? `预算：${body.budget}` : '',
+    body.activity ? `活动量：${body.activity}` : '',
+    body.allergy ? `过敏：${body.allergy}` : '',
+    body.experience ? `经验：${body.experience}` : '',
+    body.preference ? `偏好：${body.preference}` : '',
+  ].filter(Boolean).join('\n');
+
+  const SYSTEM_PROMPT = `你是宠物购买顾问，根据用户情况推荐最适合的宠物品种。输出JSON：{"recommendations":[{"petType":"类型","breed":"品种","matchScore":95,"reasons":["理由1","理由2"],"careLevel":"低/中/高","monthlyCost":"月均花费","tips":"提醒"}],"summary":"50字总结","disclaimer":"领养代替购买，建议优先考虑救助机构。"}。必须3-5个推荐，matchScore 60-98。`;
+
+  try {
+    const messages: AIMessage[] = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: context || "请根据一般情况推荐适合新手的宠物" },
+    ];
+    const raw = await aiChat(messages, { temperature: 0.5, maxTokens: 3072, responseFormat: "json" });
+    const cleaned = raw.trim().replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const guide = JSON.parse(cleaned);
+    return okResponse({ guide, sessionId: `newpet_${Date.now()}` });
+  } catch (err) {
+    console.error("newpet error:", err);
+    return okResponse({
+      guide: { summary: "暂时无法生成建议，请稍后重试。", recommendations: [], disclaimer: "领养代替购买。" },
+      sessionId: `newpet_${Date.now()}`,
+    });
+  }
+}
+
+// ─── Medical Guide (AI) ────────────────────────────────
+
+async function handleMedicalGuide(req: Request, userId: number): Promise<Response> {
+  if (req.method !== "POST") {
+    return errorResponse("INVALID_PARAMS", "仅支持 POST", 400);
+  }
+  const body = await req.json();
+
+  const context = [
+    body.symptom ? `症状：${body.symptom}` : '',
+    body.duration ? `持续时间：${body.duration}` : '',
+    body.petType ? `宠物类型：${body.petType}` : '',
+    body.petAge ? `年龄：${body.petAge}` : '',
+    body.petWeight ? `体重：${body.petWeight}kg` : '',
+    body.sterilized !== undefined ? `绝育：${body.sterilized ? '是' : '否'}` : '',
+  ].filter(Boolean).join('\n');
+
+  const SYSTEM_PROMPT = `你是宠物临床健康科普助手。只做常识科普，不做确诊不开处方。使用"高度疑似、大概率是"等温和表述。禁止推荐布洛芬、对乙酰氨基酚等对宠物有毒的人用药。输出JSON：{"judgment":"综合判断","symptomExplain":"问题说明","oralMedicine":{"name":"药名","brand":"品牌","dosage":"剂量","example":"举例"},"homeCare":["建议1","建议2","建议3"],"warningSign":["警示1","警示2"],"hospitalCheck":["检查1","检查2"],"disclaimer":"以上内容为科普，不替代执业兽医面诊。"}`;
+
+  try {
+    const messages: AIMessage[] = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: context || "宠物出现不适需要建议" },
+    ];
+    const raw = await aiChat(messages, { temperature: 0.3, maxTokens: 3072, responseFormat: "json" });
+    const cleaned = raw.trim().replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const guide = JSON.parse(cleaned);
+    return okResponse({ guide, sessionId: `medical_${Date.now()}` });
+  } catch (err) {
+    console.error("medical error:", err);
+    return okResponse({
+      guide: { judgment: "暂时无法回答，建议咨询专业兽医。", disclaimer: "以上内容为科普，不替代执业兽医面诊。" },
+      sessionId: `medical_${Date.now()}`,
+    });
   }
 }
