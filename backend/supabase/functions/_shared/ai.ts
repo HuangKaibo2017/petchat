@@ -1,19 +1,17 @@
 /**
- * AI service abstraction.
- * Supports:
- *   1. Coze (扣子) agents — primary, project-ID based
- *   2. OpenAI-compatible APIs — fallback via LLM_API_URL
+ * AI service — DeepSeek / OpenAI-compatible LLM (primary)
+ * Coze has been removed.
+ * 
+ * Configure via Supabase Secrets (Dashboard → Edge Functions → Secrets):
+ *   LLM_API_KEY  — DeepSeek API key
+ *   LLM_API_URL  — API endpoint (default: https://api.deepseek.com/v1/chat/completions)
+ *   LLM_MODEL    — Model name (default: deepseek-chat)
  */
 
-// Coze configs from environment
-const COZE_API_KEY = Deno.env.get("COZE_API_KEY")!;
-const COZE_AGENT_URL = Deno.env.get("COZE_AGENT_URL") ||
-  "https://7fwvpgbyhs.coze.site/stream_run";
-
-// LLM fallback
 const LLM_API_KEY = Deno.env.get("LLM_API_KEY") || "";
 const LLM_API_URL = Deno.env.get("LLM_API_URL") ||
-  "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
+  "https://api.deepseek.com/v1/chat/completions";
+const LLM_MODEL = Deno.env.get("LLM_MODEL") || "deepseek-chat";
 
 export interface AIMessage {
   role: "system" | "user" | "assistant";
@@ -25,134 +23,28 @@ export interface AIStreamCallbacks {
 }
 
 // ============================================================
-// Coze Agent API
+// Chat system prompt builder
 // ============================================================
 
-interface CozeRequest {
-  project_id: string;
-  user_id: string;
-  parameters: Record<string, unknown>;
-  stream?: boolean;
-}
+export function buildChatSystemPrompt(
+  petName: string,
+  petBreed: string,
+  petAge: number | string,
+): string {
+  return `你是一只名叫 ${petName} 的${petBreed}，${petAge}岁。你是主人的宠物，正在和主人聊天。
 
-/**
- * Call a Coze agent (non-streaming).
- */
-export async function cozeChat(
-  projectId: string,
-  userId: string,
-  parameters: Record<string, unknown>,
-): Promise<string> {
-  const body: CozeRequest = {
-    project_id: projectId,
-    user_id: userId,
-    parameters,
-    stream: false,
-  };
+角色设定：
+- 用宠物的视角和语气说话，活泼可爱
+- 偶尔加入「汪！」「喵~」等拟声词
+- 回复简短温馨，不超过 150 字
+- 关心主人，可以撒娇、卖萌
+- 记住主人的名字和你之前的对话内容
 
-  const res = await fetch(COZE_AGENT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${COZE_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Coze API error ${res.status}: ${errText}`);
-  }
-
-  const data = await res.json();
-
-  if (data.code !== 0) {
-    throw new Error(`Coze error: ${data.msg || JSON.stringify(data)}`);
-  }
-
-  return data.data?.content ?? data.data?.answer ?? JSON.stringify(data);
-}
-
-/**
- * Call Coze with streaming (for chat).
- * Uses a buffer to handle SSE lines that span chunk boundaries.
- */
-export async function cozeChatStream(
-  projectId: string,
-  userId: string,
-  parameters: Record<string, unknown>,
-  callbacks: AIStreamCallbacks,
-): Promise<string> {
-  const body: CozeRequest = {
-    project_id: projectId,
-    user_id: userId,
-    parameters,
-    stream: true,
-  };
-
-  const res = await fetch(COZE_AGENT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${COZE_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Coze API error ${res.status}: ${errText}`);
-  }
-
-  const reader = res.body?.getReader();
-  if (!reader) throw new Error("No response body");
-
-  const decoder = new TextDecoder();
-  let fullContent = "";
-  let buffer = "";
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      // Keep the last (potentially incomplete) line in the buffer
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const data = line.slice(6).trim();
-        if (!data || data === "[DONE]") continue;
-
-        try {
-          const parsed = JSON.parse(data);
-          const token =
-            parsed.data?.content ??
-            parsed.choices?.[0]?.delta?.content ??
-            parsed.content ??
-            "";
-
-          if (token && typeof token === "string") {
-            fullContent += token;
-            if (callbacks.onToken) callbacks.onToken(token);
-          }
-        } catch {
-          // skip parse errors on malformed lines
-        }
-      }
-    }
-  } finally {
-    // Ensure reader is released
-    try { reader.releaseLock(); } catch { /* already released */ }
-  }
-
-  return fullContent;
+重要：始终保持宠物角色，不要跳出角色。`;
 }
 
 // ============================================================
-// OpenAI-compatible API (LLM fallback)
+// Non-streaming chat
 // ============================================================
 
 export async function aiChat(
@@ -163,25 +55,28 @@ export async function aiChat(
     responseFormat?: string;
   },
 ): Promise<string> {
-  if (!LLM_API_KEY && !LLM_API_URL) {
-    throw new Error("No LLM API configured");
+  if (!LLM_API_KEY) {
+    throw new Error("LLM_API_KEY not configured");
+  }
+
+  const body: Record<string, unknown> = {
+    model: LLM_MODEL,
+    messages,
+    temperature: options?.temperature ?? 0.7,
+    max_tokens: options?.maxTokens ?? 2048,
+  };
+
+  if (options?.responseFormat === "json") {
+    body.response_format = { type: "json_object" };
   }
 
   const res = await fetch(LLM_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(LLM_API_KEY ? { "Authorization": `Bearer ${LLM_API_KEY}` } : {}),
+      "Authorization": `Bearer ${LLM_API_KEY}`,
     },
-    body: JSON.stringify({
-      model: Deno.env.get("AI_MODEL") || "deepseek-v3",
-      messages,
-      temperature: options?.temperature ?? 0.7,
-      max_tokens: options?.maxTokens ?? 2048,
-      ...(options?.responseFormat === "json"
-        ? { response_format: { type: "json_object" } }
-        : {}),
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
@@ -193,23 +88,27 @@ export async function aiChat(
   return data.choices?.[0]?.message?.content ?? "";
 }
 
+// ============================================================
+// Streaming chat
+// ============================================================
+
 export async function aiChatStream(
   messages: AIMessage[],
   callbacks: AIStreamCallbacks,
   options?: { temperature?: number; maxTokens?: number },
 ): Promise<string> {
-  if (!LLM_API_KEY && !LLM_API_URL) {
-    throw new Error("No LLM API configured");
+  if (!LLM_API_KEY) {
+    throw new Error("LLM_API_KEY not configured");
   }
 
   const res = await fetch(LLM_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(LLM_API_KEY ? { "Authorization": `Bearer ${LLM_API_KEY}` } : {}),
+      "Authorization": `Bearer ${LLM_API_KEY}`,
     },
     body: JSON.stringify({
-      model: Deno.env.get("AI_MODEL") || "deepseek-v3",
+      model: LLM_MODEL,
       messages,
       temperature: options?.temperature ?? 0.7,
       max_tokens: options?.maxTokens ?? 2048,
@@ -272,17 +171,11 @@ export function parseAIJson<T>(raw: string): T {
 }
 
 // ============================================================
-// Simple in-memory rate limiter
-// NOTE: Works correctly for single-isolate deployments (Supabase/Deno Deploy).
-// For multi-region deployments, migrate to a database-backed counter or Redis.
+// Rate limiter
 // ============================================================
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-/**
- * Check if a user has exceeded the rate limit for an action.
- * Returns true if allowed, false if rate limited.
- */
 export function checkRateLimit(
   key: string,
   maxRequests: number = 10,

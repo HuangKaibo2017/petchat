@@ -1,10 +1,10 @@
 // /functions/risk-report/index.ts
-// POST: Human-pet risk assessment via Coze constitution agent
+// POST: Human-pet risk assessment via DeepSeek LLM
 
 import { okResponse } from "../_shared/cors.ts";
 import { verifyJWT, getServiceClient } from "../_shared/auth.ts";
 import { checkQuota, recordUsage } from "../_shared/db.ts";
-import { cozeChat, checkRateLimit, parseAIJson } from "../_shared/ai.ts";
+import { aiChat, checkRateLimit, parseAIJson, type AIMessage } from "../_shared/ai.ts";
 import { AppError, errorResponse, ERR } from "../_shared/errors.ts";
 
 interface RiskRequest {
@@ -26,6 +26,38 @@ interface RiskReport {
   riskFactors: Array<{ factor: string; level: string }>;
   recommendations: string[];
 }
+
+const RISK_SYSTEM_PROMPT = `你是宠物体质综合分析专家，采用中医体质学视角为宠物做人宠风险评估。
+
+你需要结合宠物的五行体质、主人的生辰信息、以及宠物的健康数据，分析人宠之间的气场匹配度和潜在健康风险。
+
+【输出要求】
+严格输出一个 JSON 对象，不要包含任何 markdown 标记或额外文字。
+
+{
+  "petImbalance": "宠物体质偏颇分析，40-80字",
+  "qiRisk": "气场不和风险评估，30-60字",
+  "microbiomeRisk": "微生物群风险评估，30-60字",
+  "lifestyleRisk": "生活方式风险评估，30-60字",
+  "jointCarePlan": "关节养护方案，40-80字",
+  "medicalAdvice": "医疗建议，30-60字",
+  "riskLevel": "low / medium / high",
+  "riskScore": 0-100的数字,
+  "riskFactors": [
+    {"factor": "风险因素", "level": "low / medium / high"}
+  ],
+  "recommendations": [
+    "建议1",
+    "建议2",
+    "建议3"
+  ]
+}
+
+注意：
+- riskScore: low为0-33，medium为34-66，high为67-100
+- riskFactors 至少2个
+- recommendations 至少3个
+- 免责声明：本报告为体质倾向评估，不作为临床诊断依据`;
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -72,22 +104,30 @@ Deno.serve(async (req: Request) => {
       if (hr) healthContext = JSON.stringify(hr.f_input_symptoms);
     }
 
-    const projectId = Deno.env.get("COZE_CONSTITUTION_PROJECT_ID")!;
-    if (!projectId) return errorResponse("CONFIG_ERROR", "Coze 项目未配置", 500);
+    const contextParts = [
+      `宠物：${pet.f_name}`,
+      `宠物生日：${pet.f_birth_date ?? "未知"}`,
+      `宠物体重：${pet.f_weight ?? "未知"}kg`,
+      `主人生日：${body.ownerBirthday}`,
+    ];
+    if (healthContext) contextParts.push(`健康报告数据：${healthContext}`);
+    if (body.tongueImage) contextParts.push(`舌象图片：${body.tongueImage}`);
+
+    const messages: AIMessage[] = [
+      { role: "system", content: RISK_SYSTEM_PROMPT },
+      { role: "user", content: contextParts.join("\n") },
+    ];
 
     let reportJson: RiskReport;
     try {
-      const raw = await cozeChat(projectId, String(user.id), {
-        petName: pet.f_name,
-        petBirthDate: pet.f_birth_date ?? "",
-        petWeight: pet.f_weight,
-        ownerBirthday: body.ownerBirthday,
-        healthContext,
-        tongueImage: body.tongueImage ?? "",
+      const raw = await aiChat(messages, {
+        temperature: 0.4,
+        maxTokens: 4096,
+        responseFormat: "json",
       });
       reportJson = parseAIJson<RiskReport>(raw);
     } catch (aiErr) {
-      console.error("Coze error:", aiErr);
+      console.error("LLM error:", aiErr);
       return errorResponse(ERR.AI_FAILED.code, ERR.AI_FAILED.message, 503);
     }
 

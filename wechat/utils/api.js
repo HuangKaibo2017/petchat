@@ -22,11 +22,9 @@ const request = (url, options = {}) => {
       success: (res) => {
         if (res.statusCode === 200) {
           const body = res.data
-          // Express server returns { code: 200, data: {...} }
           if (body && body.code === 200) {
             resolve(body.data)
           } else {
-            // 兼容直接返回 data 的响应
             resolve(body)
           }
         } else if (res.statusCode === 401) {
@@ -48,7 +46,7 @@ const request = (url, options = {}) => {
   })
 };
 
-// ─── 真实 API（连接 Express 后端） ───
+// ─── 真实 API（直连 Supabase Edge Functions） ───
 const RealAPI = {
   get: (url, data) => request(url, { method: 'GET', data }),
   post: (url, data) => request(url, { method: 'POST', data }),
@@ -57,9 +55,9 @@ const RealAPI = {
 
   // ═══ 报告接口 ═══
   Report: {
-    emotion: async (data) => RealAPI.post('/api/emotion/report', data),
-    health: async (data) => RealAPI.post('/api/health/report', data),
-    risk: async (data) => RealAPI.post('/api/risk/report', data),
+    emotion: async (data) => RealAPI.post('/emotion-report', data),
+    health: async (data) => RealAPI.post('/health-report', data),
+    risk: async (data) => RealAPI.post('/risk-report', data),
     medical: async (data) => RealAPI.post('/api/medical/guide', data),
     history: async (type) => RealAPI.get('/api/reports', { type }),
     detail: async (id) => RealAPI.get(`/api/reports/${id}`)
@@ -70,7 +68,7 @@ const RealAPI = {
     upload: async (filePath, category, petId) => {
       return new Promise((resolve, reject) => {
         wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`,
+          url: `${app.globalData.baseUrl}/upload`,
           filePath,
           name: 'file',
           formData: { category, petId: petId || '' },
@@ -92,15 +90,14 @@ const RealAPI = {
 
   // ═══ 聊天 ═══
   Chat: {
-    listSessions: async () => RealAPI.get('/api/chat/sessions'),
-    createSession: async (petId) => RealAPI.post('/api/chat/sessions', { petId }),
-    getMessages: async (sessionId) => RealAPI.get('/api/chat/sessions/' + sessionId + '/messages'),
-    send: async (sessionId, text) => RealAPI.post('/api/chat/send-json', {
+    listSessions: async () => RealAPI.get('/chat/sessions'),
+    createSession: async (petId) => RealAPI.post('/chat/sessions', { petId }),
+    getMessages: async (sessionId) => RealAPI.get(`/chat/messages?sessionId=${sessionId}`),
+    send: async (sessionId, text) => RealAPI.post('/chat/send-json', {
       sessionId, message: text
     }),
-    // 流式聊天下个版本实现，当前等同于 send
     sendStream: async (sessionId, text, onToken) => {
-      return RealAPI.post('/api/chat/send-json', { sessionId, message: text })
+      return RealAPI.post('/chat/send-json', { sessionId, message: text })
     }
   },
 
@@ -137,9 +134,9 @@ const RealAPI = {
   },
 
   // ═══ 兼容旧版扁平 API ═══
-  getEmotionReport: (data) => RealAPI.post('/api/emotion/report', data),
-  getHealthReport: (data) => RealAPI.post('/api/health/report', data),
-  getRiskReport: (data) => RealAPI.post('/api/risk/report', data),
+  getEmotionReport: (data) => RealAPI.post('/emotion-report', data),
+  getHealthReport: (data) => RealAPI.post('/health-report', data),
+  getRiskReport: (data) => RealAPI.post('/risk-report', data),
   getMedicalGuide: (data) => RealAPI.post('/api/medical/guide', data),
   toggleFavorite: (reportId, type) => RealAPI.post('/api/favorites/toggle', { reportId, type }),
   getFavorites: () => RealAPI.get('/api/favorites'),
