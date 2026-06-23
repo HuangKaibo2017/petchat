@@ -12,7 +12,7 @@ App({
     isGuest: false,
     // 线上: Supabase Edge Functions
     // 本地开发: Express 后端 http://localhost:8001
-    baseUrl: 'https://pet.silvertower.cloud',
+    baseUrl: 'https://petchat.life',
     debug: false
   },
 
