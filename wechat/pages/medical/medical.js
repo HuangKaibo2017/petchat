@@ -75,7 +75,7 @@ Page({
     const petData = { ...selectedPet }
     if (weight) petData.weight = weight
     try {
-      const result = await API.post('/api/constitution/report', { petId: selectedPet.id, numbers })
+      const result = await API.Report.health({ petId: selectedPet.id, numbers })
       this.setData({ generating: false })
       wx.navigateTo({
         url: `/pages/medical/detail/detail?data=${encodeURIComponent(JSON.stringify({

@@ -93,8 +93,8 @@ Page({
       if (!pets[i].breed) return wx.showToast({ title: `请选择宠物${i+1}的品种`, icon: 'none' })
     }
 
-    if (!app.globalData.isAuthorized) {
-      app.requestAuth(() => this.submitRegister())
+    if (!app.globalData.isLoggedIn) {
+      app.wxLogin().then(token => { if (token) this.submitRegister() })
       return
     }
 

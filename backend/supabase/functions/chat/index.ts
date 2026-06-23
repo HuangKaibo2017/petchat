@@ -67,7 +67,8 @@ Deno.serve(async (req: Request) => {
       return errorResponse(err.code, err.message, err.status);
     }
     console.error("chat error:", err);
-    return errorResponse("INTERNAL", "聊天服务异常", 500);
+    const detail = err instanceof Error ? `${err.message} | ${(err.stack ?? "").split("\n")[1] ?? ""}` : String(err);
+    return errorResponse("INTERNAL", `聊天服务异常: ${detail}`, 500);
   }
 });
 

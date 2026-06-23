@@ -2,7 +2,7 @@
 <view class="page-container">
   <!-- User Info with owner profile entry -->
   <view class="user-card">
-    <view wx:if="{{isAuthorized}}">
+    <view wx:if="{{isLoggedIn}}">
       <view class="flex items-center">
         <image class="avatar-lg" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
         <view class="ml-md" class="flex-1">

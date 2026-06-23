@@ -62,7 +62,7 @@ Page({
           wx.removeStorageSync('cart')
           wx.removeStorageSync('chatHistory')
           wx.removeStorageSync('_demo_initialized')
-          app.globalData.isAuthorized = false
+          app.globalData.isLoggedIn = false
           app.globalData.userInfo = null
           app.globalData.pets = []
           app.globalData.currentPet = null

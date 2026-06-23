@@ -53,5 +53,12 @@ verify_jwt = false
 # Auth (for WeChat openid → Supabase user mapping):
 #   JWT_SECRET = <SET IN SUPABASE DASHBOARD — random 64-char string>
 #
-# LLM Fallback:
-#   LLM_API_URL = <SET IN SUPABASE DASHBOARD>
+# LLM (DeepSeek):
+#   LLM_API_KEY  = <SET IN SUPABASE DASHBOARD>
+#   LLM_API_URL  = <SET IN SUPABASE DASHBOARD>
+#   LLM_MODEL    = <SET IN SUPABASE DASHBOARD>
+
+[functions.migrate-schema]
+enabled = true
+verify_jwt = false
+

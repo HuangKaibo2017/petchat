@@ -57,7 +57,7 @@ Page({
   },
 
   checkAuth(callback) {
-    if (app.globalData.isAuthorized) {
+    if (app.globalData.isLoggedIn) {
       callback()
     } else {
       this.setData({ showAuth: true, _pendingAuth: callback })

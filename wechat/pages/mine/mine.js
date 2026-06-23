@@ -2,7 +2,7 @@ const app = getApp()
 
 Page({
   data: {
-    isAuthorized: false,
+    isLoggedIn: false,
     userInfo: null,
     currentPet: null,
     pets: [],
@@ -17,7 +17,7 @@ Page({
   onShow() { this.loadData() },
 
   loadData() {
-    const isAuthorized = app.globalData.isAuthorized
+    const isLoggedIn = app.globalData.isLoggedIn
     const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo')
     const pets = app.globalData.pets || wx.getStorageSync('pets') || []
     const currentPet = app.globalData.currentPet || (pets.length > 0 ? pets[0] : null)
@@ -50,7 +50,7 @@ Page({
     }
 
     this.setData({
-      isAuthorized, userInfo, pets, currentPet,
+      isLoggedIn, userInfo, pets, currentPet,
       pendingOrders: cart.length,
       hasHardware,
       hardwareFreeCount,

@@ -36,7 +36,13 @@ Page({
     this.setData({ generating: true })
 
     try {
-      const result = await API.post('/api/risk/report', { petId: selectedPet.id })
+      const ownerBirthday = wx.getStorageSync('ownerBirthday') || ''
+      if (!ownerBirthday) {
+        wx.showToast({ title: '请先在「我的」页面完善主人档案', icon: 'none' })
+        this.setData({ generating: false })
+        return
+      }
+      const result = await API.Report.risk({ petId: selectedPet.id, ownerBirthday })
       this.setData({ generating: false })
       wx.navigateTo({
         url: `/pages/risk/report/report?data=${encodeURIComponent(JSON.stringify({

@@ -24,6 +24,7 @@
     "pages/mine/register/register",
     "pages/mine/pets/pets",
     "pages/mine/pets/edit/edit",
+    "pages/mine/pets/detail/detail",
     "pages/mine/history/history",
     "pages/mine/settings/settings",
     "pages/mine/orders/orders",

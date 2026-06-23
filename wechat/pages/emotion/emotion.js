@@ -145,8 +145,8 @@ Page({
   async generateReport() {
     const { selectedPet, question, divSystem, numberInputs, uploadImage, type } = this.data
 
-    if (!app.globalData.isAuthorized) {
-      app.requestAuth(() => this.generateReport())
+    if (!app.globalData.isLoggedIn) {
+      app.wxLogin().then(token => { if (token) this.generateReport() })
       return
     }
 
@@ -188,7 +188,7 @@ Page({
           showCancel: false,
         })
       } else if (err.message === 'UNAUTHORIZED') {
-        app.requestAuth(() => this.generateReport())
+        app.wxLogin().then(token => { if (token) this.generateReport() })
       } else {
         wx.showToast({ title: err.message || '生成失败', icon: 'none' })
       }

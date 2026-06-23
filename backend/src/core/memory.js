@@ -110,3 +110,46 @@ function count() {
 }
 
 module.exports = { get, push, setAgent, trim, getMessages, getRaw, destroy, count }
+
+/**
+ * 列出用户的所有会话
+ */
+function list(userId) {
+  const result = []
+  for (const [id, session] of sessions) {
+    if (session.userId === userId) {
+      result.push({
+        id,
+        sessionId: id,
+        userId: session.userId,
+        petId: session.petId || '',
+        petName: session.petName || '',
+        title: session.title || '',
+        messages: session.messages || [],
+        createdAt: session.createdAt || now(),
+      })
+    }
+  }
+  return result
+}
+
+/**
+ * 为用户和宠物创建新会话
+ */
+function create(userId, petId, meta = {}) {
+  const sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)
+  sessions.set(sessionId, {
+    id: sessionId,
+    userId,
+    petId,
+    petName: meta.petName || '',
+    title: meta.title || '',
+    messages: [],
+    summary: '',
+    createdAt: now(),
+    currentAgent: null,
+  })
+  return sessionId
+}
+
+module.exports = { get, push, setAgent, trim, getMessages, getRaw, destroy, count, list, create }
