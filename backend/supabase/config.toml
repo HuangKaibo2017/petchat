@@ -21,6 +21,10 @@ verify_jwt = true
 enabled = true
 verify_jwt = true
 
+[functions.api]
+enabled = true
+verify_jwt = false
+
 [functions.wechat-auth]
 enabled = true
 verify_jwt = false

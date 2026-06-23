@@ -1,6 +1,5 @@
 const { MockAPI } = require('./mock')
 
-// 开发模式：无后端时使用 mock 数据
 const DEBUG = false
 
 const app = getApp()
@@ -53,22 +52,22 @@ const RealAPI = {
   put: (url, data) => request(url, { method: 'PUT', data }),
   delete: (url, data) => request(url, { method: 'DELETE', data }),
 
-  // ═══ 报告接口 ═══
+  // ═══ 报告接口 → emotion-report / health-report / risk-report functions ═══
   Report: {
     emotion: async (data) => RealAPI.post('/emotion-report', data),
     health: async (data) => RealAPI.post('/health-report', data),
     risk: async (data) => RealAPI.post('/risk-report', data),
     medical: async (data) => RealAPI.post('/api/medical/guide', data),
-    history: async (type) => RealAPI.get('/api/reports', { type }),
+    history: async (type) => RealAPI.get(`/api/reports${type ? '?type=' + type : ''}`),
     detail: async (id) => RealAPI.get(`/api/reports/${id}`)
   },
 
-  // ═══ 上传 ═══
+  // ═══ 上传 → upload function ═══
   Upload: {
     upload: async (filePath, category, petId) => {
       return new Promise((resolve, reject) => {
         wx.uploadFile({
-          url: `${app.globalData.baseUrl}/upload`,
+          url: `${app.globalData.baseUrl}/api/upload`,
           filePath,
           name: 'file',
           formData: { category, petId: petId || '' },
@@ -88,26 +87,24 @@ const RealAPI = {
     }
   },
 
-  // ═══ 聊天 ═══
+  // ═══ 聊天 → chat function ═══
   Chat: {
     listSessions: async () => RealAPI.get('/chat/sessions'),
     createSession: async (petId) => RealAPI.post('/chat/sessions', { petId }),
     getMessages: async (sessionId) => RealAPI.get(`/chat/messages?sessionId=${sessionId}`),
-    send: async (sessionId, text) => RealAPI.post('/chat/send-json', {
-      sessionId, message: text
-    }),
+    send: async (sessionId, text) => RealAPI.post('/chat/send-json', { sessionId, message: text }),
     sendStream: async (sessionId, text, onToken) => {
       return RealAPI.post('/chat/send-json', { sessionId, message: text })
     }
   },
 
-  // ═══ 收藏 ═══
+  // ═══ 收藏 → api function ═══
   Favorite: {
-    toggle: async (reportId, type) => RealAPI.post('/api/favorites/toggle', { reportId, type }),
+    toggle: async (reportId, type) => RealAPI.post('/api/favorites', { reportId, type }),
     list: async () => RealAPI.get('/api/favorites')
   },
 
-  // ═══ 宠物档案 ═══
+  // ═══ 宠物档案 → api function ═══
   Pet: {
     create: async (data) => RealAPI.post('/api/pets', data),
     list: async () => RealAPI.get('/api/pets'),
@@ -116,18 +113,18 @@ const RealAPI = {
     delete: async (id) => RealAPI.delete(`/api/pets/${id}`)
   },
 
-  // ═══ 商城 ═══
+  // ═══ 商城 → api function ═══
   Product: {
     list: async (params) => RealAPI.get('/api/products', params),
     detail: async (id) => RealAPI.get(`/api/products/${id}`)
   },
 
-  // ═══ 订单 ═══
+  // ═══ 订单 → api function ═══
   Order: {
     create: async (data) => RealAPI.post('/api/orders', data)
   },
 
-  // ═══ 医院 ═══
+  // ═══ 医院 → api function ═══
   Hospital: {
     list: async (params) => RealAPI.get('/api/hospitals', params),
     detail: async (id) => RealAPI.get(`/api/hospitals/${id}`)
@@ -138,13 +135,13 @@ const RealAPI = {
   getHealthReport: (data) => RealAPI.post('/health-report', data),
   getRiskReport: (data) => RealAPI.post('/risk-report', data),
   getMedicalGuide: (data) => RealAPI.post('/api/medical/guide', data),
-  toggleFavorite: (reportId, type) => RealAPI.post('/api/favorites/toggle', { reportId, type }),
+  toggleFavorite: (reportId, type) => RealAPI.post('/api/favorites', { reportId, type }),
   getFavorites: () => RealAPI.get('/api/favorites'),
   getPets: () => RealAPI.get('/api/pets'),
   savePet: (data) => RealAPI.post('/api/pets', data),
   updatePet: (id, data) => RealAPI.put(`/api/pets/${id}`, data),
   deletePet: (id) => RealAPI.delete(`/api/pets/${id}`),
-  getHistory: (type) => RealAPI.get('/api/reports', { type }),
+  getHistory: (type) => RealAPI.get(`/api/reports${type ? '?type=' + type : ''}`),
   getReportDetail: (id) => RealAPI.get(`/api/reports/${id}`),
   getProducts: (params) => RealAPI.get('/api/products', params),
   getProductDetail: (id) => RealAPI.get(`/api/products/${id}`),
@@ -172,10 +169,7 @@ const MockNamespaced = {
       const history = wx.getStorageSync('chatHistory') || []
       return { sessions: history }
     },
-    createSession: async (petId) => {
-      const id = Date.now()
-      return { sessionId: id, petId }
-    },
+    createSession: async (petId) => { const id = Date.now(); return { sessionId: id, petId } },
     getMessages: async (sessionId) => {
       return { messages: [{ id: Date.now(), role: 'pet', content: '汪汪！我是你的宠物，今天想跟你聊聊天~', at: new Date().toISOString() }] }
     },
@@ -211,5 +205,4 @@ const MockNamespaced = {
 }
 
 const API = DEBUG ? MockNamespaced : RealAPI
-
 module.exports = API
