@@ -10,9 +10,9 @@ App({
     cart: [],
     nfcEnabled: true,
     isGuest: false,
+    // 线上: Supabase Edge Functions
     // 本地开发: Express 后端 http://localhost:8001
-    // 线上部署: https://petchat.life
-    baseUrl: 'https://www.petchat.life',
+    baseUrl: 'https://dlvgbwyvxjdggxpddpod.supabase.co/functions/v1',
     debug: false
   },
 

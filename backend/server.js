@@ -677,7 +677,7 @@ app.listen(PORT, async () => {
 
   // 异步检查 LLM 连通性
   llm.ping().then(ok => {
-    console.log(`  🤖 智能体引擎: ${ok ? '✅ Qwen 已连接' : '⚠️  LLM_API_KEY 未配置（降级 mock）'}`)
+    console.log(`  🤖 智能体引擎: ${ok ? '✅ LLM 已连接' : '⚠️  LLM_API_KEY 未配置（降级 mock）'}`)
   })
 
   console.log(`  🐱 演示宠物: ${db.pets.map(p => p.name).join(', ')}`)

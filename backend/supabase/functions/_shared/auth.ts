@@ -40,7 +40,7 @@ export async function verifyJWT(req: Request): Promise<AuthUser> {
   const { data: tUser, error: dbErr } = await supabase
     .from("t_user")
     .select("f_id, f_meta_info")
-    .eq("f_public_id", supabaseUserId)
+    .eq("f_public_uid", supabaseUserId)
     .single();
 
   if (dbErr || !tUser) {
@@ -137,12 +137,12 @@ export async function exchangeWechatCode(
   const { data: existing } = await supabase
     .from("t_user")
     .select("f_id")
-    .eq("f_public_id", supabaseUserId)
+    .eq("f_public_uid", supabaseUserId)
     .single();
 
   if (!existing) {
     await supabase.from("t_user").insert({
-      f_public_id: supabaseUserId,
+      f_public_uid: supabaseUserId,
       f_nickname: userInfo?.nickName ?? "",
       f_avatar_url: userInfo?.avatarUrl ?? "",
       f_meta_info: { wechat_openid: openid },
