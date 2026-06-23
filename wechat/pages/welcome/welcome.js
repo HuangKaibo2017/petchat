@@ -4,7 +4,7 @@ Page({
   data: {
     nfcSupported: false,
     nfcActive: false,
-    autoGoTimer: null
+    loggingIn: false
   },
 
   onLoad() {
@@ -13,48 +13,57 @@ Page({
     // NFC 触发：快速进入
     if (app.globalData.nfcTriggered) {
       this.setData({ nfcActive: true })
-      this.data.autoGoTimer = setTimeout(() => {
+      setTimeout(() => {
         this.goHomeNFC()
       }, 1500)
       return
     }
 
-    // 正常：4 秒自动跳转
-    this.data.autoGoTimer = setTimeout(() => {
+    // 已有 token，直接跳首页
+    const token = wx.getStorageSync('token')
+    if (token) {
       this.goHome()
-    }, 4000)
+    }
   },
 
-  onUnload() {
-    if (this.data.autoGoTimer) {
-      clearTimeout(this.data.autoGoTimer)
+  // 微信一键登录
+  async handleWechatLogin() {
+    if (this.data.loggingIn) return
+    this.setData({ loggingIn: true })
+
+    wx.showLoading({ title: '登录中...', mask: true })
+
+    try {
+      const token = await app.wxLogin()
+      wx.hideLoading()
+
+      if (token) {
+        wx.showToast({ title: '登录成功', icon: 'success', duration: 1000 })
+        // 刷新真实宠物数据
+        app.refreshPets().finally(() => {})
+        setTimeout(() => this.goHome(), 1000)
+      } else {
+        this.setData({ loggingIn: false })
+        wx.showToast({ title: '登录失败，请重试', icon: 'none' })
+      }
+    } catch (e) {
+      wx.hideLoading()
+      this.setData({ loggingIn: false })
+      wx.showToast({ title: '登录失败，请重试', icon: 'none' })
     }
   },
 
   goHome() {
-    this.clearTimer()
-    wx.setStorageSync('_welcome_shown', true)
     wx.switchTab({ url: '/pages/index/index' })
   },
 
   goHomeNFC() {
-    this.clearTimer()
-    wx.setStorageSync('_welcome_shown', true)
     app.globalData._nfcWelcome = true
     wx.switchTab({ url: '/pages/index/index' })
   },
 
   goHomeGuest() {
-    this.clearTimer()
-    wx.setStorageSync('_welcome_shown', true)
     app.globalData.isGuest = true
     wx.switchTab({ url: '/pages/index/index' })
-  },
-
-  clearTimer() {
-    if (this.data.autoGoTimer) {
-      clearTimeout(this.data.autoGoTimer)
-      this.data.autoGoTimer = null
-    }
   }
 })

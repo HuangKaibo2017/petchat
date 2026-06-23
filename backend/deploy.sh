@@ -53,18 +53,18 @@ echo ""
 
 read -p "WECHAT_APPID: " WECHAT_APPID
 read -p "WECHAT_SECRET: " WECHAT_SECRET
-read -p "AI_API_KEY: " AI_API_KEY
-read -p "AI_BASE_URL (default: https://api.openai.com/v1): " AI_BASE_URL
-AI_BASE_URL="${AI_BASE_URL:-https://api.openai.com/v1}"
-read -p "AI_MODEL (default: gpt-4o-mini): " AI_MODEL
-AI_MODEL="${AI_MODEL:-gpt-4o-mini}"
+read -p "LLM_API_KEY: " LLM_API_KEY
+read -p "LLM_API_URL (default: https://api.deepseek.com/v1/chat/completions): " LLM_API_URL
+LLM_API_URL="${LLM_API_URL:-https://api.deepseek.com/v1/chat/completions}"
+read -p "LLM_MODEL (default: deepseek-chat): " LLM_MODEL
+LLM_MODEL="${LLM_MODEL:-gpt-4o-mini}"
 
 supabase secrets set \
   WECHAT_APPID="$WECHAT_APPID" \
   WECHAT_SECRET="$WECHAT_SECRET" \
-  AI_API_KEY="$AI_API_KEY" \
-  AI_BASE_URL="$AI_BASE_URL" \
-  AI_MODEL="$AI_MODEL" \
+  LLM_API_KEY="$LLM_API_KEY" \
+  LLM_API_URL="$LLM_API_URL" \
+  LLM_MODEL="$LLM_MODEL" \
   --project-ref "$PROJECT_REF"
 
 echo ""

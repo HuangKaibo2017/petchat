@@ -75,8 +75,8 @@ Page({
 
   // 整体分析
   async generateOverall() {
-    if (!app.globalData.isAuthorized) {
-      app.requestAuth(() => this.generateOverall())
+    if (!app.globalData.isLoggedIn) {
+      app.wxLogin().then(token => { if (token) this.generateOverall() })
       return
     }
 
@@ -117,8 +117,8 @@ Page({
 
   // 具体分析
   async generateSpecific() {
-    if (!app.globalData.isAuthorized) {
-      app.requestAuth(() => this.generateSpecific())
+    if (!app.globalData.isLoggedIn) {
+      app.wxLogin().then(token => { if (token) this.generateSpecific() })
       return
     }
 

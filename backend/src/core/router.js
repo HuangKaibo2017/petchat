@@ -10,24 +10,16 @@ const sessionAgent = new Map()
 
 const CATEGORIES = {
   chat:          '日常闲聊、打招呼、闲聊',
-  mood:          '询问宠物情绪、心情、精神状态',
-  health:        '询问宠物健康、症状、身体状况',
-  consultation:  '询问宠物医疗知识、疾病科普、喂养建议',
-  constitution:  '询问宠物体质、体态评估',
   personality:   '询问宠物性格、行为习惯分析',
 }
 
 const ROUTER_PROMPT = `你是意图分类器。根据用户消息判断属于哪一类。
 
 类别定义：
-- chat: 日常闲聊、打招呼
-- mood: 询问宠物情绪、心情
-- health: 询问健康、症状
-- consultation: 医疗科普、喂养知识
-- constitution: 体质评估
-- personality: 性格分析
+- chat: 日常闲聊、打招呼、撒娇互动、问候
+- personality: 询问宠物性格、行为习惯、训练建议分析
 
-规则：只回复小写类别名，不要解释。
+规则：只回复小写类别名（chat 或 personality），不要解释。
 
 用户消息：`
 

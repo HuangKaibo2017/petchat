@@ -13,6 +13,72 @@ function getRoute(path: string): string {
   return route;
 }
 
+// ─── Field Transformation Helpers ─────────────────────
+
+/** Transform a raw t_pet DB row into frontend-friendly camelCase */
+function transformPet(row: Record<string, unknown>): Record<string, unknown> {
+  const petTypeName = (row.t_pet_type as Record<string,unknown>)?.f_name as Record<string,string> | undefined;
+  const breedName = (row.t_pet_breed as Record<string,unknown>)?.f_name as Record<string,string> | undefined;
+  const genderName = (row.t_gender as Record<string,unknown>)?.f_name as Record<string,string> | undefined;
+  return {
+    id: row.f_id,
+    name: row.f_name,
+    avatar: row.f_avatar_url || "",
+    petTypeId: row.f_pet_type_id,
+    petType: petTypeName?.["zh-CN"] || petTypeName?.["en-US"] || "",
+    breedId: row.f_breed_id,
+    breed: breedName?.["zh-CN"] || breedName?.["en-US"] || "",
+    genderId: row.f_gender_id,
+    gender: genderName?.["zh-CN"] || genderName?.["en-US"] || "",
+    birthDate: row.f_birth_date,
+    birthYear: row.f_birth_year,
+    birthMonth: row.f_birth_month,
+    weight: row.f_weight,
+    sterilized: row.f_sterilized,
+    vaccinated: row.f_vaccinated,
+    tags: row.f_personality_tags,
+    statusPet: row.f_status_pet,
+    createdAt: row.f_created_at,
+    updatedAt: row.f_updated_at,
+  };
+}
+
+/** Transform a raw t_product_spu DB row into frontend-friendly camelCase */
+function transformProduct(row: Record<string, unknown>): Record<string, unknown> {
+  const catName = (row.t_product_category as Record<string,unknown>)?.f_name as Record<string,string> | undefined;
+  const sku = (row.t_product_sku as unknown[]) || [];
+  const firstSku = (sku.length > 0 ? sku[0] : null) as Record<string,unknown> | null;
+  return {
+    id: row.f_id,
+    name: row.f_name,
+    desc: row.f_description || "",
+    categoryId: row.f_category_id,
+    category: catName?.["zh-CN"] || catName?.["en-US"] || "",
+    price: firstSku ? (firstSku.f_price ?? 0) : 0,
+    currency: firstSku ? (firstSku.f_currency ?? "CNY") : "CNY",
+    image: ((row.f_meta_info as Record<string,unknown>)?.image as string) || "",
+    brand: row.f_brand || "",
+  };
+}
+
+/** Transform a raw t_hospital DB row into frontend-friendly camelCase */
+function transformHospital(row: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: row.f_id,
+    name: row.f_name,
+    address: row.f_address || "",
+    phone: row.f_phone || "",
+    businessHours: row.f_business_hours || "",
+    tags: row.f_service_tags || [],
+    rating: row.f_rating || 0,
+    lat: ((row.f_meta_info as Record<string,unknown>)?.lat as number) || null,
+    lng: ((row.f_meta_info as Record<string,unknown>)?.lng as number) || null,
+    image: ((row.f_meta_info as Record<string,unknown>)?.image as string) || "",
+  };
+}
+
+// ─── Main Router ──────────────────────────────────────
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -29,7 +95,6 @@ Deno.serve(async (req: Request) => {
     const route = getRoute(url.pathname);
     const [resource, id, action] = route.split("/");
 
-    // Auth required for most endpoints
     let userId = 0;
     try {
       const user = await verifyJWT(req);
@@ -64,54 +129,124 @@ Deno.serve(async (req: Request) => {
 
 // ─── Pets ──────────────────────────────────────────────
 
+/** Build insert/update payload from frontend body, handling all field name variants */
+function buildPetPayload(body: Record<string, unknown>, userId: number, isInsert: boolean): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+
+  // name
+  if (body.name !== undefined) payload.f_name = body.name;
+
+  // avatar: multiple field name variants
+  const avatar = body.avatar ?? body.avatarUrl ?? body.f_avatar_url;
+  if (avatar !== undefined) payload.f_avatar_url = avatar;
+
+  // petTypeId
+  if (body.petTypeId !== undefined) payload.f_pet_type_id = body.petTypeId;
+
+  // breedId OR breed string → try numeric, fallback to meta
+  if (body.breedId !== undefined) {
+    payload.f_breed_id = body.breedId;
+  } else if (typeof body.breed === 'string' && body.breed.trim()) {
+    const breedStr = body.breed.trim();
+    const breedNum = parseInt(breedStr);
+    if (!isNaN(breedNum) && breedNum > 0) {
+      payload.f_breed_id = breedNum;
+    }
+    payload.f_meta_info = { ...((body.metaInfo ?? body.f_meta_info ?? {}) as Record<string,unknown>), breedName: breedStr };
+  }
+
+  // genderId OR gender string
+  if (body.genderId !== undefined) {
+    payload.f_gender_id = body.genderId;
+  } else if (typeof body.gender === 'string') {
+    const g = body.gender.toLowerCase();
+    if (g === 'male' || g === '公') payload.f_gender_id = 1;
+    else if (g === 'female' || g === '母') payload.f_gender_id = 2;
+    else payload.f_gender_id = -1;
+  }
+
+  // birth date fields
+  if (body.birthDate !== undefined) payload.f_birth_date = body.birthDate;
+  if (body.birthYear !== undefined) payload.f_birth_year = body.birthYear;
+  if (body.birthMonth !== undefined) payload.f_birth_month = body.birthMonth;
+
+  // age → compute birthYear
+  if (body.age !== undefined && body.birthDate === undefined && body.birthYear === undefined) {
+    const age = typeof body.age === 'string' ? parseInt(body.age) : (body.age as number);
+    if (!isNaN(age) && age > 0) {
+      const now = new Date();
+      payload.f_birth_year = now.getFullYear() - Math.floor(age);
+      payload.f_birth_month = 1;
+    }
+  }
+
+  // weight
+  if (body.weight !== undefined) payload.f_weight = body.weight;
+
+  // sterilized OR neutered
+  if (body.sterilized !== undefined) {
+    payload.f_sterilized = body.sterilized;
+  } else if (body.neutered !== undefined) {
+    payload.f_sterilized = body.neutered;
+  }
+
+  // vaccinated OR vaccine (string → boolean)
+  if (body.vaccinated !== undefined) {
+    payload.f_vaccinated = body.vaccinated;
+  } else if (body.vaccine !== undefined) {
+    const v = typeof body.vaccine === 'string' ? body.vaccine.trim() : '';
+    payload.f_vaccinated = !!v && v !== 'false' && v !== '0' && v !== '否' && v !== '未';
+  }
+
+  // tags
+  if (body.tags !== undefined) payload.f_personality_tags = body.tags;
+
+  // meta_info: merge existing with extra fields
+  const existingMeta = ((body.f_meta_info ?? body.metaInfo ?? {}) as Record<string,unknown>);
+  const extraMeta: Record<string,unknown> = { ...existingMeta };
+  if (body.history !== undefined) extraMeta.history = body.history;
+  payload.f_meta_info = extraMeta;
+
+  // insert-only fields
+  if (isInsert) {
+    payload.f_user_id = userId;
+    payload.f_lang = "zh-CN";
+    payload.f_public_uid = crypto.randomUUID();
+    if (payload.f_name === undefined) payload.f_name = "未命名";
+    if (payload.f_pet_type_id === undefined) payload.f_pet_type_id = 1;
+  }
+
+  return payload;
+}
+
 async function handlePets(req: Request, userId: number, id?: string, action?: string): Promise<Response> {
   const supabase = getServiceClient();
 
   if (req.method === "GET") {
     const { data: pets } = await supabase
       .from("t_pet")
-      .select("*, t_pet_type:f_pet_type_id(f_name)")
+      .select("*, t_pet_type:f_pet_type_id(f_name), t_pet_breed:f_breed_id(f_name), t_gender:f_gender_id(f_name)")
       .eq("f_user_id", userId)
+      .eq("f_deleted", 0)
       .order("f_id", { ascending: true });
-    return okResponse(pets || []);
+    const transformed = (pets || []).map(transformPet);
+    return okResponse(transformed);
   }
 
   if (req.method === "POST") {
     const body = await req.json();
-    const insert = {
-      f_user_id: userId,
-      f_name: body.name || "未命名",
-      f_pet_type_id: body.petTypeId || 1,
-      f_breed_id: body.breedId || null,
-      f_gender_id: body.genderId || 1,
-      f_birth_date: body.birthDate || null,
-      f_birth_year: body.birthYear || null,
-      f_birth_month: body.birthMonth || null,
-      f_weight: body.weight || null,
-      f_sterilized: body.sterilized || false,
-      f_vaccinated: body.vaccinated || false,
-      f_lang: "zh-CN",
-      f_public_uid: crypto.randomUUID(),
-    };
-    const { data: pet } = await supabase.from("t_pet").insert(insert).select("*").single();
-    return okResponse(pet);
+    const insert = buildPetPayload(body, userId, true);
+    const { data: pet } = await supabase.from("t_pet").insert(insert).select("*, t_pet_type:f_pet_type_id(f_name), t_pet_breed:f_breed_id(f_name), t_gender:f_gender_id(f_name)").single();
+    return okResponse(pet ? transformPet(pet) : null);
   }
 
   if (req.method === "PUT" && id) {
     const body = await req.json();
-    const update: Record<string, unknown> = {};
-    if (body.name !== undefined) update.f_name = body.name;
-    if (body.petTypeId !== undefined) update.f_pet_type_id = body.petTypeId;
-    if (body.breedId !== undefined) update.f_breed_id = body.breedId;
-    if (body.genderId !== undefined) update.f_gender_id = body.genderId;
-    if (body.birthDate !== undefined) update.f_birth_date = body.birthDate;
-    if (body.weight !== undefined) update.f_weight = body.weight;
-    if (body.sterilized !== undefined) update.f_sterilized = body.sterilized;
-    if (body.vaccinated !== undefined) update.f_vaccinated = body.vaccinated;
+    const update = buildPetPayload(body, userId, false);
     update.f_updated_at = new Date().toISOString();
 
-    const { data: pet } = await supabase.from("t_pet").update(update).eq("f_id", parseInt(id!)).eq("f_user_id", userId).select("*").single();
-    return okResponse(pet);
+    const { data: pet } = await supabase.from("t_pet").update(update).eq("f_id", parseInt(id!)).eq("f_user_id", userId).select("*, t_pet_type:f_pet_type_id(f_name), t_pet_breed:f_breed_id(f_name), t_gender:f_gender_id(f_name)").single();
+    return okResponse(pet ? transformPet(pet) : null);
   }
 
   if (req.method === "DELETE" && id) {
@@ -129,16 +264,26 @@ async function handleProducts(req: Request, _userId: number, id?: string): Promi
   const url = new URL(req.url);
 
   if (req.method === "GET" && id) {
-    const { data: product } = await supabase.from("t_product_spu").select("*").eq("f_id", parseInt(id)).single();
-    return okResponse(product);
+    const { data: product } = await supabase
+      .from("t_product_spu")
+      .select("*, t_product_category:f_category_id(f_name), t_product_sku:f_id(f_price, f_currency)")
+      .eq("f_id", parseInt(id))
+      .eq("f_deleted", 0)
+      .single();
+    return okResponse(product ? transformProduct(product) : null);
   }
 
   if (req.method === "GET") {
     const category = url.searchParams.get("category");
-    let query = supabase.from("t_product_spu").select("*").limit(50);
+    let query = supabase
+      .from("t_product_spu")
+      .select("*, t_product_category:f_category_id(f_name), t_product_sku:f_id(f_price, f_currency)")
+      .eq("f_deleted", 0)
+      .limit(50);
     if (category) query = query.eq("f_category_id", parseInt(category));
     const { data: products } = await query;
-    return okResponse(products || []);
+    const transformed = (products || []).map(transformProduct);
+    return okResponse(transformed);
   }
 
   return errorResponse("INVALID_PARAMS", "不支持的请求", 400);
@@ -151,16 +296,22 @@ async function handleHospitals(req: Request, _userId: number, id?: string): Prom
   const url = new URL(req.url);
 
   if (req.method === "GET" && id) {
-    const { data: hospital } = await supabase.from("t_hospital").select("*").eq("f_id", parseInt(id)).single();
-    return okResponse(hospital);
+    const { data: hospital } = await supabase
+      .from("t_hospital")
+      .select("*")
+      .eq("f_id", parseInt(id))
+      .eq("f_deleted", 0)
+      .single();
+    return okResponse(hospital ? transformHospital(hospital) : null);
   }
 
   if (req.method === "GET") {
     const keyword = url.searchParams.get("keyword");
-    let query = supabase.from("t_hospital").select("*").limit(50);
+    let query = supabase.from("t_hospital").select("*").eq("f_deleted", 0).limit(50);
     if (keyword) query = query.ilike("f_name", `%${keyword}%`);
     const { data: hospitals } = await query;
-    return okResponse(hospitals || []);
+    const transformed = (hospitals || []).map(transformHospital);
+    return okResponse(transformed);
   }
 
   return errorResponse("INVALID_PARAMS", "不支持的请求", 400);
@@ -248,33 +399,25 @@ async function handleReports(req: Request, userId: number, id?: string): Promise
   if (req.method === "GET" && id) {
     const tables = ["t_report_emotion", "t_report_health", "t_report_human_pet_risk", "t_report_personality"];
     for (const table of tables) {
-      const { data: report } = await supabase.from(table).select("*").eq("f_id", parseInt(id)).eq("f_user_id", userId).single();
-      if (report) return okResponse(report);
+      try {
+        const { data } = await supabase.from(table).select("*").eq("f_id", parseInt(id!)).eq("f_user_id", userId).single();
+        if (data) return okResponse(data);
+      } catch { continue; }
     }
-    return errorResponse(ERR.NOT_FOUND.code, "报告不存在", 404);
+    return errorResponse("NOT_FOUND", "报告不存在", 404);
   }
 
   if (req.method === "GET") {
     const type = url.searchParams.get("type");
-    const results: any[] = [];
+    const tables = type
+      ? [({ emotion: "t_report_emotion", health: "t_report_health", risk: "t_report_human_pet_risk", personality: "t_report_personality" } as Record<string,string>)[type]].filter(Boolean)
+      : ["t_report_emotion", "t_report_health", "t_report_human_pet_risk", "t_report_personality"];
 
-    const queryMap: Record<string, string> = {
-      emotion: "t_report_emotion",
-      health: "t_report_health",
-      risk: "t_report_human_pet_risk",
-      personality: "t_report_personality",
-    };
-
-    if (type && queryMap[type]) {
-      const { data } = await supabase.from(queryMap[type]).select("*").eq("f_user_id", userId).order("f_created_at", { ascending: false }).limit(50);
+    const results: unknown[] = [];
+    for (const table of tables) {
+      const { data } = await supabase.from(table).select("*").eq("f_user_id", userId).order("f_created_at", { ascending: false }).limit(20);
       if (data) results.push(...data);
-    } else {
-      for (const table of Object.values(queryMap)) {
-        const { data } = await supabase.from(table).select("*").eq("f_user_id", userId).order("f_created_at", { ascending: false }).limit(20);
-        if (data) results.push(...data);
-      }
     }
-
     return okResponse(results);
   }
 
@@ -284,17 +427,17 @@ async function handleReports(req: Request, userId: number, id?: string): Promise
 // ─── Upload ────────────────────────────────────────────
 
 async function handleUpload(req: Request, userId: number): Promise<Response> {
-  if (req.method !== "POST") {
-    return errorResponse("INVALID_PARAMS", "仅支持 POST", 400);
-  }
-
   try {
-    const form = await req.formData();
-    const file = form.get("file") as File;
-    const category = form.get("category")?.toString() || "general";
-    const petId = form.get("petId")?.toString() || "";
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
+      return errorResponse("INVALID_PARAMS", "需要multipart/form-data", 400);
+    }
 
-    if (!file) return errorResponse("INVALID_PARAMS", "未找到文件", 400);
+    const form = await req.formData();
+    const file = form.get("file") as File | null;
+    const category = (form.get("category") as string) || "reports";
+
+    if (!file) return errorResponse("INVALID_PARAMS", "缺少文件", 400);
 
     const supabase = getServiceClient();
     const timestamp = Date.now();

@@ -1,0 +1,54 @@
+<nav-bar title="宠物详情" showBack="{{true}}" />
+<view class="page-container" wx:if="{{!isLoading}}">
+  <view class="pet-header">
+    <image class="pet-avatar" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+    <view class="pet-header-info">
+      <view class="pet-name">{{pet.name}}</view>
+      <view class="pet-subtitle">{{pet.breed || '未知品种'}} · {{pet.petType || ''}}</view>
+      <view class="pet-tags" wx:if="{{pet.tags && pet.tags.length}}">
+        <text class="tag tag-primary" wx:for="{{pet.tags}}" wx:key="*this">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="detail-section">
+    <view class="section-title">基本信息</view>
+    <view class="info-grid">
+      <view class="info-item">
+        <view class="info-label">性别</view>
+        <view class="info-value">{{pet.gender === 'male' ? '♂ 公' : pet.gender === 'female' ? '♀ 母' : '未知'}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">年龄</view>
+        <view class="info-value">{{pet.age || pet.birthYear ? (pet.age || (2026 - pet.birthYear) + '岁') : '未知'}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">体重</view>
+        <view class="info-value">{{pet.weight ? pet.weight + 'kg' : '未知'}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">绝育</view>
+        <view class="info-value">{{pet.sterilized ? '已绝育' : '未绝育'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="detail-section" wx:if="{{pet.history || pet.vaccine}}">
+    <view class="section-title">健康信息</view>
+    <view class="info-grid">
+      <view class="info-item info-item-full" wx:if="{{pet.history}}">
+        <view class="info-label">病史</view>
+        <view class="info-value">{{pet.history}}</view>
+      </view>
+      <view class="info-item info-item-full" wx:if="{{pet.vaccine}}">
+        <view class="info-label">防疫</view>
+        <view class="info-value">{{pet.vaccine}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="action-bar">
+    <button class="btn btn-primary btn-block" bindtap="goEdit">编辑档案</button>
+    <button class="btn btn-ghost btn-block mt-md" bindtap="deletePet">删除档案</button>
+  </view>
+</view>
