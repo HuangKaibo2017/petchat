@@ -1,6 +1,6 @@
 <nav-bar title="宠物档案" showBack="{{true}}" />
 <view class="page-container">
-  <pet-card wx:for="{{pets}}" wx:key="id" pet="{{item}}" bind:select="goEditPet" />
+  <pet-card wx:for="{{pets}}" wx:key="id" pet="{{item}}" bind:select="goDetailPet" />
   <view class="add-btn text-center mt-lg" bindtap="goAddPet">
     <button class="btn btn-outline">+ 添加新宠物</button>
   </view>

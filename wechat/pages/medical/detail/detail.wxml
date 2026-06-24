@@ -1,32 +1,333 @@
-<nav-bar title="科普指南" showBack="{{true}}" />
-<view class="page-container">
+<nav-bar title="{{type === 'constitution' ? '体质报告' : type === 'medical' ? '科普指南' : '科普指南'}}" showBack="{{true}}" />
+
+<!-- ══════════════════════════════════════
+     体质综合分析报告
+     ══════════════════════════════════════ -->
+<view wx:if="{{type === 'constitution'}}" class="page-container">
+  <view class="const-header">
+    <view class="const-header-bg"></view>
+    <view class="const-header-content">
+      <view class="const-badge"><text class="const-badge-icon">🩺</text><text class="const-badge-text">中医体质 · 十二维度分析</text></view>
+      <view class="const-title">宠物健康体质</view>
+      <view class="const-title-sub">综合分析报告</view>
+      <view class="const-time">{{time}}</view>
+    </view>
+  </view>
+  <view wx:if="{{pet}}" class="pet-card card">
+    <view class="pet-card-avatar"><image class="avatar-lg pet-avatar-img" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" /></view>
+    <view class="pet-card-info">
+      <view class="pet-card-name">{{pet.name}}</view>
+      <view class="pet-card-meta">
+        <text class="meta-tag">{{pet.breed}}</text><text class="meta-tag">{{pet.age}}</text>
+        <text class="meta-tag">{{pet.gender === 'male' ? '♂ 公' : '♀ 母'}}{{pet.neutered ? '·绝育' : ''}}</text>
+      </view>
+      <view class="pet-card-meta" wx:if="{{pet.weight}}"><text class="meta-tag muted">体重 {{pet.weight}}kg</text></view>
+    </view>
+  </view>
+  <block wx:for="{{sections}}" wx:key="title">
+    <view wx:if="{{item.isBaseInfo}}" class="section-baseinfo card">
+      <view class="section-label">{{item.title}}</view>
+      <view wx:for="{{item.items}}" wx:key="text" wx:for-item="info" class="baseinfo-row"><text wx:if="{{info.text}}" class="text-md">{{info.text}}</text></view>
+    </view>
+    <view wx:else class="const-section card">
+      <view class="section-label"><text class="section-icon">{{getSectionIcon(item.title)}}</text>{{item.title}}</view>
+      <block wx:for="{{item.subsections}}" wx:key="label" wx:for-item="sub">
+        <view wx:if="{{sub.isRisk}}" class="risk-row {{getRiskClass(sub.label)}}">
+          <text class="risk-emoji">{{getRiskEmoji(getRiskClass(sub.label))}}</text>
+          <view class="risk-body"><text class="risk-label">{{sub.label}}</text><text wx:if="{{sub.content}}" class="risk-content text-sm">：{{sub.content}}</text></view>
+        </view>
+        <view wx:elif="{{item.title.includes('现存问题')}}" class="problem-block">
+          <view class="problem-title">{{sub.label}}</view>
+          <view wx:if="{{sub.content}}" class="problem-content text-sm">{{sub.content}}</view>
+          <view wx:for="{{sub.items}}" wx:key="text" wx:for-item="pi" class="problem-item"><text class="problem-dot">·</text><text class="text-sm">{{pi.text}}</text></view>
+        </view>
+        <view wx:elif="{{item.title.includes('专属调理') || item.title.includes('品种')}}" class="care-block">
+          <view class="care-subtitle">{{sub.label}}</view>
+          <view wx:if="{{sub.content}}" class="care-content text-sm">{{sub.content}}</view>
+          <view wx:for="{{sub.items}}" wx:key="text" wx:for-item="ci" class="care-item"><text class="text-sm">{{ci.text}}</text></view>
+        </view>
+        <view wx:else class="subsection-block">
+          <view wx:if="{{sub.label}}" class="subsection-label">{{sub.label}}</view>
+          <view wx:if="{{sub.content}}" class="subsection-content text-sm">{{sub.content}}</view>
+          <view wx:for="{{sub.items}}" wx:key="text" wx:for-item="si" class="subsection-item"><text class="text-sm">{{si.text}}</text></view>
+        </view>
+      </block>
+      <view wx:if="{{item.title.includes('十二项体质维度')}}" class="dimension-list">
+        <view wx:for="{{item.items}}" wx:key="index" wx:for-item="dim" class="dimension-item">
+          <view class="dim-number">{{dim.index}}</view><view class="dim-text"><text class="dim-title">{{dim.text}}</text></view>
+        </view>
+      </view>
+      <block wx:elif="{{item.items.length > 0 && !item.title.includes('十二项体质维度')}}">
+        <view wx:for="{{item.items}}" wx:key="text" wx:for-item="li" class="section-item">
+          <text wx:if="{{li.isQuote}}" class="quote-text text-sm">{{li.text}}</text>
+          <text wx:else class="text-sm">{{li.text}}</text>
+        </view>
+      </block>
+    </view>
+  </block>
+  <view class="disclaimer card">
+    <view class="disclaimer-icon">⚠️</view>
+    <view class="disclaimer-text">
+      <view class="text-sm font-bold">免责声明</view>
+      <view class="text-xs text-hint mt-xs">本报告基于AI体质分析模型生成，提供健康养护参考，不构成医疗诊断。如宠物出现明显不适，请及时就医。</view>
+    </view>
+  </view>
+  <view class="report-actions flex-between">
+    <view class="action-btn" bindtap="toggleFavorite"><text class="text-lg">{{favorited ? '❤️' : '🤍'}}</text><text class="text-xs text-hint">收藏</text></view>
+    <view class="action-btn" bindtap="shareReport"><text class="text-lg">📤</text><text class="text-xs text-hint">分享</text></view>
+  </view>
+  <view style="height: 120rpx"></view>
+</view>
+
+<!-- ══════════════════════════════════════
+     医疗科普报告（结构化JSON）
+     ══════════════════════════════════════ -->
+<view wx:elif="{{type === 'medical' && guide}}" class="page-container">
+  <!-- Header -->
+  <view class="med-header">
+    <view class="med-header-bg"></view>
+    <view class="med-header-content">
+      <view class="med-badge"><text class="med-badge-icon">💊</text><text class="med-badge-text">兽医临床科普 · 中西结合</text></view>
+      <view class="med-title">医疗科普指南</view>
+      <view class="med-time">{{time}}</view>
+    </view>
+  </view>
+
+  <!-- Pet info -->
+  <view wx:if="{{pet}}" class="pet-card card">
+    <view class="pet-card-avatar"><image class="avatar-lg pet-avatar-img" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" /></view>
+    <view class="pet-card-info">
+      <view class="pet-card-name">{{pet.name}}</view>
+      <view class="pet-card-meta">
+        <text class="meta-tag">{{pet.breed}}</text><text class="meta-tag">{{pet.age}}</text>
+        <text class="meta-tag">{{pet.gender === 'male' ? '♂ 公' : '♀ 母'}}{{pet.neutered ? '·绝育' : ''}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Judgment -->
+  <view wx:if="{{guide.judgment}}" class="med-section card">
+    <view class="med-section-label">📋 综合判断</view>
+    <view class="med-judgment text-md">{{guide.judgment}}</view>
+    <view wx:if="{{guide.symptomExplain}}" class="med-explain text-sm text-muted mt-sm">{{guide.symptomExplain}}</view>
+  </view>
+
+  <!-- Oral Medicine -->
+  <view wx:if="{{guide.oralMedicine && guide.oralMedicine.name}}" class="med-section card highlight-green">
+    <view class="med-section-label">💊 口服药物参考</view>
+    <view class="med-info-row"><text class="med-info-key">药品名称</text><text class="med-info-val">{{guide.oralMedicine.name}}</text></view>
+    <view wx:if="{{guide.oralMedicine.brand}}" class="med-info-row"><text class="med-info-key">常用品牌</text><text class="med-info-val">{{guide.oralMedicine.brand}}</text></view>
+    <view wx:if="{{guide.oralMedicine.dosage}}" class="med-info-row"><text class="med-info-key">参考剂量</text><text class="med-info-val">{{guide.oralMedicine.dosage}}</text></view>
+    <view wx:if="{{guide.oralMedicine.example}}" class="med-info-row"><text class="med-info-key">举例说明</text><text class="med-info-val">{{guide.oralMedicine.example}}</text></view>
+  </view>
+
+  <!-- Injection -->
+  <view wx:if="{{guide.injection && guide.injection.name}}" class="med-section card">
+    <view class="med-section-label">💉 注射用药参考</view>
+    <view class="med-info-row"><text class="med-info-key">药品名称</text><text class="med-info-val">{{guide.injection.name}}</text></view>
+    <view wx:if="{{guide.injection.dosage}}" class="med-info-row"><text class="med-info-key">常规剂量</text><text class="med-info-val">{{guide.injection.dosage}}</text></view>
+    <view wx:if="{{guide.injection.note}}" class="med-note text-sm text-hint mt-sm">⚠️ {{guide.injection.note}}</view>
+  </view>
+
+  <!-- Human Medicine Warning -->
+  <view wx:if="{{guide.humanMedicine && guide.humanMedicine.name}}" class="med-section card highlight-yellow">
+    <view class="med-section-label">⚠️ 人用药替代参考</view>
+    <view class="med-info-row"><text class="med-info-key">药品名称</text><text class="med-info-val">{{guide.humanMedicine.name}}</text></view>
+    <view wx:if="{{guide.humanMedicine.dosage}}" class="med-info-row"><text class="med-info-key">大致剂量</text><text class="med-info-val">{{guide.humanMedicine.dosage}}</text></view>
+    <view wx:if="{{guide.humanMedicine.warning}}" class="med-warning text-sm mt-sm">🚫 {{guide.humanMedicine.warning}}</view>
+  </view>
+
+  <!-- Treatment Cycle -->
+  <view wx:if="{{guide.treatmentCycle}}" class="med-section card">
+    <view class="med-section-label">📅 疗程与周期</view>
+    <view class="text-md">{{guide.treatmentCycle}}</view>
+  </view>
+
+  <!-- Home Care -->
+  <view wx:if="{{guide.homeCare && guide.homeCare.length}}" class="med-section card">
+    <view class="med-section-label">🏠 家庭护理建议</view>
+    <view wx:for="{{guide.homeCare}}" wx:key="*this" class="med-list-item">
+      <text class="med-list-dot">•</text><text class="text-sm">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- Warning Signs -->
+  <view wx:if="{{guide.warningSign && guide.warningSign.length}}" class="med-section card highlight-red">
+    <view class="med-section-label">🚨 警示信号</view>
+    <view wx:for="{{guide.warningSign}}" wx:key="*this" class="med-list-item">
+      <text class="med-list-dot danger">!</text><text class="text-sm">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- Hospital Check -->
+  <view wx:if="{{guide.hospitalCheck && guide.hospitalCheck.length}}" class="med-section card">
+    <view class="med-section-label">🏥 建议检查项目</view>
+    <view wx:for="{{guide.hospitalCheck}}" wx:key="*this" class="med-list-item">
+      <text class="med-list-dot">✓</text><text class="text-sm">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- Chinese Medication -->
+  <view wx:if="{{guide.chineseMedication}}" class="med-section card highlight-herb">
+    <view class="med-section-label">🌿 中兽医用药参考</view>
+    <!-- Herbal Formulas -->
+    <view wx:if="{{guide.chineseMedication.herbalFormulas && guide.chineseMedication.herbalFormulas.name}}" class="tcm-block">
+      <view class="tcm-title">草药方剂：{{guide.chineseMedication.herbalFormulas.name}}</view>
+      <view wx:if="{{guide.chineseMedication.herbalFormulas.ingredients && guide.chineseMedication.herbalFormulas.ingredients.length}}" class="tcm-row">
+        <text class="tcm-key">成分</text>
+        <text class="tcm-val">{{guide.chineseMedication.herbalFormulas.ingredients.join('、')}}</text>
+      </view>
+      <view wx:if="{{guide.chineseMedication.herbalFormulas.indications && guide.chineseMedication.herbalFormulas.indications.length}}" class="tcm-row">
+        <text class="tcm-key">适用</text><text class="tcm-val">{{guide.chineseMedication.herbalFormulas.indications.join('、')}}</text>
+      </view>
+      <view wx:if="{{guide.chineseMedication.herbalFormulas.dosage}}" class="tcm-row"><text class="tcm-key">用法</text><text class="tcm-val">{{guide.chineseMedication.herbalFormulas.dosage}}</text></view>
+    </view>
+    <!-- Aromatherapy -->
+    <view wx:if="{{guide.chineseMedication.ancientAromatherapy && guide.chineseMedication.ancientAromatherapy.name}}" class="tcm-block">
+      <view class="tcm-title">古香方：{{guide.chineseMedication.ancientAromatherapy.name}}</view>
+      <view wx:if="{{guide.chineseMedication.ancientAromatherapy.ingredients && guide.chineseMedication.ancientAromatherapy.ingredients.length}}" class="tcm-row">
+        <text class="tcm-key">成分</text><text class="tcm-val">{{guide.chineseMedication.ancientAromatherapy.ingredients.join('、')}}</text>
+      </view>
+      <view wx:if="{{guide.chineseMedication.ancientAromatherapy.benefits}}" class="tcm-row"><text class="tcm-key">功效</text><text class="tcm-val">{{guide.chineseMedication.ancientAromatherapy.benefits}}</text></view>
+      <view wx:if="{{guide.chineseMedication.ancientAromatherapy.usage}}" class="tcm-row"><text class="tcm-key">使用</text><text class="tcm-val">{{guide.chineseMedication.ancientAromatherapy.usage}}</text></view>
+    </view>
+    <!-- Patent Medicine -->
+    <view wx:if="{{guide.chineseMedication.patentMedicine && guide.chineseMedication.patentMedicine.names && guide.chineseMedication.patentMedicine.names.length}}" class="tcm-block">
+      <view class="tcm-title">中成药：{{guide.chineseMedication.patentMedicine.names.join('、')}}</view>
+      <view wx:if="{{guide.chineseMedication.patentMedicine.indications}}" class="tcm-row"><text class="tcm-key">适用</text><text class="tcm-val">{{guide.chineseMedication.patentMedicine.indications}}</text></view>
+      <view wx:if="{{guide.chineseMedication.patentMedicine.dosage}}" class="tcm-row"><text class="tcm-key">用法</text><text class="tcm-val">{{guide.chineseMedication.patentMedicine.dosage}}</text></view>
+    </view>
+  </view>
+
+  <!-- Constitution Advice -->
+  <view wx:if="{{guide.constitutionAdvice && guide.constitutionAdvice.constitutionType}}" class="med-section card">
+    <view class="med-section-label">🧬 体质关联分析</view>
+    <view class="med-info-row"><text class="med-info-key">体质类型</text><text class="med-info-val">{{guide.constitutionAdvice.constitutionType}}</text></view>
+    <view wx:if="{{guide.constitutionAdvice.symptomMatch}}" class="text-sm text-muted mt-sm">{{guide.constitutionAdvice.symptomMatch}}</view>
+    <view wx:if="{{guide.constitutionAdvice.herbalGuidance}}" class="mt-md">
+      <view wx:if="{{guide.constitutionAdvice.herbalGuidance.taboos && guide.constitutionAdvice.herbalGuidance.taboos.length}}" class="med-list-item">
+        <text class="med-list-dot danger">✕</text><text class="text-sm">禁忌：{{guide.constitutionAdvice.herbalGuidance.taboos.join('、')}}</text>
+      </view>
+    </view>
+    <view wx:if="{{guide.constitutionAdvice.acupressureGuidance && guide.constitutionAdvice.acupressureGuidance.points && guide.constitutionAdvice.acupressureGuidance.points.length}}" class="mt-md">
+      <view class="text-sm font-bold">穴位按摩建议</view>
+      <view class="text-sm text-muted mt-xs">穴位：{{guide.constitutionAdvice.acupressureGuidance.points.join('、')}} | {{guide.constitutionAdvice.acupressureGuidance.methods || ''}} | {{guide.constitutionAdvice.acupressureGuidance.frequency || ''}}</view>
+    </view>
+  </view>
+
+  <!-- Acupuncture Guide -->
+  <view wx:if="{{guide.acupunctureGuide && guide.acupunctureGuide.points && guide.acupunctureGuide.points.length}}" class="med-section card">
+    <view class="med-section-label">📍 针灸按摩参考</view>
+    <view class="med-info-row"><text class="med-info-key">常用穴位</text><text class="med-info-val">{{guide.acupunctureGuide.points.join('、')}}</text></view>
+    <view wx:if="{{guide.acupunctureGuide.benefits}}" class="med-info-row"><text class="med-info-key">功效</text><text class="med-info-val">{{guide.acupunctureGuide.benefits}}</text></view>
+    <view wx:if="{{guide.acupunctureGuide.frequency}}" class="med-info-row"><text class="med-info-key">频率</text><text class="med-info-val">{{guide.acupunctureGuide.frequency}}</text></view>
+  </view>
+
+  <!-- Disclaimer -->
+  <view wx:if="{{guide.disclaimer}}" class="disclaimer card">
+    <view class="disclaimer-icon">⚠️</view>
+    <view class="disclaimer-text"><view class="text-sm font-bold">免责声明</view><view class="text-xs text-hint mt-xs">{{guide.disclaimer}}</view></view>
+  </view>
+
+  <!-- Follow-up Chat Button -->
+  <view class="chat-fab" bindtap="toggleChat">
+    <text class="text-2xl">💬</text>
+  </view>
+
+  <!-- Chat Panel -->
+  <view wx:if="{{showChat}}" class="chat-panel">
+    <view class="chat-header flex-between">
+      <text class="text-md font-bold">教授在线答疑</text>
+      <text class="text-lg" bindtap="toggleChat">✕</text>
+    </view>
+    <scroll-view class="chat-body" scroll-y scroll-into-view="chat-bottom">
+      <view wx:for="{{chatMessages}}" wx:key="time" class="chat-msg {{item.role}}">
+        <view class="chat-avatar">{{item.role === 'user' ? '👤' : '👨‍⚕️'}}</view>
+        <view class="chat-bubble"><text class="text-sm">{{item.content}}</text></view>
+      </view>
+      <view wx:if="{{chatLoading}}" class="chat-msg assistant"><view class="chat-avatar">👨‍⚕️</view><view class="chat-bubble typing">正在输入…</view></view>
+      <view id="chat-bottom"></view>
+    </scroll-view>
+    <view class="chat-footer flex">
+      <input class="chat-input flex-1" placeholder="继续追问教授…" value="{{chatInput}}" bindinput="onChatInput" confirm-type="send" bindconfirm="sendChat" />
+      <button class="chat-send-btn" bindtap="sendChat" disabled="{{chatLoading}}">发送</button>
+    </view>
+  </view>
+
+  <view class="report-actions flex-between">
+    <view class="action-btn" bindtap="toggleFavorite"><text class="text-lg">{{favorited ? '❤️' : '🤍'}}</text><text class="text-xs text-hint">收藏</text></view>
+    <view class="action-btn" bindtap="shareReport"><text class="text-lg">📤</text><text class="text-xs text-hint">分享</text></view>
+  </view>
+  <view style="height: 120rpx"></view>
+</view>
+
+
+<!-- ══════════════════════════════════════
+     新宠购买建议
+     ══════════════════════════════════════ -->
+<view wx:elif="{{type === 'newpet' && guide}}" class="page-container">
+  <view class="np-header">
+    <view class="np-header-bg"></view>
+    <view class="np-header-content">
+      <view class="np-badge"><text class="np-badge-icon">🐾</text><text class="np-badge-text">AI智能匹配 · 专属推荐</text></view>
+      <view class="np-title">新宠购买建议</view>
+      <view class="np-time">{{time}}</view>
+    </view>
+  </view>
+
+  <!-- Summary -->
+  <view wx:if="{{guide.summary}}" class="np-summary card">
+    <view class="np-summary-icon">✨</view>
+    <view class="np-summary-text text-md">{{guide.summary}}</view>
+  </view>
+
+  <!-- Recommendations -->
+  <view wx:if="{{guide.recommendations && guide.recommendations.length}}" class="np-list">
+    <view wx:for="{{guide.recommendations}}" wx:key="breed" class="np-card card">
+      <view class="np-card-header">
+        <view class="np-card-type text-sm">{{item.petType}}</view>
+        <view class="np-card-score">
+          <text class="np-score-num">{{item.matchScore}}%</text>
+          <text class="np-score-label">匹配度</text>
+        </view>
+      </view>
+      <view class="np-card-title">{{item.breed}}</view>
+      <view class="np-card-tags">
+        <text class="np-tag">{{item.careLevel === '低' ? '🟢' : item.careLevel === '中' ? '🟡' : '🔴'}} 养护{{item.careLevel}}</text>
+        <text class="np-tag">💰 {{item.monthlyCost}}</text>
+      </view>
+      <view class="np-reasons mt-sm">
+        <view wx:for="{{item.reasons}}" wx:key="*this" wx:for-item="r" class="np-reason">
+          <text class="np-reason-dot">•</text><text class="text-sm">{{r}}</text>
+        </view>
+      </view>
+      <view wx:if="{{item.tips}}" class="np-tips mt-sm">
+        <text class="np-tips-icon">💡</text><text class="text-xs text-hint">{{item.tips}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Disclaimer -->
+  <view wx:if="{{guide.disclaimer}}" class="disclaimer card">
+    <view class="disclaimer-icon">🐾</view>
+    <view class="disclaimer-text"><view class="text-xs text-hint">{{guide.disclaimer}}</view></view>
+  </view>
+
+  <view class="report-actions flex-between">
+    <view class="action-btn" bindtap="toggleFavorite"><text class="text-lg">{{favorited ? '❤️' : '🤍'}}</text><text class="text-xs text-hint">收藏</text></view>
+    <view class="action-btn" bindtap="shareReport"><text class="text-lg">📤</text><text class="text-xs text-hint">分享</text></view>
+  </view>
+  <view style="height: 120rpx"></view>
+</view>
+
+<!-- ═══ Fallback: 新宠/旧版指南 ═══ -->
+<view wx:else class="page-container">
   <view class="report-section card" wx:if="{{guide.summary || guide.guide}}">
     <view class="section-label">📋 分析结果</view>
     <view class="text-md">{{guide.summary || '根据症状描述，可能涉及消化系统不适或环境应激反应。'}}</view>
     <block wx:if="{{guide.guide}}">
-      <view wx:for="{{guide.guide}}" wx:key="title" class="mt-md">
-        <view class="text-md font-bold">{{item.title}}</view>
-        <view class="text-sm text-muted mt-sm">{{item.desc}}</view>
-      </view>
+      <view wx:for="{{guide.guide}}" wx:key="title" class="mt-md"><view class="text-md font-bold">{{item.title}}</view><view class="text-sm text-muted mt-sm">{{item.desc}}</view></view>
     </block>
   </view>
-  <view class="report-section card" wx:if="{{guide.careAdvice}}">
-    <view class="section-label">🏠 居家护理</view>
-    <view class="text-md">{{guide.careAdvice}}</view>
-  </view>
-  <view class="report-section card" wx:if="{{guide.dosage}}">
-    <view class="section-label">💊 科普剂量（仅供参考）</view>
-    <view class="text-md">{{guide.dosage}}</view>
-  </view>
-  <view class="report-section card" wx:if="{{guide.hospitalAdvice}}">
-    <view class="section-label">🏥 就医建议</view>
-    <view class="text-md">{{guide.hospitalAdvice}}</view>
-  </view>
-  <view class="report-section card" wx:if="{{guide.exams}}">
-    <view class="section-label">🔬 建议检查项目</view>
-    <view class="text-md">{{guide.exams}}</view>
-  </view>
-  <view class="disclaimer card bg-primary-light">
-    <view class="text-xs text-hint text-center">⚠️ 所有用药遵医嘱，本平台不提供诊疗服务</view>
-  </view>
+  <view class="disclaimer card bg-primary-light"><view class="text-xs text-hint text-center">⚠️ 所有用药遵医嘱，本平台不提供诊疗服务</view></view>
 </view>

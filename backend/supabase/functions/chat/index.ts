@@ -1,9 +1,9 @@
 // /functions/chat/index.ts
-// AI pet chat via Coze agent — SSE streaming support
+// AI pet chat via DeepSeek LLM — SSE streaming support
 
 import { okResponse, failResponse } from "../_shared/cors.ts";
 import { verifyJWT, getServiceClient } from "../_shared/auth.ts";
-import { cozeChatStream, checkRateLimit, type AIMessage } from "../_shared/ai.ts";
+import { aiChatStream, buildChatSystemPrompt, checkRateLimit, type AIMessage } from "../_shared/ai.ts";
 import { AppError, errorResponse, ERR } from "../_shared/errors.ts";
 
 interface ChatSendRequest {
@@ -67,7 +67,8 @@ Deno.serve(async (req: Request) => {
       return errorResponse(err.code, err.message, err.status);
     }
     console.error("chat error:", err);
-    return errorResponse("INTERNAL", "聊天服务异常", 500);
+    const detail = err instanceof Error ? `${err.message} | ${(err.stack ?? "").split("\n")[1] ?? ""}` : String(err);
+    return errorResponse("INTERNAL", `聊天服务异常: ${detail}`, 500);
   }
 });
 
@@ -79,9 +80,8 @@ async function handleListSessions(req: Request): Promise<Response> {
 
   const { data: sessions } = await supabase
     .from("t_chat_history")
-    .select("f_id, f_pet_id, f_lang, f_status_session, f_started_at, f_ended_at")
+    .select("f_id, f_pet_id, f_lang, f_started_at, f_ended_at")
     .eq("f_user_id", user.id)
-    .eq("f_status_user", 1)
     .order("f_started_at", { ascending: false })
     .limit(50);
 
@@ -146,33 +146,38 @@ async function handleCreateSession(req: Request): Promise<Response> {
     .select("f_id")
     .eq("f_user_id", user.id)
     .eq("f_pet_id", body.petId)
-    .eq("f_status_session", 1)
-    .eq("f_status_user", 1)
     .limit(1)
     .single();
 
-  if (existing) return okResponse({ sessionId: existing.f_id, isNew: false });
-
-  const greeting = `汪汪！我是${pet.f_name}，今天想跟你聊聊天~ 你想跟我说什么呀？`;
+  if (existing) return okResponse({ sessionId: existing.f_id });
 
   const { data: session } = await supabase
     .from("t_chat_history")
     .insert({
       f_user_id: user.id,
+      f_session_uid: crypto.randomUUID(),
       f_pet_id: body.petId,
       f_lang: "zh-CN",
-      f_status_session: 1,
-      f_chat_history: [
-        { id: Date.now(), role: "pet", content: greeting, at: new Date().toISOString() },
-      ],
+      f_chat_history: [],
+      f_started_at: new Date().toISOString(),
     })
     .select("f_id")
     .single();
 
-  return okResponse({ sessionId: session?.f_id, isNew: true, greeting });
+  return okResponse({ sessionId: session?.f_id });
 }
 
-// ─── POST /stream (SSE) ──────────────────────────────────
+// ─── POST /send or /stream (SSE streaming) ───────────────
+
+function enqueueSSE(
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  event: string,
+  data: unknown,
+) {
+  controller.enqueue(
+    new TextEncoder().encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+  );
+}
 
 async function handleSendMessageStream(req: Request): Promise<Response> {
   const user = await verifyJWT(req);
@@ -193,18 +198,12 @@ async function handleSendMessageStream(req: Request): Promise<Response> {
 
   const { data: pet } = await supabase
     .from("t_pet")
-    .select("f_id, f_name, f_pet_type_id, f_personality_tags")
+    .select("f_id, f_name, f_pet_type_id, f_birth_date")
     .eq("f_id", session.f_pet_id)
     .single();
 
-  const projectId = Deno.env.get("COZE_CHAT_PROJECT_ID")!;
-
-  // Rate limit: 30 requests per minute per user
-  if (!checkRateLimit(`chat:${user.id}`, 30, 60000)) {
-    return errorResponse("RATE_LIMITED", "消息发送太频繁，请稍后再试", 429);
-  }
-
   const history = (session.f_chat_history as AIMessage[]) ?? [];
+
   const userMsg = {
     id: Date.now(),
     role: "user" as const,
@@ -213,49 +212,36 @@ async function handleSendMessageStream(req: Request): Promise<Response> {
   };
   history.push(userMsg);
 
+  if (!checkRateLimit(`chat:${user.id}`, 30, 60000)) {
+    return errorResponse("RATE_LIMITED", "消息发送太频繁，请稍后再试", 429);
+  }
+
+  // Build LLM messages: system prompt + history
+  const petName = pet?.f_name ?? "宠物";
+  const petAge = pet?.f_birth_date
+    ? Math.max(1, new Date().getFullYear() - new Date(pet.f_birth_date).getFullYear())
+    : 3;
+  const petBreed = "宠物";
+
+  const messages: AIMessage[] = [
+    { role: "system", content: buildChatSystemPrompt(petName, petBreed, petAge) },
+    ...history.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
   const stream = new ReadableStream({
     async start(controller) {
-      const encoder = new TextEncoder();
-      const enqueue = (type: string, payload: unknown) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type, ...payload })}\n\n`));
-      };
-
-      if (!projectId) {
-        const fallbacks = ["主人主人，我在这儿呢！", "能不能摸摸我的头呀？", "汪汪！你今天心情好吗？"];
-        const reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-        const petMsg = { id: Date.now() + 1, role: "pet" as const, content: reply, at: new Date().toISOString() };
-        history.push(petMsg);
-
-        // Truncate history to last 200 messages to prevent unbounded growth
-      const truncated = history.length > 200 ? history.slice(-200) : history;
-      await supabase.from("t_chat_history")
-          .update({ f_chat_history: truncated })
-          .eq("f_id", session.f_id);
-
-        enqueue("done", { petMessage: petMsg, sessionId: session.f_id });
-        controller.close();
-        return;
-      }
+      const enqueue = (event: string, data: unknown) =>
+        enqueueSSE(controller, event, data);
 
       try {
-        const recentMessages = history.slice(-10)
-          .map((m) => `${m.role === "user" ? "主人" : (pet?.f_name ?? "宠物")}: ${m.content}`)
-          .join("\n");
-
-        const aiReply = await cozeChatStream(
-          projectId,
-          String(user.id),
-          {
-            petName: pet?.f_name ?? "宠物",
-            conversation: recentMessages,
-            latestMessage: body.message,
-            personalityTags: pet?.f_personality_tags ?? [],
-          },
+        const aiReply = await aiChatStream(
+          messages,
           {
             onToken: (token: string) => {
               enqueue("token", { token });
             },
           },
+          { temperature: 0.8, maxTokens: 1024 },
         );
 
         const petMsg = {
@@ -266,24 +252,23 @@ async function handleSendMessageStream(req: Request): Promise<Response> {
         };
         history.push(petMsg);
 
-        // Truncate history to last 200 messages to prevent unbounded growth
-      const truncated = history.length > 200 ? history.slice(-200) : history;
-      await supabase.from("t_chat_history")
+        // Truncate history to last 200 messages
+        const truncated = history.length > 200 ? history.slice(-200) : history;
+        await supabase.from("t_chat_history")
           .update({ f_chat_history: truncated })
           .eq("f_id", session.f_id);
 
         enqueue("done", { petMessage: petMsg, sessionId: session.f_id });
         controller.close();
       } catch (aiErr) {
-        console.error("Coze chat error:", aiErr);
+        console.error("LLM chat error:", aiErr);
         const fallbacks = ["主人主人，我在这儿呢！", "能不能摸摸我的头呀？", "汪汪！你今天心情好吗？"];
         const reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
         const petMsg = { id: Date.now() + 1, role: "pet" as const, content: reply, at: new Date().toISOString() };
         history.push(petMsg);
 
-        // Truncate history to last 200 messages to prevent unbounded growth
-      const truncated = history.length > 200 ? history.slice(-200) : history;
-      await supabase.from("t_chat_history")
+        const truncated = history.length > 200 ? history.slice(-200) : history;
+        await supabase.from("t_chat_history")
           .update({ f_chat_history: truncated })
           .eq("f_id", session.f_id);
 
@@ -325,7 +310,7 @@ async function handleSendMessageJson(req: Request): Promise<Response> {
 
   const { data: pet } = await supabase
     .from("t_pet")
-    .select("f_id, f_name, f_pet_type_id, f_personality_tags")
+    .select("f_id, f_name, f_pet_type_id, f_birth_date")
     .eq("f_id", session.f_pet_id)
     .single();
 
@@ -338,38 +323,30 @@ async function handleSendMessageJson(req: Request): Promise<Response> {
   };
   history.push(userMsg);
 
-  const projectId = Deno.env.get("COZE_CHAT_PROJECT_ID")!;
-
   if (!checkRateLimit(`chat:${user.id}`, 30, 60000)) {
     return errorResponse("RATE_LIMITED", "消息发送太频繁，请稍后再试", 429);
   }
 
-  if (!projectId) {
-    const fallbacks = ["主人主人！", "汪！我在呢~", "摸摸头~", "今天也很想你哦！"];
-    const reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-    const petMsg = { id: Date.now() + 1, role: "pet" as const, content: reply, at: new Date().toISOString() };
-    history.push(petMsg);
-    await supabase.from("t_chat_history").update({ f_chat_history: history }).eq("f_id", session.f_id);
-    return okResponse({ sessionId: session.f_id, userMessage: userMsg, petMessage: petMsg });
-  }
+  const petName = pet?.f_name ?? "宠物";
+  const petAge = pet?.f_birth_date
+    ? Math.max(1, new Date().getFullYear() - new Date(pet.f_birth_date).getFullYear())
+    : 3;
+  const petBreed = "宠物";
+
+  const messages: AIMessage[] = [
+    { role: "system", content: buildChatSystemPrompt(petName, petBreed, petAge) },
+    ...history.map((m) => ({ role: m.role, content: m.content })),
+  ];
 
   let aiReply: string;
   try {
-    aiReply = await cozeChatStream(
-      projectId,
-      String(user.id),
-      {
-        petName: pet?.f_name ?? "宠物",
-        conversation: history.slice(-10).map((m) =>
-          `${m.role === "user" ? "主人" : pet?.f_name ?? "宠物"}: ${m.content}`
-        ).join("\n"),
-        latestMessage: body.message,
-        personalityTags: pet?.f_personality_tags ?? [],
-      },
+    aiReply = await aiChatStream(
+      messages,
       {},
+      { temperature: 0.8, maxTokens: 1024 },
     );
   } catch (aiErr) {
-    console.error("Coze chat error:", aiErr);
+    console.error("LLM chat error:", aiErr);
     const fallbacks = ["主人主人，我在这儿呢！", "能不能摸摸我的头呀？", "汪汪！你今天心情好吗？"];
     aiReply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
@@ -382,7 +359,11 @@ async function handleSendMessageJson(req: Request): Promise<Response> {
   };
   history.push(petMsg);
 
-  await supabase.from("t_chat_history").update({ f_chat_history: history }).eq("f_id", session.f_id);
+  // Truncate history to last 200 messages
+  const truncated = history.length > 200 ? history.slice(-200) : history;
+  await supabase.from("t_chat_history")
+    .update({ f_chat_history: truncated })
+    .eq("f_id", session.f_id);
 
   return okResponse({ sessionId: session.f_id, userMessage: userMsg, petMessage: petMsg });
 }

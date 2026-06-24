@@ -1,6 +1,12 @@
 {
   "pages": [
+    "pages/welcome/welcome",
     "pages/index/index",
+    "pages/personality/personality",
+    "pages/lostpet/lostpet",
+    "pages/newpet/newpet",
+    "pages/photo/photo",
+    "pages/rescue/rescue",
     "pages/emotion/emotion",
     "pages/emotion/report/report",
     "pages/health/health",
@@ -18,6 +24,7 @@
     "pages/mine/register/register",
     "pages/mine/pets/pets",
     "pages/mine/pets/edit/edit",
+    "pages/mine/pets/detail/detail",
     "pages/mine/history/history",
     "pages/mine/settings/settings",
     "pages/mine/orders/orders",
@@ -29,7 +36,9 @@
     "pages/hospitals/detail/detail",
     "pages/community/community",
     "pages/community/post/post",
-    "pages/favorites/favorites"
+    "pages/favorites/favorites",
+    "pages/mine/agreement/agreement",
+    "pages/mine/hardware/hardware"
   ],
   "window": {
     "backgroundTextStyle": "light",

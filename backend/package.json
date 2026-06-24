@@ -14,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@nestjs/common": "^11.1.27",
     "@nestjs/core": "^11.1.27",
     "@nestjs/platform-express": "^11.1.27",
@@ -35,5 +36,10 @@
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
+=======
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "mysql2": "^3.22.5"
+>>>>>>> 63a6635f02f99eef64ee4b01a35f585dc41dc43b
   }
 }

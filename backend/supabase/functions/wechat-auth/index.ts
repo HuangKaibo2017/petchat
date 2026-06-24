@@ -1,5 +1,6 @@
 // /functions/wechat-auth/index.ts
 // POST: exchange wx.login() code for Supabase JWT
+// Returns user profile with frontend-friendly camelCase fields
 
 import { okResponse } from "../_shared/cors.ts";
 import { checkRateLimit } from "../_shared/ai.ts";

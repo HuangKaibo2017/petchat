@@ -1,0 +1,109 @@
+<nav-bar title="救助专区" showBack="{{true}}" />
+<view class="page-container">
+  <!-- 顶部双标签切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab==='help'?'tab-active':''}}" bindtap="switchTab" data-tab="help">
+      <text>🆘 流浪求助</text>
+    </view>
+    <view class="tab-item {{activeTab==='adopt'?'tab-active':''}}" bindtap="switchTab" data-tab="adopt">
+      <text>🐕 宠物领养</text>
+    </view>
+  </view>
+
+  <!-- 公益组织联系 -->
+  <view class="section">
+    <view class="section-title">合作公益组织</view>
+    <scroll-view class="org-scroll" scroll-x enable-flex>
+      <view class="org-card" wx:for="{{organizations}}" wx:key="id">
+        <view class="org-avatar">{{item.emoji}}</view>
+        <view class="org-name text-sm font-bold">{{item.name}}</view>
+        <view class="org-phone text-xs text-hint" bindtap="callOrg" data-phone="{{item.phone}}">📞 {{item.phone}}</view>
+        <view class="org-desc text-xs text-hint">{{item.desc}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 流浪求助列表 -->
+  <view class="section" wx:if="{{activeTab==='help'}}">
+    <view class="flex-between items-center section-header">
+      <view class="section-title" class="mb-0">流浪求助</view>
+      <view class="btn btn-primary btn-sm" bindtap="goPublishHelp">发布求助</view>
+    </view>
+    <view class="empty-state" wx:if="{{helpList.length===0}}">
+      <text class="text-4xl mb-md">🐾</text>
+      <text class="text-hint">暂无流浪求助信息</text>
+    </view>
+    <view class="help-card card" wx:for="{{helpList}}" wx:key="id">
+      <view class="flex-between items-center mb-sm">
+        <view class="tag tag-warning">{{item.petType}}</view>
+        <view class="text-xs text-hint">{{item.time}}</view>
+      </view>
+      <view class="text-sm font-bold mb-xs">{{item.location}}</view>
+      <view class="text-sm text-hint mb-sm">{{item.description}}</view>
+      <view class="flex-between items-center">
+        <view class="text-xs text-primary">📞 {{item.contactPhone || '未留联系方式'}}</view>
+        <view class="flex items-center">
+          <view class="tag tag-primary mr-sm" wx:if="{{item.donationCount}}">已筹 {{item.donationCount}} 积分</view>
+          <view class="btn btn-sm btn-outline" catchtap="donateToHelp" data-id="{{item.id}}">捐赠</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 宠物领养列表 -->
+  <view class="section" wx:if="{{activeTab==='adopt'}}">
+    <view class="flex-between items-center section-header">
+      <view class="section-title" class="mb-0">待领养宠物</view>
+      <view class="btn btn-primary btn-sm" bindtap="goPublishAdopt">发布领养</view>
+    </view>
+    <view class="empty-state" wx:if="{{adoptList.length===0}}">
+      <text class="text-4xl mb-md">🏠</text>
+      <text class="text-hint">暂无可领养宠物</text>
+    </view>
+    <view class="adopt-card card" wx:for="{{adoptList}}" wx:key="id">
+      <view class="flex items-center mb-sm">
+        <image class="avatar-lg" src="{{item.image || '/images/default-pet.png'}}" mode="aspectFill" />
+        <view class="ml-md" class="flex-1">
+          <view class="flex-between items-center">
+            <view class="text-md font-bold">{{item.petName}}</view>
+            <view class="tag tag-success">{{item.adoptionType}}</view>
+          </view>
+          <view class="text-xs text-hint mt-xs">{{item.breed}} · {{item.age}}</view>
+        </view>
+      </view>
+      <view class="text-sm text-hint mb-sm">{{item.description}}</view>
+      <view class="flex-between items-center">
+        <view class="text-xs text-primary">{{item.location}}</view>
+        <view class="btn btn-sm btn-outline" catchtap="contactAdopt" data-phone="{{item.contactPhone}}">联系领养</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 捐赠区 -->
+  <view class="section">
+    <view class="donate-banner card" bindtap="goDonate">
+      <view class="flex items-center">
+        <view class="donate-icon">🎁</view>
+        <view class="ml-md" class="flex-1">
+          <view class="text-md font-bold">捐赠积分，为流浪动物献爱心</view>
+          <view class="text-xs text-hint mt-xs">捐赠可获平台权益兑换，每100积分 = 1份口粮</view>
+        </view>
+        <view class="text-lg text-primary">›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 志愿者招募 -->
+  <view class="section">
+    <view class="volunteer-card card">
+      <view class="flex items-center mb-sm">
+        <view class="volunteer-icon">🤝</view>
+        <view class="ml-md">
+          <view class="text-md font-bold">志愿者招募</view>
+          <view class="text-xs text-hint">实地采集数据，帮助更多流浪动物</view>
+        </view>
+      </view>
+      <view class="btn btn-primary btn-block" bindtap="goVolunteer">申请成为志愿者</view>
+    </view>
+  </view>
+</view>

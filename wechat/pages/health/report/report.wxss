@@ -52,3 +52,32 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 .action-btn { display: flex; flex-direction: column; align-items: center; gap: 4rpx; }
+
+/* ─── 雷达图 ─── */
+.radar-info { text-align: center; }
+.radar-canvas {
+  width: 500rpx;
+  height: 500rpx;
+  margin: 0 auto;
+}
+.radar-legend {
+  gap: 16rpx;
+  justify-content: center;
+}
+.radar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+.legend-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+}
+
+/* ─── 分享按钮 ─── */
+.share-hint {
+  color: #F97316;
+  margin-top: 8rpx;
+  text-align: center;
+}

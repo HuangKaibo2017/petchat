@@ -1,10 +1,10 @@
 // /functions/health-report/index.ts
-// POST: Generate pet health assessment via Coze agent
+// POST: Generate pet health assessment via DeepSeek LLM
 
 import { okResponse, failResponse } from "../_shared/cors.ts";
 import { verifyJWT, getServiceClient } from "../_shared/auth.ts";
 import { checkQuota, recordUsage } from "../_shared/db.ts";
-import { cozeChat, checkRateLimit, parseAIJson } from "../_shared/ai.ts";
+import { aiChat, checkRateLimit, parseAIJson, type AIMessage } from "../_shared/ai.ts";
 import { AppError, errorResponse, ERR } from "../_shared/errors.ts";
 
 interface HealthRequest {
@@ -26,6 +26,44 @@ interface HealthReport {
   healthScore: string;
   carePlan: Array<{ title: string; desc: string }>;
 }
+
+const HEALTH_SYSTEM_PROMPT = `你是宠物健康顾问，为宠物提供健康监测分析。
+
+职责：
+1. 解读主人提供的症状描述
+2. 判断是否需要立即就医
+3. 给出居家护理建议
+4. 提醒定期体检和疫苗接种
+
+重要原则：
+- 你不能替代兽医诊断，始终建议「如有疑虑请咨询兽医」
+- 遇到紧急症状（如呼吸困难、持续呕吐、抽搐）应立即建议就医
+- 回复结构清晰，分点说明
+
+紧急症状参考：呼吸困难、严重出血、意识丧失、持续呕吐/腹泻超过24小时、无法站立、抽搐。
+
+【输出要求】
+严格输出一个 JSON 对象，不要包含任何 markdown 标记或额外文字。
+JSON 字段：
+
+{
+  "currentSymptoms": "当前症状总结，40-80字",
+  "symptomMapping": [
+    {"area": "身体部位/系统", "symptoms": "对应症状描述"}
+  ],
+  "potentialDeficiencies": "潜在营养或健康缺失总结，30-60字",
+  "deficiencyDetails": [
+    {"type": "缺失类型", "manifestations": "具体表现"}
+  ],
+  "emergency": "是否需要立即就医的判断，20-40字",
+  "futureRisk": "未来发展风险评估，30-60字",
+  "healthScore": "★★☆☆☆ 到 ★★★★★",
+  "carePlan": [
+    {"title": "方案标题1", "desc": "具体建议40-60字"},
+    {"title": "方案标题2", "desc": "具体建议40-60字"},
+    {"title": "方案标题3", "desc": "具体建议40-60字"}
+  ]
+}`;
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -60,25 +98,33 @@ Deno.serve(async (req: Request) => {
 
     if (!pet) return errorResponse(ERR.NOT_FOUND.code, "宠物不存在", 404);
 
-    const projectId = Deno.env.get("COZE_HEALTH_CHECK_PROJECT_ID")!;
-    if (!projectId) return errorResponse("CONFIG_ERROR", "Coze 项目未配置", 500);
+    const contextParts = [
+      `宠物：${pet.f_name}`,
+      `体重：${pet.f_weight ?? "未知"}kg`,
+      `绝育：${pet.f_sterilized ? "是" : "否"}`,
+      `疫苗：${pet.f_vaccinated ? "已完成" : "未完成"}`,
+      `症状：${body.symptom}`,
+      `持续时间：${body.duration}`,
+    ];
+    if (body.abnormal) contextParts.push(`异常情况：${body.abnormal}`);
+    if (body.numbers?.length) contextParts.push(`测评数字：${body.numbers.join(",")}`);
+    if (body.imageUrl) contextParts.push(`参考图片：${body.imageUrl}`);
+
+    const messages: AIMessage[] = [
+      { role: "system", content: HEALTH_SYSTEM_PROMPT },
+      { role: "user", content: contextParts.join("\n") },
+    ];
 
     let reportJson: HealthReport;
     try {
-      const raw = await cozeChat(projectId, String(user.id), {
-        petName: pet.f_name,
-        petWeight: pet.f_weight,
-        petSterilized: pet.f_sterilized,
-        petVaccinated: pet.f_vaccinated,
-        symptom: body.symptom,
-        duration: body.duration,
-        abnormal: body.abnormal ?? "",
-        numbers: (body.numbers ?? []).join(","),
-        imageUrl: body.imageUrl ?? "",
+      const raw = await aiChat(messages, {
+        temperature: 0.3,
+        maxTokens: 3072,
+        responseFormat: "json",
       });
       reportJson = parseAIJson<HealthReport>(raw);
     } catch (aiErr) {
-      console.error("Coze error:", aiErr);
+      console.error("LLM error:", aiErr);
       return errorResponse(ERR.AI_FAILED.code, ERR.AI_FAILED.message, 503);
     }
 
