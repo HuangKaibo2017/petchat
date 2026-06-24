@@ -1,4 +1,7 @@
-require('dotenv').config({ path: '../.env.local' })
+require('dotenv').config({ path: '../../.env.local' })
+
+const { createLogger } = require('./utils/logger')
+const log = createLogger('app')
 
 const express = require('express')
 const app = express()
@@ -573,7 +576,7 @@ app.post('/api/medical/guide', auth, async (req, res) => {
       ...reportJson,
     }})
   } catch (err) {
-    console.error('Coze medical error:', err.message)
+    log.error('Coze medical error:', err.message)
     res.json({ code: 200, data: {
       id: `rpt_${Date.now()}`, type: 'medical',
       time: now(),
@@ -720,7 +723,7 @@ app.post('/api/chat/sessions/:id/messages', auth, async (req, res) => {
     session.messages.push(petMsg)
     res.json({ code: 200, data: { sessionId: session.id, userMessage: userMsg, petMessage: petMsg } })
   } catch (err) {
-    console.error('Coze chat error:', err.message)
+    log.error('Coze chat error:', err.message)
     const fallbacks = ['主人主人！', '汪！我在呢~', '摸摸头~']
     const reply = fallbacks[Math.floor(Math.random() * fallbacks.length)]
     const petMsg = { id: Date.now() + 1, role: 'pet', content: reply, at: now() }
@@ -799,20 +802,20 @@ app.get('/api/health', (req, res) => {
 // ═══════════════════════════════════════════
 
 app.listen(PORT, () => {
-  console.log('═══════════════════════════════════')
-  console.log('  🐾 更懂它 后端已启动')
-  console.log(`  📡 http://localhost:${PORT}`)
-  console.log(`  🤖 Coze 智能体: ${cozeAvailable ? '✅ 已连接' : '❌ 未配置（降级 mock）'}`)
-  console.log(`  🐱 演示宠物: ${db.pets.map(p => p.name).join(', ')}`)
-  console.log(`  🛒 商品数: ${db.products.length}`)
-  console.log(`  🏥 医院数: ${db.hospitals.length}`)
-  console.log('═══════════════════════════════════')
-  console.log('')
-  console.log('  Coze 端点:')
-  console.log('  POST /api/emotion/report   情绪解读')
-  console.log('  POST /api/health/report    健康监测')
-  console.log('  POST /api/risk/report      风险评估')
-  console.log('  POST /api/medical/guide    医疗科普')
-  console.log('  POST /api/chat/send-json   AI 聊天')
-  console.log('')
+  log.info('═══════════════════════════════════')
+  log.info('  🐾 更懂它 后端已启动')
+  log.info(`  📡 http://localhost:${PORT}`)
+  log.info(`  🤖 Coze 智能体: ${cozeAvailable ? '✅ 已连接' : '❌ 未配置（降级 mock）'}`)
+  log.info(`  🐱 演示宠物: ${db.pets.map(p => p.name).join(', ')}`)
+  log.info(`  🛒 商品数: ${db.products.length}`)
+  log.info(`  🏥 医院数: ${db.hospitals.length}`)
+  log.info('═══════════════════════════════════')
+  log.info('')
+  log.info('  Coze 端点:')
+  log.info('  POST /api/emotion/report   情绪解读')
+  log.info('  POST /api/health/report    健康监测')
+  log.info('  POST /api/risk/report      风险评估')
+  log.info('  POST /api/medical/guide    医疗科普')
+  log.info('  POST /api/chat/send-json   AI 聊天')
+  log.info('')
 })

@@ -22,8 +22,8 @@ fi
 # Check dependencies
 if [ ! -d node_modules ]; then
   echo "📦 安装依赖…"
-  npm install
+  pnpm install
 fi
 
 echo "🚀 启动服务 (端口: ${SERVER_PORT:-8001})"
-node server.js
+node src/server.js
