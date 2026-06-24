@@ -67,6 +67,8 @@ page {
   background-color: var(--color-bg);
   line-height: 1.6;
   box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100vw;
 }
 
 /* Utility Classes */
@@ -245,6 +247,7 @@ page {
   min-height: 100vh;
   background: var(--color-bg);
   padding-bottom: var(--safe-bottom);
+  overflow-x: hidden;
 }
 
 /* Section */
@@ -356,3 +359,14 @@ page {
   font-weight: 600;
   color: #666666;
 }
+
+/* ─── 补充工具类 ─── */
+.inline-flex { display: inline-flex; }
+.mb-0 { margin-bottom: 0; }
+.text-white-85 { color: rgba(255,255,255,0.85); }
+
+.gap-sm { gap: 16rpx; }
+.gap-md { gap: 24rpx; }
+.gap-lg { gap: 32rpx; }
+.line-through { text-decoration: line-through; }
+.mr-sm { margin-right: 8rpx; }

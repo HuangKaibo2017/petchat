@@ -10,8 +10,114 @@ Page({
   },
 
   onLoad(options) {
-    const rawData = options.data ? JSON.parse(decodeURIComponent(options.data)) : {}
+    const rawData = app.globalData._reportData || {}; app.globalData._reportData = null
     this.buildReport(rawData)
+    // 整体分析：绘制雷达图
+    if (rawData.mode === 'overall') {
+      this.prepareRadarData(rawData)
+    }
+  },
+
+  // 准备雷达图数据
+  prepareRadarData(report) {
+    const dims = [
+      { label: '气血', value: Math.floor(Math.random()*30+55), color: '#EF4444' },
+      { label: '阴阳', value: Math.floor(Math.random()*30+55), color: '#F97316' },
+      { label: '脏腑', value: Math.floor(Math.random()*30+55), color: '#8B5CF6' },
+      { label: '经络', value: Math.floor(Math.random()*30+55), color: '#3B82F6' },
+      { label: '情志', value: Math.floor(Math.random()*30+55), color: '#22C55E' },
+      { label: '卫气', value: Math.floor(Math.random()*30+55), color: '#EC4899' }
+    ]
+    this.setData({ radarDimensions: dims }, () => {
+      this.drawRadarChart(dims)
+    })
+  },
+
+  // 绘制雷达图
+  drawRadarChart(dims) {
+    const query = wx.createSelectorQuery()
+    query.select('#radarCanvas').fields({ node: true, size: true }).exec((res) => {
+      if (!res[0] || !res[0].node) return
+      const canvas = res[0].node
+      const ctx = canvas.getContext('2d')
+      const dpr = wx.getSystemInfoSync().pixelRatio
+      const w = res[0].width
+      const h = res[0].height
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      ctx.scale(dpr, dpr)
+
+      const cx = w / 2
+      const cy = h / 2
+      const radius = Math.min(w, h) / 2 - 30
+      const count = dims.length
+      const angleStep = (Math.PI * 2) / count
+
+      // 绘制背景网格
+      for (let level = 1; level <= 5; level++) {
+        ctx.beginPath()
+        const r = (radius / 5) * level
+        for (let i = 0; i <= count; i++) {
+          const angle = angleStep * i - Math.PI / 2
+          const x = cx + r * Math.cos(angle)
+          const y = cy + r * Math.sin(angle)
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+        }
+        ctx.closePath()
+        ctx.strokeStyle = '#E5E7EB'
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+
+      // 绘制轴线
+      for (let i = 0; i < count; i++) {
+        const angle = angleStep * i - Math.PI / 2
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
+        ctx.lineTo(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle))
+        ctx.strokeStyle = '#E5E7EB'
+        ctx.stroke()
+
+        // 标签
+        const labelR = radius + 22
+        const lx = cx + labelR * Math.cos(angle)
+        const ly = cy + labelR * Math.sin(angle)
+        ctx.fillStyle = '#6B7280'
+        ctx.font = '12px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(dims[i].label, lx, ly)
+      }
+
+      // 绘制数据区域
+      ctx.beginPath()
+      for (let i = 0; i <= count; i++) {
+        const idx = i % count
+        const angle = angleStep * idx - Math.PI / 2
+        const r = (dims[idx].value / 100) * radius
+        const x = cx + r * Math.cos(angle)
+        const y = cy + r * Math.sin(angle)
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+      }
+      ctx.closePath()
+      ctx.fillStyle = 'rgba(45, 125, 110, 0.15)'
+      ctx.fill()
+      ctx.strokeStyle = '#2D7D6E'
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // 数据点
+      for (let i = 0; i < count; i++) {
+        const angle = angleStep * i - Math.PI / 2
+        const r = (dims[i].value / 100) * radius
+        const x = cx + r * Math.cos(angle)
+        const y = cy + r * Math.sin(angle)
+        ctx.beginPath()
+        ctx.arc(x, y, 4, 0, Math.PI * 2)
+        ctx.fillStyle = '#2D7D6E'
+        ctx.fill()
+      }
+    })
   },
 
   buildReport(data) {

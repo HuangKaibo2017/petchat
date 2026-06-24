@@ -1,0 +1,55 @@
+<view class="welcome-page">
+  <!-- 背景渐变 -->
+  <view class="welcome-bg"></view>
+
+  <!-- 主体内容 -->
+  <view class="welcome-body">
+    <!-- NFC 快速进入 -->
+    <block wx:if="{{nfcActive}}">
+      <view class="welcome-logo-area">
+        <view class="welcome-logo">🐾</view>
+        <view class="welcome-brand">更懂它</view>
+      </view>
+      <view class="welcome-nfc-area">
+        <view class="nfc-glow"></view>
+        <view class="nfc-icon">📱</view>
+        <view class="nfc-text">NFC 识别成功</view>
+        <view class="nfc-sub">正在进入宠物档案…</view>
+      </view>
+    </block>
+
+    <!-- 正常登录流程 -->
+    <block wx:else>
+      <!-- Logo & 品牌 -->
+      <view class="welcome-logo-area">
+        <view class="welcome-logo">🐾</view>
+        <view class="welcome-brand">更懂它</view>
+        <view class="welcome-slogan">懂宠物，更懂你</view>
+      </view>
+
+      <!-- 微信一键登录按钮 -->
+      <view class="welcome-actions">
+        <button
+          class="welcome-btn-primary"
+          bindtap="handleWechatLogin"
+          loading="{{loggingIn}}"
+          disabled="{{loggingIn}}"
+        >
+          微信一键登录
+        </button>
+        <view class="welcome-desc">
+          <text>授权登录即同意</text>
+          <text class="link" bindtap="goAgreement">《用户协议》</text>
+          <text>和</text>
+          <text class="link" bindtap="goPrivacy">《隐私政策》</text>
+        </view>
+        <view class="welcome-guest" bindtap="goHomeGuest">游客模式浏览 ›</view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 底部版本 -->
+  <view class="welcome-footer">
+    <text class="text-xs text-hint">v1.0 · AI 驱动的宠物智能养护平台</text>
+  </view>
+</view>

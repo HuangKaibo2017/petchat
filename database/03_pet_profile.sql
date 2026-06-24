@@ -39,6 +39,7 @@ CREATE TABLE public.t_pet (
     f_pet_type_id   INTEGER     NOT NULL,
     f_breed_id      INTEGER,
     f_name          VARCHAR(64) NOT NULL,
+    f_avatar_url    VARCHAR(512) NOT NULL DEFAULT '',
     f_gender_id     INTEGER NOT NULL DEFAULT -1,
     f_birth_date    DATE,
     f_birth_year    INTEGER,
@@ -77,6 +78,7 @@ COMMENT ON COLUMN public.t_pet.f_lang             IS 'FK -> public.t_lang(f_code
 COMMENT ON COLUMN public.t_pet.f_pet_type_id      IS 'FK -> public.t_pet_type(f_id) | defined in 01_enums.sql | 必填, 不可空';
 COMMENT ON COLUMN public.t_pet.f_breed_id         IS 'FK -> public.t_pet_breed(f_id) | defined in 01_enums.sql | 可空 (用户可能不知道品种)';
 COMMENT ON COLUMN public.t_pet.f_name             IS '宠物昵称, 1-64 字符';
+COMMENT ON COLUMN public.t_pet.f_avatar_url       IS '宠物头像 URL (主图, 与 t_pet_photo 表联动)';
 COMMENT ON COLUMN public.t_pet.f_gender_id        IS 'FK -> public.t_gender(f_id) | defined in 01_enums.sql | 可空 (哨兵 -1 = 未知)';
 COMMENT ON COLUMN public.t_pet.f_birth_date       IS '精确生日 (优先); 与 f_birth_year / f_birth_month 互斥 (CHECK: f_birth_date IS NOT NULL OR f_birth_year IS NOT NULL)';
 COMMENT ON COLUMN public.t_pet.f_birth_year       IS '出生年份 (f_birth_date 为空时使用), 1980-2100 | 互斥: t_pet.f_birth_date / t_pet.f_birth_month';

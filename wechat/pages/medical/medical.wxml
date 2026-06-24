@@ -1,19 +1,124 @@
-<nav-bar title="{{type === 'newpet' ? '新宠购买指南' : '医疗科普指南'}}" showBack="{{true}}" />
+<nav-bar title="{{type === 'newpet' ? '新宠购买指南' : type === 'constitution' ? '体质综合分析' : type === 'medical' ? '医疗科普指南' : '医疗健康'}}" showBack="{{true}}" />
 <view class="page-container section">
-  <view wx:if="{{type !== 'newpet'}}">
-    <view class="section-title">症状咨询</view>
-    <view class="section-subtitle">AI知识库为您提供科普参考，非诊疗服务</view>
-    <textarea class="input-field input-textarea" placeholder="描述症状、时长、异常表现…" value="{{symptom}}" bindinput="onInput" data-field="symptom" />
-    <view class="upload-row flex mt-sm">
-      <view class="upload-btn" bindtap="chooseImage"><text>📷 上传检查报告</text></view>
+
+  <!-- ═══ 模式选择 ═══ -->
+  <view wx:if="{{!type}}" class="mode-select">
+    <view class="section-title">医疗健康</view>
+    <view class="section-subtitle">选择你需要的服务</view>
+    <view class="mode-cards mt-lg">
+      <view class="mode-card card" bindtap="switchMode" data-type="constitution">
+        <view class="mode-icon">🩺</view>
+        <view class="mode-title">体质综合分析</view>
+        <view class="mode-desc">中医体质视角 · 十二维度深度解读 · 专属调理方案</view>
+      </view>
+      <view class="mode-card card" bindtap="switchMode" data-type="medical">
+        <view class="mode-icon">💊</view>
+        <view class="mode-title">医疗科普指南</view>
+        <view class="mode-desc">症状解读 · 用药科普 · 中西结合 · 居家护理</view>
+      </view>
+      <view class="mode-card card" bindtap="switchMode" data-type="newpet">
+        <view class="mode-icon">🐾</view>
+        <view class="mode-title">新宠购买指南</view>
+        <view class="mode-desc">品种推荐 · 性格匹配 · 养护准备</view>
+      </view>
     </view>
-    <button class="btn btn-primary btn-block mt-lg" bindtap="generateGuide" disabled="{{!symptom}}">生成科普指南</button>
   </view>
-  <view wx:else>
+
+  <!-- ═══ 体质综合分析 ═══ -->
+  <view wx:if="{{type === 'constitution'}}">
+    <view class="section-title">宠物体质综合分析</view>
+    <view class="section-subtitle">填写信息，获取十二维度中医体质解读</view>
+    <view class="form-group mt-md">
+      <view class="form-label">选择宠物</view>
+      <picker mode="selector" range="{{petNames}}" bindchange="onPetChange" value="{{petIndex}}">
+        <view class="input-field picker-field">{{petNames[petIndex] || '请选择宠物'}}</view>
+      </picker>
+    </view>
+    <view wx:if="{{selectedPet}}" class="pet-info-card card mt-sm">
+      <view class="info-row"><text class="info-key">品种</text><text class="info-val">{{selectedPet.breed}}</text></view>
+      <view class="info-row"><text class="info-key">年龄</text><text class="info-val">{{selectedPet.age}}</text></view>
+      <view class="info-row"><text class="info-key">性别</text><text class="info-val">{{selectedPet.gender === 'male' ? '公' : '母'}}{{selectedPet.neutered ? '·已绝育' : '·未绝育'}}</text></view>
+      <view class="info-row"><text class="info-key">体重</text><text class="info-val">{{selectedPet.weight || '未填写'}}<text wx:if="{{!selectedPet.weight}}" class="text-hint">（请补充）</text></text></view>
+    </view>
+    <view class="form-group mt-sm" wx:if="{{selectedPet && !selectedPet.weight}}">
+      <view class="form-label">体重（kg）</view>
+      <input class="input-field" type="digit" placeholder="如：4.5" value="{{weight}}" bindinput="onFieldInput" data-field="weight" />
+    </view>
+    <view class="form-group mt-md">
+      <view class="form-label">象数能量数字（三组，用空格分隔）</view>
+      <view class="number-inputs">
+        <input class="input-field number-input" type="number" placeholder="第一组" value="{{num1}}" bindinput="onFieldInput" data-field="num1" maxlength="4" />
+        <input class="input-field number-input" type="number" placeholder="第二组" value="{{num2}}" bindinput="onFieldInput" data-field="num2" maxlength="4" />
+        <input class="input-field number-input" type="number" placeholder="第三组" value="{{num3}}" bindinput="onFieldInput" data-field="num3" maxlength="4" />
+      </view>
+      <view class="text-xs text-hint mt-xs">选填，三组数字将用于专属象数能量调和分析</view>
+    </view>
+    <button class="btn btn-primary btn-block mt-lg" bindtap="generateConstitution" disabled="{{!selectedPet}}">开始体质分析</button>
+  </view>
+
+  <!-- ═══ 医疗科普指南 ═══ -->
+  <view wx:if="{{type === 'medical'}}">
+    <!-- Step 0: Select pet -->
+    <view class="form-group">
+      <view class="form-label">选择宠物</view>
+      <picker mode="selector" range="{{petNames}}" bindchange="onPetChange" value="{{petIndex}}">
+        <view class="input-field picker-field">{{petNames[petIndex] || '请选择宠物'}}</view>
+      </picker>
+    </view>
+    <view wx:if="{{selectedPet}}" class="pet-info-card card mt-sm">
+      <view class="info-row"><text class="info-key">品种</text><text class="info-val">{{selectedPet.breed}}</text></view>
+      <view class="info-row"><text class="info-key">年龄</text><text class="info-val">{{selectedPet.age}}</text></view>
+      <view class="info-row"><text class="info-key">性别</text><text class="info-val">{{selectedPet.gender === 'male' ? '公' : '母'}}{{selectedPet.neutered ? '·已绝育' : '·未绝育'}}</text></view>
+      <view class="info-row"><text class="info-key">体重</text><text class="info-val">{{selectedPet.weight || '未填写'}}</text></view>
+      <view wx:if="{{selectedPet.history}}" class="info-row"><text class="info-key">病史</text><text class="info-val">{{selectedPet.history}}</text></view>
+      <view wx:if="{{selectedPet.tags && selectedPet.tags.length}}" class="info-row"><text class="info-key">体质</text><text class="info-val">{{selectedPet.tags.join('、')}}</text></view>
+    </view>
+
+    <!-- Step 1: Symptom input -->
+    <view class="section-title mt-lg">症状描述</view>
+    <view class="section-subtitle">请详细描述宠物的异常表现</view>
+    <textarea class="input-field input-textarea" placeholder="如：精神不好、呕吐、拉稀、皮肤红肿…" value="{{symptom}}" bindinput="onInput" data-field="symptom" />
+
+    <!-- Step 2: Upload image -->
+    <view class="upload-row flex mt-sm">
+      <view class="upload-btn" bindtap="chooseImage">
+        <text>📷 {{symptomImage ? '已选1张' : '上传检查报告/照片'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{symptomImage}}" class="image-preview mt-sm">
+      <image class="preview-img" src="{{symptomImage}}" mode="aspectFill" />
+    </view>
+
+    <!-- Step 3: Submit -->
+    <button class="btn btn-primary btn-block mt-lg" bindtap="generateMedicalGuide" disabled="{{!symptom}}">生成科普指南</button>
+
+    <!-- Step 4: Follow-up questions (shown after first response) -->
+    <view wx:if="{{followUpQuestions && followUpQuestions.length && showFollowUp}}" class="followup-section mt-xl">
+      <view class="section-title">补充信息</view>
+      <view class="section-subtitle">回答以下问题，让分析更精准</view>
+      <view wx:for="{{followUpQuestions}}" wx:key="id" class="followup-q mt-md">
+        <view class="followup-q-text text-md font-bold">{{item.text}}</view>
+        <view class="followup-options mt-sm">
+          <view wx:for="{{item.options}}" wx:key="*this" wx:for-item="opt"
+                class="followup-opt {{followUpAnswers[item.id] === opt ? 'opt-selected' : ''}}"
+                bindtap="selectFollowUp" data-qid="{{item.id}}" data-val="{{opt}}">
+            {{opt}}
+          </view>
+        </view>
+      </view>
+      <button class="btn btn-outline btn-block mt-lg" bindtap="submitFollowUp" disabled="{{!hasFollowUpAnswers}}">
+        补充后重新分析
+      </button>
+    </view>
+  </view>
+
+  <!-- ═══ 新宠购买指南 ═══ -->
+  <view wx:elif="{{type === 'newpet'}}">
     <view class="section-title">新宠购买建议指南</view>
     <view class="section-subtitle">选择适合你的毛孩子</view>
     <textarea class="input-field input-textarea" placeholder="描述你的生活情况、偏好…" value="{{symptom}}" bindinput="onInput" data-field="symptom" />
-    <button class="btn btn-primary btn-block mt-lg" bindtap="generateGuide" disabled="{{!symptom}}">获取购买建议</button>
+    <button class="btn btn-primary btn-block mt-lg" bindtap="generateNewpetGuide" disabled="{{!symptom}}">获取购买建议</button>
   </view>
-  <loading visible="{{generating}}" text="AI正在分析…" />
+
+  <loading visible="{{generating}}" text="{{generatingText}}" />
 </view>

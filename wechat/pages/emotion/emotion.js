@@ -22,15 +22,12 @@ Page({
     divSystem: 'liuyao',
     numberInputs: ['', '', '', '', '', ''],
     canSubmit: false,
-    generating: false,
+    emotionMode: 'multi', singleNum: '', generating: false,
     selectedCards: [],
     tarotCards: ['🌟', '🌙', '☀️', '🌈', '🔥', '💧', '🌿', '⚡', '🦋', '🐉', '🔮', '💎']
   },
 
   onLoad(options) {
-    if (options.type === 'personality') {
-      this.setData({ pageTitle: '宠物性格分析', type: 'personality' })
-    }
     this.loadPets()
   },
 
@@ -100,10 +97,23 @@ Page({
     this.checkCanSubmit()
   },
 
+  switchEmotionMode(e) {
+    const mode = e.currentTarget.dataset.mode
+    this.setData({ emotionMode: mode })
+    this.checkCanSubmit()
+  },
+
+  onSingleNumInput(e) {
+    this.setData({ singleNum: e.detail.value.slice(-1) })
+    this.checkCanSubmit()
+  },
+
   checkCanSubmit() {
-    const { question, divSystem, numberInputs } = this.data
+    const { question, divSystem, numberInputs, emotionMode, singleNum } = this.data
     let canSubmit = !!question.trim()
-    if (divSystem !== 'tarot') {
+    if (emotionMode === 'single') {
+      canSubmit = canSubmit && !!singleNum
+    } else if (divSystem !== 'tarot') {
       canSubmit = canSubmit && numberInputs.every(n => n !== '')
     }
     this.setData({ canSubmit })
@@ -135,8 +145,8 @@ Page({
   async generateReport() {
     const { selectedPet, question, divSystem, numberInputs, uploadImage, type } = this.data
 
-    if (!app.globalData.isAuthorized) {
-      app.requestAuth(() => this.generateReport())
+    if (!app.globalData.isLoggedIn) {
+      app.wxLogin().then(token => { if (token) this.generateReport() })
       return
     }
 
@@ -167,9 +177,8 @@ Page({
 
       this.setData({ generating: false })
 
-      wx.navigateTo({
-        url: `/pages/emotion/report/report?data=${encodeURIComponent(JSON.stringify(result))}`
-      })
+      app.globalData._reportData = result
+        wx.navigateTo({ url: '/pages/emotion/report/report' })
     } catch (err) {
       this.setData({ generating: false })
       if (err.message === 'QUOTA_EXCEEDED') {
@@ -179,7 +188,7 @@ Page({
           showCancel: false,
         })
       } else if (err.message === 'UNAUTHORIZED') {
-        app.requestAuth(() => this.generateReport())
+        app.wxLogin().then(token => { if (token) this.generateReport() })
       } else {
         wx.showToast({ title: err.message || '生成失败', icon: 'none' })
       }

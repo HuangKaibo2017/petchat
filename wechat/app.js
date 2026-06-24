@@ -3,15 +3,16 @@ const { mockPets, mockUser } = require('./utils/mock')
 App({
   globalData: {
     userInfo: null,
-    isAuthorized: false,
+    isLoggedIn: false,
     currentPet: null,
     pets: [],
     favorites: [],
     cart: [],
     nfcEnabled: true,
-    // 本地开发: Express 后端
-    // 线上部署: 替换为 https://api.gengdongta.com
-    baseUrl: 'http://localhost:8001',
+    isGuest: false,
+    // 线上: Supabase Edge Functions
+    // 本地开发: Express 后端 http://localhost:8001
+    baseUrl: 'https://gengdongta.com',
     debug: false
   },
 
@@ -19,9 +20,18 @@ App({
     this.initDemoData()
     this.loadUserData()
     this.checkUpdate()
+    this.restoreLogin()
   },
 
   onShow(options) {
+    const token = wx.getStorageSync('token')
+    if (token && getCurrentPages().length === 1) {
+      const currentPage = getCurrentPages()[0]
+      if (currentPage && currentPage.route === 'pages/welcome/welcome') {
+        wx.switchTab({ url: '/pages/index/index' })
+        return
+      }
+    }
     if (options.query && options.query.scene) {
       this.handleScene(options.query.scene)
     }
@@ -32,7 +42,6 @@ App({
     if (hasRun) return
 
     console.log('[更懂它] 首次启动，注入演示数据…')
-    wx.setStorageSync('token', 'demo_token_local')
     wx.setStorageSync('userInfo', mockUser)
     wx.setStorageSync('pets', mockPets)
     wx.setStorageSync('currentPetId', mockPets[0].id)
@@ -57,14 +66,15 @@ App({
 
     const token = wx.getStorageSync('token')
     if (token) {
-      this.globalData.isAuthorized = true
+      this.globalData.isLoggedIn = true
     }
   },
 
   handleScene(scene) {
     if (scene && scene.startsWith('nfc_')) {
       const petId = scene.replace('nfc_', '')
-      wx.navigateTo({ url: `/pages/index/index?nfcPetId=${petId}` })
+      this.globalData.nfcTriggered = true
+      this.globalData.nfcPetId = petId
     }
   },
 
@@ -85,41 +95,74 @@ App({
     }
   },
 
-  requestAuth(callback) {
-    if (!wx.getUserProfile) {
-      console.warn('[更懂它] getUserProfile 不可用，请使用 authorize 组件')
-      wx.showToast({ title: '授权后可体验完整功能', icon: 'none' })
-      return
-    }
-    wx.getUserProfile({
-      desc: '用于完善宠物档案信息',
-      success: (res) => {
-        this.globalData.userInfo = res.userInfo
-        this.globalData.isAuthorized = true
-        wx.setStorageSync('userInfo', res.userInfo)
-        if (callback) callback(res)
-      },
-      fail: () => {
-        wx.showToast({ title: '授权后可体验完整功能', icon: 'none' })
-      }
+  /**
+   * 微信原生登录：wx.login 获取 code，换取后端 JWT。
+   */
+  wxLogin() {
+    return new Promise((resolve) => {
+      wx.login({
+        success: (res) => {
+          if (!res.code) {
+            console.warn('[更懂它] wx.login 未返回 code')
+            return resolve(null)
+          }
+          wx.request({
+            url: `${this.globalData.baseUrl}/wechat-auth`,
+            method: 'POST',
+            header: { 'Content-Type': 'application/json' },
+            data: { code: res.code },
+            timeout: 30000,
+            success: (r) => {
+              const body = r.data || {}
+              const data = body.data || body
+              if (r.statusCode === 200 && data && data.token) {
+                wx.setStorageSync('token', data.token)
+                this.globalData.isLoggedIn = true
+                if (data.user) {
+                  const userInfo = {
+                    nickName: data.user.nickname || data.user.name || '微信用户',
+                    avatarUrl: data.user.avatarUrl || data.user.avatar || ''
+                  }
+                  this.globalData.userInfo = userInfo
+                  wx.setStorageSync('userInfo', userInfo)
+                }
+                console.log('[更懂它] 微信登录成功')
+                resolve(data.token)
+              } else {
+                console.warn('[更懂它] 登录失败:', body.message || r.statusCode)
+                resolve(null)
+              }
+            },
+            fail: (err) => {
+              console.warn('[更懂它] 登录请求失败:', err.errMsg)
+              resolve(null)
+            }
+          })
+        },
+        fail: () => {
+          resolve(null)
+        }
+      })
     })
   },
 
-  loginWithCode(callback) {
-    wx.login({
-      success: (res) => {
-        if (res.code) {
-          wx.setStorageSync('_wx_code', res.code)
-          this.globalData.isAuthorized = true
-          if (callback) callback({ code: res.code })
-        } else {
-          wx.showToast({ title: '登录失败，请重试', icon: 'none' })
-        }
-      },
-      fail: () => {
-        wx.showToast({ title: '授权后可体验完整功能', icon: 'none' })
-      }
-    })
+  /**
+   * 静默恢复已有登录态。
+   */
+  restoreLogin() {
+    const token = wx.getStorageSync('token')
+    if (token) {
+      this.globalData.isLoggedIn = true
+    }
+  },
+
+  /**
+   * 接口调用前确保已有有效 token，没有则触发登录。
+   */
+  async ensureLogin() {
+    const token = wx.getStorageSync('token')
+    if (token) return token
+    return await this.wxLogin()
   },
 
   async refreshPets() {
@@ -127,6 +170,7 @@ App({
       const API = require('./utils/api')
       const pets = await API.Pet.list()
       if (pets && pets.length > 0) {
+        // API.Pet.list 已做标准化（f_name→name, f_id→id），直接使用
         this.globalData.pets = pets
         wx.setStorageSync('pets', pets)
         const currentId = wx.getStorageSync('currentPetId')

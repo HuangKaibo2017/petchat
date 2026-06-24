@@ -40,7 +40,7 @@ export async function verifyJWT(req: Request): Promise<AuthUser> {
   const { data: tUser, error: dbErr } = await supabase
     .from("t_user")
     .select("f_id, f_meta_info")
-    .eq("f_public_id", supabaseUserId)
+    .eq("f_public_uid", supabaseUserId)
     .single();
 
   if (dbErr || !tUser) {
@@ -67,6 +67,17 @@ async function derivePassword(openid: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(hash)));
 }
 
+/** Frontend-friendly user profile shape */
+interface UserProfile {
+  id: number;
+  name: string;
+  nickname: string;
+  avatarUrl: string;
+  phone: string;
+  openid: string;
+  supabaseUserId: string;
+}
+
 /**
  * Exchange WeChat login code for Supabase JWT.
  *
@@ -75,12 +86,12 @@ async function derivePassword(openid: string): Promise<string> {
  *  2. Call WeChat API: code → openid + session_key
  *  3. Derive stable password from openid (NOT session_key — it rotates)
  *  4. Sign in / sign up to Supabase Auth
- *  5. Return JWT to mini program
+ *  5. Return JWT + user profile with frontend-friendly field names
  */
 export async function exchangeWechatCode(
   wxCode: string,
   userInfo?: { nickName?: string; avatarUrl?: string },
-): Promise<{ token: string; user: Record<string, unknown> }> {
+): Promise<{ token: string; user: UserProfile }> {
   const supabase = getServiceClient();
   const appId = Deno.env.get("WECHAT_APPID")!;
   const appSecret = Deno.env.get("WECHAT_SECRET")!;
@@ -108,56 +119,105 @@ export async function exchangeWechatCode(
   const email = `${openid}@wechat.gengdongta.local`;
   const password = await derivePassword(openid);
 
-  // Step 3: Sign in or sign up
+  // Step 3: Sign in, or create the account on first login.
   let authRes = await supabase.auth.signInWithPassword({ email, password });
 
   if (authRes.error) {
-    // First-time user: create account
-    authRes = await supabase.auth.signUp({ email, password });
-    if (authRes.error) {
-      // If signUp also fails (e.g. user exists but wrong password from old session_key approach),
-      // use admin API to update the user's password to the new derived one
-      if (authRes.error.message?.includes("already registered")) {
-        const { data: { user: existingUser } } = await supabase.auth.admin.getUserByEmail(email);
-        // Cannot fix old accounts without admin intervention — return clear error
-        throw new AppError(
-          "AUTH_MIGRATION_NEEDED",
-          "账号需要重新绑定，请清除小程序数据后重试",
-          401,
-        );
+    // First-time user (or stale password): create/repair via admin API
+    const { error: createErr } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (createErr) {
+      const msg = createErr.message ?? "";
+      if (msg.includes("already been registered") || msg.includes("already registered")) {
+        // Account exists but with a stale password. Reset it.
+        const { data: list } = await supabase.auth.admin.listUsers();
+        const existing = list?.users?.find((u) => u.email === email);
+        if (existing) {
+          await supabase.auth.admin.updateUserById(existing.id, {
+            password,
+            email_confirm: true,
+          });
+        }
+      } else {
+        throw new AppError("AUTH_FAILED", `账号创建失败: ${msg}`, 500);
       }
-      throw new AppError("AUTH_FAILED", "账号创建失败", 500);
+    }
+
+    authRes = await supabase.auth.signInWithPassword({ email, password });
+    if (authRes.error || !authRes.data.session) {
+      throw new AppError(
+        "AUTH_FAILED",
+        `登录失败: ${authRes.error?.message ?? "未获取到会话"}`,
+        500,
+      );
     }
   }
 
   const supabaseUserId = authRes.data.user!.id.toLowerCase();
   const token = authRes.data.session!.access_token;
 
-  // Step 4: Upsert into our t_user table
+  // Step 4: Upsert into our t_user table and get the full profile
   const { data: existing } = await supabase
     .from("t_user")
-    .select("f_id")
-    .eq("f_public_id", supabaseUserId)
+    .select("f_id, f_nickname, f_avatar_url, f_phone")
+    .eq("f_public_uid", supabaseUserId)
     .single();
 
+  let tUserId: number;
+  let nickname: string;
+  let avatarUrl: string;
+  let phone: string;
+
   if (!existing) {
-    await supabase.from("t_user").insert({
-      f_public_id: supabaseUserId,
-      f_nickname: userInfo?.nickName ?? "",
-      f_avatar_url: userInfo?.avatarUrl ?? "",
+    nickname = (userInfo?.nickName && userInfo.nickName.trim())
+      ? userInfo.nickName.trim().slice(0, 64)
+      : "微信用户";
+    avatarUrl = userInfo?.avatarUrl ?? "";
+    phone = "";
+
+    const { data: inserted } = await supabase.from("t_user").insert({
+      f_public_uid: supabaseUserId,
+      f_nickname: nickname,
+      f_avatar_url: avatarUrl,
+      f_phone: phone,
       f_meta_info: { wechat_openid: openid },
-    });
-  } else {
-    // Update nickname/avatar on each login
-    if (userInfo?.nickName || userInfo?.avatarUrl) {
-      await supabase.from("t_user")
-        .update({
-          f_nickname: userInfo?.nickName ?? undefined,
-          f_avatar_url: userInfo?.avatarUrl ?? undefined,
-        })
-        .eq("f_id", existing.f_id);
+    }).select("f_id").single();
+
+    if (!inserted) {
+      throw new AppError("AUTH_FAILED", "用户写入失败", 500);
     }
+    tUserId = inserted.f_id as number;
+  } else {
+    tUserId = existing.f_id as number;
+    // Update nickname/avatar on each login if provided
+    if (userInfo?.nickName || userInfo?.avatarUrl) {
+      const upd: Record<string, string> = {};
+      if (userInfo?.nickName) upd.f_nickname = userInfo.nickName.trim().slice(0, 64);
+      if (userInfo?.avatarUrl) upd.f_avatar_url = userInfo.avatarUrl;
+      await supabase.from("t_user").update(upd).eq("f_id", tUserId);
+    }
+    nickname = (userInfo?.nickName && userInfo.nickName.trim())
+      ? userInfo.nickName.trim().slice(0, 64)
+      : (existing.f_nickname as string);
+    avatarUrl = userInfo?.avatarUrl ?? (existing.f_avatar_url as string) ?? "";
+    phone = (existing.f_phone as string) ?? "";
   }
 
-  return { token, user: { openid, supabaseUserId } };
+  // Return frontend-friendly field names
+  return {
+    token,
+    user: {
+      id: tUserId,
+      name: nickname,
+      nickname: nickname,
+      avatarUrl: avatarUrl,
+      phone: phone,
+      openid,
+      supabaseUserId,
+    },
+  };
 }
