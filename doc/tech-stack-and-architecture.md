@@ -1,7 +1,7 @@
 # PetChat 技术栈与技术架构文档
 
-> **文档版本**: v1.3\
-> **更新日期**: 2026-06-11\
+> **文档版本**: v1.4
+> **更新日期**: 2026-06-24\
 > **维护团队**: 技术架构组
 
 ***
@@ -158,7 +158,37 @@ frontend/
 
 - **Node 版本管理**：Volta（项目级锁定）
 - **进程管理**：PM2（进程守护、负载均衡、热部署）
-- **包管理**：npm（各自项目独立管理）
+- **包管理**：pnpm（各自项目独立管理）
+
+#### 3.1.1 常用 pnpm 命令
+
+```bash
+cd backend
+
+# 安装依赖
+pnpm install
+
+# 编译 NestJS TypeScript → dist/
+pnpm build
+
+# 启动开发服务器（热重载）
+pnpm start:dev
+
+# 构建 + 启动生产模式
+pnpm start
+
+# 直接运行编译产物
+pnpm start:prod
+
+# 运行测试
+pnpm test
+
+# 运行测试（监听模式）
+pnpm test:watch
+
+# 运行 Express 遗留服务
+pnpm start:express
+```
 
 ### 3.2 数据库操作规范
 
@@ -216,7 +246,92 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 > **设计说明**：Refresh Token 30 天足够用户日常使用，同时避免过长有效期带来的安全风险。Supabase Auth 会自动处理 Token 续期，前端无感知。
 
-### 3.4 核心模块划分
+### 3.4 源代码文件命名规范
+
+#### 3.4.1 目录结构
+
+```
+backend/
+├── src/
+│   ├── main.ts                   # NestJS 引导入口（模块局外人，不带域前缀）
+│   ├── server.js                 # 遗留 Express 服务（迁移中）
+│   ├── app.module.ts             # 根模块
+│   ├── app.controller.ts         # 根控制器
+│   ├── app.service.ts            # 根服务
+│   ├── database/
+│   │   ├── database.module.ts    # 数据库特性模块
+│   │   └── database.service.ts   # 数据库特性服务
+│   └── utils/
+│       └── logger.js             # 共享日志工具（CommonJS）
+├── test/
+│   └── database/
+│       └── connection.test.js    # 数据库连接测试
+├── nest-cli.json
+├── tsconfig.json
+├── vitest.config.js
+├── package.json
+└── pnpm-lock.yaml
+```
+
+#### 3.4.2 核心命名规则：`[domain].[type].ts`
+
+所有 NestJS 源代码文件遵循 **`[domain].[type].ts`** 格式，其中：
+
+- **`[domain]`**：领域/特性名称（如 `app`、`database`、`auth`、`pets`）
+- **`[type]`** ：文件类型（如 `module`、`controller`、`service`、`gateway`、`guard`、`dto`）
+
+**示例**：
+
+| 文件 | 领域 | 类型 | 说明 |
+|------|------|------|------|
+| `app.module.ts` | `app`（根） | `module` | NestJS 根模块 |
+| `app.controller.ts` | `app`（根） | `controller` | NestJS 根控制器 |
+| `app.service.ts` | `app`（根） | `service` | NestJS 根服务 |
+| `database.module.ts` | `database` | `module` | 数据库特性模块 |
+| `database.service.ts` | `database` | `service` | 数据库特性服务 |
+| `auth.controller.ts` | `auth` | `controller` | 认证控制器 |
+| `pets.service.ts` | `pets` | `service` | 宠物服务 |
+
+#### 3.4.3 唯一例外：`main.ts`
+
+`main.ts` 是 NestJS 框架约定的引导入口文件，不带域前缀。它不属任何模块——唯一职责是通过 `NestFactory.create(AppModule)` 创建应用实例并启动 `app.listen()`，没有其他文件 import 它。
+
+```typescript
+// main.ts — 模块局外人，只负责启动
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+#### 3.4.4 非 TypeScript 文件
+
+| 类型 | 命名规则 | 示例 |
+|------|----------|------|
+| 工具脚本（CommonJS） | `snake_case.js` | `logger.js` |
+| 遗留服务 | `snake_case.js` | `server.js` |
+| Shell 脚本 | `snake_case.sh` | `start.sh`、`deploy.sh` |
+| 测试文件 | `[test-feature].test.js` | `connection.test.js` |
+
+#### 3.4.5 命名设计理由
+
+选择 `[domain].[type].ts`（如 `app.service.ts`）而非 `[domain]/service.ts`（目录嵌套），基于以下考量：
+
+| 维度 | `app.service.ts` | `app/service.ts` |
+|------|-----------------|-------------------|
+| **Goto File 搜索** | `app.service` → 精准命中 1 个结果 | `service` → 多个重名文件，必须选目录 |
+| **导入自文档化** | `from './app.service'` 一眼识别来源 | `from './service'` 丢失上下文，需看目录 |
+| **新增领域** | 直接加 `pets.service.ts`，无需建目录 | 必须建 `pets/` 目录，否则多 `service.ts` 冲突 |
+| **NestJS 对齐** | CLI 生成 `cats/cats.service.ts`，完全一致 | 需要自定义 schematics |
+| **移动文件** | import 路径不变（文件名自包含语义） | 跨目录移动后语义变化 |
+
+> 核心原则：**文件名应包含完整语义，不依赖目录层级提供上下文**。第 3 个开发者（或 3 个月后的你自己）打开任意 import 语句，即刻理解依赖关系，无需在文件树中溯源。
+
+### 3.5 核心模块划分
 
 | 模块             | 职责                | 关键技术                               |
 | -------------- | ----------------- | ---------------------------------- |
