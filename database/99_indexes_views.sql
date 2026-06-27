@@ -79,6 +79,36 @@ CREATE INDEX IF NOT EXISTS idx_t_report_pers_pgroonga
     ON public.t_report_personality
     USING pgroonga (f_personality_analysis);
 
+-- 99.2.5a AI 情绪报告核心回答 (f_core_answer TEXT)
+-- 表结构见 04_ai_reports.sql: t_report_emotion
+CREATE INDEX IF NOT EXISTS idx_t_report_emotion_pgroonga
+    ON public.t_report_emotion
+    USING pgroonga (f_core_answer, f_pet_message, f_owner_view);
+
+-- 99.2.5b AI 健康报告核心回答 (f_core_answer TEXT)
+-- 表结构见 04_ai_reports.sql: t_report_health
+CREATE INDEX IF NOT EXISTS idx_t_report_health_pgroonga
+    ON public.t_report_health
+    USING pgroonga (f_core_answer, f_emergency, f_diet_advice);
+
+-- 99.2.5c AI 人宠风险报告 (f_pet_imbalance TEXT)
+-- 表结构见 04_ai_reports.sql: t_report_human_pet_risk
+CREATE INDEX IF NOT EXISTS idx_t_report_hpr_pgroonga
+    ON public.t_report_human_pet_risk
+    USING pgroonga (f_pet_imbalance, f_qi_risk, f_medical_advice);
+
+-- 99.2.5d AI 体质分析报告 (f_pet_constitution TEXT)
+-- 表结构见 04_ai_reports.sql: t_report_constitution
+CREATE INDEX IF NOT EXISTS idx_t_report_const_pgroonga
+    ON public.t_report_constitution
+    USING pgroonga (f_pet_constitution, f_season_advice, f_diet_advice);
+
+-- 99.2.5e AI 医疗咨询报告 (f_judgment TEXT)
+-- 表结构见 04_ai_reports.sql: t_report_consultation
+CREATE INDEX IF NOT EXISTS idx_t_report_consult_pgroonga
+    ON public.t_report_consultation
+    USING pgroonga (f_judgment, f_symptom_explain);
+
 -- 99.2.6 救助申请描述 (f_description TEXT)
 -- 表结构见 13_welfare.sql: t_rescue_request
 CREATE INDEX IF NOT EXISTS idx_t_rescue_request_pgroonga
@@ -280,11 +310,33 @@ CREATE INDEX IF NOT EXISTS idx_t_adoption_type ON public.t_adoption(f_adoption_t
 CREATE INDEX IF NOT EXISTS idx_t_volunteer_user     ON public.t_volunteer(f_user_id);
 CREATE INDEX IF NOT EXISTS idx_t_rescue_created     ON public.t_rescue_request(f_created_at DESC);
 
--- 报告: 按 (user, pet, time)
-CREATE INDEX IF NOT EXISTS idx_t_report_emotion_user_pet ON public.t_report_emotion(f_user_id, f_pet_id, f_created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_t_report_health_user_pet  ON public.t_report_health(f_user_id, f_pet_id, f_created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_t_report_hpr_user_pet     ON public.t_report_human_pet_risk(f_user_id, f_pet_id, f_created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_t_report_pers_user_pet    ON public.t_report_personality(f_user_id, f_pet_id, f_created_at DESC);
+-- 报告: 按 (user, pet, time) + 状态过滤
+CREATE INDEX IF NOT EXISTS idx_t_report_emotion_user_pet ON public.t_report_emotion(f_user_id, f_pet_id, f_created_at DESC) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_report_health_user_pet  ON public.t_report_health(f_user_id, f_pet_id, f_created_at DESC) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_report_hpr_user_pet     ON public.t_report_human_pet_risk(f_user_id, f_pet_id, f_created_at DESC) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_report_pers_user_pet    ON public.t_report_personality(f_user_id, f_pet_id, f_created_at DESC) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_report_const_user_pet   ON public.t_report_constitution(f_user_id, f_pet_id, f_created_at DESC) WHERE f_deleted = 0;
+CREATE INDEX IF NOT EXISTS idx_t_report_consult_user_pet ON public.t_report_consultation(f_user_id, f_pet_id, f_created_at DESC) WHERE f_deleted = 0;
+
+-- 报告: 按状态 + 时间 (pending/failed/timeout 查询)
+CREATE INDEX IF NOT EXISTS idx_t_report_emotion_status ON public.t_report_emotion(f_status, f_created_at DESC) WHERE f_status IN (1, 20, 30);
+CREATE INDEX IF NOT EXISTS idx_t_report_health_status  ON public.t_report_health(f_status, f_created_at DESC) WHERE f_status IN (1, 20, 30);
+CREATE INDEX IF NOT EXISTS idx_t_report_hpr_status     ON public.t_report_human_pet_risk(f_status, f_created_at DESC) WHERE f_status IN (1, 20, 30);
+CREATE INDEX IF NOT EXISTS idx_t_report_pers_status    ON public.t_report_personality(f_status, f_created_at DESC) WHERE f_status IN (1, 20, 30);
+CREATE INDEX IF NOT EXISTS idx_t_report_const_status   ON public.t_report_constitution(f_status, f_created_at DESC) WHERE f_status IN (1, 20, 30);
+CREATE INDEX IF NOT EXISTS idx_t_report_consult_status ON public.t_report_consultation(f_status, f_created_at DESC) WHERE f_status IN (1, 20, 30);
+
+-- 报告: JSONB GIN 索引 (标签/症状/风险因子等)
+-- 注: t_report_emotion 取消了 f_emotion_tags 字段, 改为通过 f_care_plan 表达; 索引一并删除
+-- CREATE INDEX IF NOT EXISTS idx_t_report_emotion_tags_gin    ON public.t_report_emotion USING GIN (f_emotion_tags);
+CREATE INDEX IF NOT EXISTS idx_t_report_health_issues_gin   ON public.t_report_health USING GIN (f_health_issues);
+CREATE INDEX IF NOT EXISTS idx_t_report_health_sugg_gin     ON public.t_report_health USING GIN (f_health_suggestions);
+CREATE INDEX IF NOT EXISTS idx_t_report_hpr_factors_gin     ON public.t_report_human_pet_risk USING GIN (f_risk_factors);
+CREATE INDEX IF NOT EXISTS idx_t_report_pers_tags_gin       ON public.t_report_personality USING GIN (f_personality_tags);
+CREATE INDEX IF NOT EXISTS idx_t_report_emotion_input_gin
+    ON public.t_report_emotion USING GIN (f_llm_input jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS idx_t_report_health_input_gin
+    ON public.t_report_health USING GIN (f_llm_input jsonb_path_ops);
 
 -- 活动/Banner/提示词
 CREATE INDEX IF NOT EXISTS idx_t_activity_time ON public.t_activity(f_start_time);
@@ -366,6 +418,30 @@ CREATE INDEX IF NOT EXISTS idx_t_ab_event_type
 -- 按 f_ver 过滤 (多版本兼容)
 CREATE INDEX IF NOT EXISTS idx_t_ab_event_ver
     ON public.t_ab_event(f_ver) WHERE f_status_id = 1;
+
+
+-- ============================================================
+-- 99.3b 报告表 pg_trgm 相似度索引 (GIN, 用于短文本相似度查询)
+-- ============================================================
+-- pg_trgm: PostgreSQL 内置的三元组(trigram)相似度模块
+-- 原理: 将文本拆分为连续3字符的片段(trigram), 建立 GIN 倒排索引
+-- 适用: 短文本(<=1000字)的模糊匹配、拼写纠错、相似度排序
+-- 与 pgroonga 区别: pg_trgm 做字符级相似度, pgroonga 做语义级全文搜索
+-- 用法:
+--   SELECT * FROM t_report_emotion WHERE f_core_answer % '关键词' ORDER BY similarity(f_core_answer, '关键词') DESC;
+--   SELECT * FROM t_report_emotion WHERE f_core_answer ILIKE '%关键词%';
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE INDEX IF NOT EXISTS idx_t_report_emotion_trgm
+    ON public.t_report_emotion USING GIN (f_core_answer gin_trgm_ops, f_pet_message gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_t_report_health_trgm
+    ON public.t_report_health USING GIN (f_core_answer gin_trgm_ops, f_emergency gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_t_report_pers_trgm
+    ON public.t_report_personality USING GIN (f_core_answer gin_trgm_ops, f_personality_analysis gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_t_report_const_trgm
+    ON public.t_report_constitution USING GIN (f_core_answer gin_trgm_ops, f_pet_constitution gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_t_report_consult_trgm
+    ON public.t_report_consultation USING GIN (f_judgment gin_trgm_ops, f_symptom_explain gin_trgm_ops);
 
 
 -- ============================================================

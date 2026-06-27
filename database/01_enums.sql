@@ -154,6 +154,7 @@ COMMENT ON COLUMN public.t_photo_type.f_ver       IS '版本号: x00=主版本 +
 -- 1.2.5 报告类型 / Report Type
 CREATE TABLE public.t_report_type (
     f_id        INTEGER PRIMARY KEY,
+    f_code      VARCHAR(32) NOT NULL UNIQUE,
     f_ver       INT4    NOT NULL DEFAULT 100,
     f_name      JSONB NOT NULL DEFAULT '{}'::jsonb,
     f_desc      JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -161,9 +162,10 @@ CREATE TABLE public.t_report_type (
     f_deleted   INT2 NOT NULL DEFAULT 0,
     CONSTRAINT ck_t_report_type_name_is_object CHECK (jsonb_typeof(f_name) = 'object')
 );
-COMMENT ON TABLE  public.t_report_type IS 'AI 报告类型 (emotion/health/human_pet_risk/personality/...)';
+COMMENT ON TABLE  public.t_report_type IS 'AI 报告类型 (EMOTION/HEALTH/HUMAN_PET_RISK/PERSONALITY/CONSTITUTION/CONSULTATION/...)';
 COMMENT ON COLUMN public.t_report_type.f_id        IS '主键; 哨兵: -1 = NOT-SET';
-COMMENT ON COLUMN public.t_report_type.f_name      IS '多语言名称 | 引用方: t_report_emotion.f_report_type_id, t_report_health.f_report_type_id, t_report_human_pet_risk.f_report_type_id, t_report_personality.f_report_type_id';
+COMMENT ON COLUMN public.t_report_type.f_code      IS '业务语义代码, e.g. EMOTION, HEALTH, HUMAN_PET_RISK, PERSONALITY, CONSTITUTION, CONSULTATION | UNIQUE';
+COMMENT ON COLUMN public.t_report_type.f_name      IS '多语言名称 | 引用方: t_report_emotion.f_report_type_id, t_report_health.f_report_type_id, t_report_human_pet_risk.f_report_type_id, t_report_personality.f_report_type_id, t_report_constitution.f_report_type_id, t_report_consultation.f_report_type_id';
 COMMENT ON COLUMN public.t_report_type.f_desc      IS '多语言描述';
 COMMENT ON COLUMN public.t_report_type.f_order     IS '排序权重';
 COMMENT ON COLUMN public.t_report_type.f_deleted IS '启用开关';
@@ -206,6 +208,48 @@ COMMENT ON COLUMN public.t_personality_tag.f_desc      IS '多语言描述';
 COMMENT ON COLUMN public.t_personality_tag.f_order     IS '排序权重';
 COMMENT ON COLUMN public.t_personality_tag.f_deleted IS '启用开关';
 COMMENT ON COLUMN public.t_personality_tag.f_ver       IS '版本号: x00=主版本 + xx=小版本, 例: 100=v1.00, 101=v1.01, 200=v2.00';
+
+
+-- 1.2.7a 情绪状态 / Emotion State
+CREATE TABLE public.t_emotion_state (
+    f_id        INTEGER PRIMARY KEY,
+    f_ver       INT4    NOT NULL DEFAULT 100,
+    f_code      VARCHAR(32) NOT NULL UNIQUE,
+    f_name      JSONB NOT NULL DEFAULT '{}'::jsonb,
+    f_desc      JSONB NOT NULL DEFAULT '{}'::jsonb,
+    f_order     INTEGER NOT NULL DEFAULT 0,
+    f_deleted   INT2 NOT NULL DEFAULT 0,
+    CONSTRAINT ck_t_emotion_state_name_is_object CHECK (jsonb_typeof(f_name) = 'object')
+);
+COMMENT ON TABLE  public.t_emotion_state IS '宠物情绪状态枚举 (HAPPY/CALM/ANXIOUS/FEAR/ANGRY/SAD/EXCITED/NERVOUS/CONTENTED/RESTLESS/...)';
+COMMENT ON COLUMN public.t_emotion_state.f_id        IS '主键; 哨兵: -1 = NOT-SET';
+COMMENT ON COLUMN public.t_emotion_state.f_code      IS '业务语义代码, e.g. HAPPY, CALM, ANXIOUS, FEAR, ANGRY, SAD, EXCITED, NERVOUS, CONTENTED, RESTLESS | UNIQUE';
+COMMENT ON COLUMN public.t_emotion_state.f_name      IS '多语言名称 | 引用方: t_report_emotion.f_emotion_state_id';
+COMMENT ON COLUMN public.t_emotion_state.f_desc      IS '多语言描述';
+COMMENT ON COLUMN public.t_emotion_state.f_order     IS '排序权重';
+COMMENT ON COLUMN public.t_emotion_state.f_deleted   IS '启用开关';
+COMMENT ON COLUMN public.t_emotion_state.f_ver       IS '版本号: x00=主版本 + xx=小版本, 例: 100=v1.00, 101=v1.01, 200=v2.00';
+
+
+-- 1.2.7b 情绪趋势 / Emotion Trend
+CREATE TABLE public.t_emotion_trend (
+    f_id        INTEGER PRIMARY KEY,
+    f_ver       INT4    NOT NULL DEFAULT 100,
+    f_code      VARCHAR(32) NOT NULL UNIQUE,
+    f_name      JSONB NOT NULL DEFAULT '{}'::jsonb,
+    f_desc      JSONB NOT NULL DEFAULT '{}'::jsonb,
+    f_order     INTEGER NOT NULL DEFAULT 0,
+    f_deleted   INT2 NOT NULL DEFAULT 0,
+    CONSTRAINT ck_t_emotion_trend_name_is_object CHECK (jsonb_typeof(f_name) = 'object')
+);
+COMMENT ON TABLE  public.t_emotion_trend IS '宠物情绪趋势枚举 (rising/falling/stable/fluctuating)';
+COMMENT ON COLUMN public.t_emotion_trend.f_id        IS '主键; 哨兵: -1 = NOT-SET';
+COMMENT ON COLUMN public.t_emotion_trend.f_code      IS '业务语义代码, e.g. rising, falling, stable, fluctuating | UNIQUE';
+COMMENT ON COLUMN public.t_emotion_trend.f_name      IS '多语言名称 | 引用方: t_report_emotion.f_emotion_trend_id';
+COMMENT ON COLUMN public.t_emotion_trend.f_desc      IS '多语言描述';
+COMMENT ON COLUMN public.t_emotion_trend.f_order     IS '排序权重';
+COMMENT ON COLUMN public.t_emotion_trend.f_deleted   IS '启用开关';
+COMMENT ON COLUMN public.t_emotion_trend.f_ver       IS '版本号: x00=主版本 + xx=小版本, 例: 100=v1.00, 101=v1.01, 200=v2.00';
 
 
 -- 1.2.8 通用状态 / Status (用户状态等通用, 软删统一入口)
@@ -453,9 +497,9 @@ CREATE TABLE public.t_health_level (
     f_deleted   INT2 NOT NULL DEFAULT 0,
     CONSTRAINT ck_t_health_level_name_is_object CHECK (jsonb_typeof(f_name) = 'object')
 );
-COMMENT ON TABLE  public.t_health_level IS '健康等级 (优秀/良好/一般/较差/严重)';
+COMMENT ON TABLE  public.t_health_level IS '健康等级 (临床紧急度: URGENT/ATTENTION/NORMAL/GOOD)';
 COMMENT ON COLUMN public.t_health_level.f_id        IS '主键; 哨兵: -1 = NOT-SET';
-COMMENT ON COLUMN public.t_health_level.f_code      IS '业务语义代码, e.g. excellent, good, fair, poor, severe | UNIQUE';
+COMMENT ON COLUMN public.t_health_level.f_code      IS '业务语义代码 (临床紧急度, clinical urgency), e.g. URGENT, ATTENTION, NORMAL, GOOD | UNIQUE';
 COMMENT ON COLUMN public.t_health_level.f_name      IS '多语言名称 | 引用方: t_report_health.f_health_level_id (in 04_ai_reports.sql)';
 COMMENT ON COLUMN public.t_health_level.f_desc      IS '多语言描述';
 COMMENT ON COLUMN public.t_health_level.f_order     IS '排序权重';
