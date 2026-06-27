@@ -16,18 +16,20 @@ pnpm install
 ```bash
 # 从 Supabase Dashboard > Settings > API 获取
 SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_KEY=eyJhbGciOi...
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
 
-# 从 Supabase Dashboard > Settings > Database > Connection string 获取
-# 选择 "URI" 格式
-SUPABASE_DIRECT=postgresql://postgres:[YOUR-PASSWORD]@db.xxx.supabase.co:5432/postgres
+# 从 Supabase Dashboard > Settings > Database > Connection string 获取密码
+# host/user/port 在测试代码里 hardcode (pooler URL), 这里只存密码 (单引号防 dotenv 插值)
+SUPABASE_PASSWORD='YOUR-DB-PASSWORD'
 ```
 
 | 变量 | 用途 | 获取位置 |
 |------|------|----------|
 | `SUPABASE_URL` | REST API 地址 | Settings → API → Project URL |
-| `SUPABASE_KEY` | anon key 或 service_role key | Settings → API → Project API keys |
-| `SUPABASE_DIRECT` | PostgreSQL 直连 URI | Settings → Database → Connection string → URI |
+| `SUPABASE_PUBLISHABLE_KEY` | publishable key (新命名, 替代 anon) | Settings → API Keys → Publishable key |
+| `SUPABASE_PASSWORD` | pg 直连密码 (单引号包) | Settings → Database → Connection string |
+
+> 注: 测试代码从 `SUPABASE_PASSWORD` 拼出完整的 Postgres connectionString (`postgresql://postgres.<ref>:<encoded-pwd>@aws-...pooler.supabase.com:6543/postgres`). host/user/port 是项目拓扑信息, 不算机密, 写死在测试里.
 
 ### 1.3 确保数据库已初始化
 
@@ -98,7 +100,7 @@ pnpm vitest run -t "2.2"
   env:
     SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
     SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-    SUPABASE_DIRECT: ${{ secrets.SUPABASE_DIRECT }}
+    SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
   run: pnpm test
 ```
 

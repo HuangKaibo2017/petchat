@@ -290,24 +290,22 @@ INSERT INTO public.t_photo_type (f_id, f_ver, f_name, f_desc, f_order) VALUES
 -- ============================================================
 -- 1.6 t_report_type / 报告类型
 -- ============================================================
-INSERT INTO public.t_report_type (f_id, f_ver, f_name, f_desc, f_order) VALUES
-    (-1, 100, '{"zh-CN":"未设置","en-US":"Not Set"}',
+INSERT INTO public.t_report_type (f_id, f_code, f_ver, f_name, f_desc, f_order) VALUES
+    (-1, 'NOT-SET', 100, '{"zh-CN":"未设置","en-US":"Not Set"}',
         '{"zh-CN":"占位符","en-US":"Sentinel"}', 0),
-    ( 1, 100, '{"zh-CN":"情绪分析","en-US":"Emotion Analysis"}',
-        '{"zh-CN":"宠物情绪/表情分析报告","en-US":"Pet emotion / expression analysis"}', 10),
-    ( 2, 100, '{"zh-CN":"健康评估","en-US":"Health Assessment"}',
+    ( 1, 'emotion', 100, '{"zh-CN":"情绪分析","en-US":"Emotion Analysis"}',
+        '{"zh-CN":"宠物情绪/表情分析报告 (multi_dim 多维度)","en-US":"Pet emotion / expression analysis (multi-dim)"}', 10),
+    ( 2, 'health', 100, '{"zh-CN":"健康评估","en-US":"Health Assessment"}',
         '{"zh-CN":"宠物健康综合评估报告","en-US":"Pet health assessment"}', 20),
-    ( 3, 100, '{"zh-CN":"人宠风险","en-US":"Human-Pet Risk"}',
+    ( 3, 'human_pet_risk', 100, '{"zh-CN":"人宠风险","en-US":"Human-Pet Risk"}',
         '{"zh-CN":"人宠相处风险评估","en-US":"Human-pet interaction risk"}', 30),
-    ( 4, 100, '{"zh-CN":"性格画像","en-US":"Personality Profile"}',
+    ( 4, 'personality', 100, '{"zh-CN":"性格画像","en-US":"Personality Profile"}',
         '{"zh-CN":"宠物性格画像报告","en-US":"Pet personality profile"}', 40),
-    ( 5, 100, '{"zh-CN":"行为分析","en-US":"Behavior Analysis"}',
-        '{"zh-CN":"行为习惯/异常分析","en-US":"Behavior / anomaly analysis"}', 50),
-    ( 6, 100, '{"zh-CN":"饮食建议","en-US":"Diet Recommendation"}',
-        '{"zh-CN":"基于体征的饮食建议","en-US":"Diet recommendation"}', 60),
-    ( 7, 100, '{"zh-CN":"训练计划","en-US":"Training Plan"}',
-        '{"zh-CN":"个性化训练计划","en-US":"Personalized training plan"}', 70),
-    (99, 100, '{"zh-CN":"其他报告","en-US":"Other Report"}',
+    ( 5, 'constitution', 100, '{"zh-CN":"体质分析","en-US":"Constitution Analysis"}',
+        '{"zh-CN":"宠物五行/中医体质综合分析","en-US":"Pet constitution analysis (TCM)"}', 50),
+    ( 6, 'consultation', 100, '{"zh-CN":"医疗咨询","en-US":"Medical Consultation"}',
+        '{"zh-CN":"宠物医疗科普/咨询报告","en-US":"Pet medical consultation"}', 60),
+    (99, 'other', 100, '{"zh-CN":"其他报告","en-US":"Other Report"}',
         '{"zh-CN":"未列举报告类型","en-US":"Other report type"}', 990);
 
 
@@ -332,21 +330,19 @@ INSERT INTO public.t_risk_level (f_id, f_ver, f_name, f_desc, f_order) VALUES
 
 
 -- ============================================================
--- 1.8 t_health_level / 健康等级
+-- 1.8 t_health_level / 健康等级 (临床紧急度)
 -- ============================================================
 INSERT INTO public.t_health_level (f_id, f_ver, f_code, f_name, f_desc, f_order) VALUES
     (-1, 100, 'NOT-SET',  '{"zh-CN":"未设置","en-US":"Not Set"}',
         '{"zh-CN":"占位符","en-US":"Sentinel"}', 0),
-    ( 1, 100, 'excellent','{"zh-CN":"优秀","en-US":"Excellent"}',
-        '{"zh-CN":"健康状况极佳","en-US":"Optimal health"}', 10),
-    ( 2, 100, 'good',     '{"zh-CN":"良好","en-US":"Good"}',
-        '{"zh-CN":"健康状况良好","en-US":"Generally healthy"}', 20),
-    ( 3, 100, 'fair',     '{"zh-CN":"一般","en-US":"Fair"}',
-        '{"zh-CN":"健康状况一般, 需关注","en-US":"Needs attention"}', 30),
-    ( 4, 100, 'poor',     '{"zh-CN":"较差","en-US":"Poor"}',
-        '{"zh-CN":"健康状况较差","en-US":"Suboptimal"}', 40),
-    ( 5, 100, 'severe',   '{"zh-CN":"严重","en-US":"Severe"}',
-        '{"zh-CN":"需立即就医","en-US":"Critical, seek vet care"}', 50);
+    ( 1, 100, 'urgent',   '{"zh-CN":"紧急","en-US":"Urgent"}',
+        '{"zh-CN":"需立即就医","en-US":"Immediate vet care required"}', 10),
+    ( 2, 100, 'attention','{"zh-CN":"需关注","en-US":"Attention"}',
+        '{"zh-CN":"健康状况需关注","en-US":"Needs attention"}', 20),
+    ( 3, 100, 'normal',   '{"zh-CN":"一般","en-US":"Normal"}',
+        '{"zh-CN":"健康状况一般","en-US":"Normal condition"}', 30),
+    ( 4, 100, 'good',     '{"zh-CN":"良好","en-US":"Good"}',
+        '{"zh-CN":"健康状况良好","en-US":"Generally healthy"}', 40);
 
 
 -- ============================================================
@@ -365,6 +361,50 @@ INSERT INTO public.t_status (f_id, f_ver, f_name, f_desc, f_order) VALUES
         '{"zh-CN":"已停用 (非删除)","en-US":"Disabled (not deleted)"}', 300),
     (40, 100, '{"zh-CN":"已删除","en-US":"Deleted"}',
         '{"zh-CN":"已软删除","en-US":"Soft deleted"}', 400);
+
+
+-- ============================================================
+-- 1.8a t_emotion_state / 情绪状态枚举
+-- ============================================================
+INSERT INTO public.t_emotion_state (f_id, f_ver, f_code, f_name, f_desc, f_order) VALUES
+    (-1, 100, 'NOT-SET',  '{"zh-CN":"未设置","en-US":"Not Set"}',
+        '{"zh-CN":"占位符","en-US":"Sentinel"}', 0),
+    ( 1, 100, 'happy',    '{"zh-CN":"开心","en-US":"Happy"}',
+        '{"zh-CN":"心情愉悦","en-US":"Joyful and content"}', 10),
+    ( 2, 100, 'calm',     '{"zh-CN":"平静","en-US":"Calm"}',
+        '{"zh-CN":"情绪平稳","en-US":"Peaceful and relaxed"}', 20),
+    ( 3, 100, 'anxious',  '{"zh-CN":"焦虑","en-US":"Anxious"}',
+        '{"zh-CN":"紧张不安","en-US":"Nervous and uneasy"}', 30),
+    ( 4, 100, 'fear',     '{"zh-CN":"恐惧","en-US":"Fearful"}',
+        '{"zh-CN":"害怕惊恐","en-US":"Scared and frightened"}', 40),
+    ( 5, 100, 'angry',    '{"zh-CN":"愤怒","en-US":"Angry"}',
+        '{"zh-CN":"生气发怒","en-US":"Irritated and mad"}', 50),
+    ( 6, 100, 'sad',      '{"zh-CN":"悲伤","en-US":"Sad"}',
+        '{"zh-CN":"情绪低落","en-US":"Down and melancholy"}', 60),
+    ( 7, 100, 'excited',  '{"zh-CN":"兴奋","en-US":"Excited"}',
+        '{"zh-CN":"激动亢奋","en-US":"Excited and energetic"}', 70),
+    ( 8, 100, 'nervous',  '{"zh-CN":"紧张","en-US":"Nervous"}',
+        '{"zh-CN":"神经紧绷","en-US":"Tense and jittery"}', 80),
+    ( 9, 100, 'contented','{"zh-CN":"满足","en-US":"Contented"}',
+        '{"zh-CN":"心满意足","en-US":"Satisfied and pleased"}', 90),
+    (10, 100, 'restless', '{"zh-CN":"不安","en-US":"Restless"}',
+        '{"zh-CN":"坐立不安","en-US":"Restless and unsettled"}', 100);
+
+
+-- ============================================================
+-- 1.8b t_emotion_trend / 情绪趋势枚举
+-- ============================================================
+INSERT INTO public.t_emotion_trend (f_id, f_ver, f_code, f_name, f_desc, f_order) VALUES
+    (-1, 100, 'NOT-SET',    '{"zh-CN":"未设置","en-US":"Not Set"}',
+        '{"zh-CN":"占位符","en-US":"Sentinel"}', 0),
+    ( 1, 100, 'rising',     '{"zh-CN":"上升","en-US":"Rising"}',
+        '{"zh-CN":"情绪趋于积极","en-US":"Trending positive"}', 10),
+    ( 2, 100, 'falling',    '{"zh-CN":"下降","en-US":"Falling"}',
+        '{"zh-CN":"情绪趋于消极","en-US":"Trending negative"}', 20),
+    ( 3, 100, 'stable',     '{"zh-CN":"稳定","en-US":"Stable"}',
+        '{"zh-CN":"情绪平稳","en-US":"Stable and consistent"}', 30),
+    ( 4, 100, 'fluctuating','{"zh-CN":"波动","en-US":"Fluctuating"}',
+        '{"zh-CN":"情绪波动","en-US":"Fluctuating and variable"}', 40);
 
 
 -- ============================================================
