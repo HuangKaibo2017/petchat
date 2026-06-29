@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   Index — 复刻设计稿
+   Index — 首页
    ═══════════════════════════════════════════ */
 
 .idx-page {
@@ -7,173 +7,224 @@
   background: #FBF9F2;
 }
 
-/* ─── 品牌头部 ─── */
-.idx-brand {
-  padding-right: 32rpx;
-  padding-bottom: 40rpx;
-  padding-left: 32rpx;
-  text-align: center;
-  background: linear-gradient(180deg, #FFF8ED 0%, #FBF9F2 100%);
+/* ─── 海报 Banner ─── */
+.idx-hero {
+  margin: 0 32rpx 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.08);
 }
-.idx-brand-title {
-  font-size: 64rpx;
-  font-weight: 800;
-  color: #3D2C1E;
-  letter-spacing: 16rpx;
-  margin-bottom: 8rpx;
-}
-.idx-brand-slogan {
-  font-size: 26rpx;
-  color: #A89789;
-  letter-spacing: 4rpx;
+.idx-hero-img {
+  width: 100%;
+  height: 340rpx;
+  display: block;
+  background: linear-gradient(135deg, #D8EBE6 0%, #FFF3E8 50%, #FCE7F3 100%);
 }
 
-/* ─── 通用分区 ─── */
+/* ─── 分区通用 ─── */
 .idx-section {
-  padding: 32rpx 32rpx 0;
+  padding: 0 32rpx;
+  margin-bottom: 32rpx;
 }
 .idx-section-title {
-  font-size: 32rpx;
-  font-weight: 700;
+  font-size: 28rpx;
+  font-weight: 600;
   color: #3D2C1E;
-  margin-bottom: 20rpx;
-  position: relative;
-  padding-left: 20rpx;
-}
-.idx-section-title::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6rpx;
-  height: 26rpx;
-  border-radius: 3rpx;
-  background: #C8A87C;
-}
-.idx-section-subtitle {
-  font-size: 24rpx;
-  color: #A89789;
-  margin-bottom: 20rpx;
-  margin-top: -12rpx;
-  text-align: center;
+  margin-bottom: 16rpx;
+  text-align: left;
 }
 
-/* ═══════════════════════════════════════════
-   核心工具 — 3 卡横排
-   ═══════════════════════════════════════════ */
-.idx-tools {
-  display: flex;
-  gap: 20rpx;
-}
-.idx-tool {
-  flex: 1;
+/* ─── 核心工具 - 三列横排 ─── */
+.idx-tools-box {
+  padding: 24rpx 20rpx;
   background: #FFFFFF;
-  border-radius: 20rpx;
-  padding: 28rpx 16rpx 24rpx;
-  text-align: center;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+.idx-tools-row {
+  display: flex;
+  gap: 12rpx;
+}
+.idx-tool-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   transition: transform 0.15s;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  padding: 20rpx 14rpx 0;
 }
-.idx-tool:active { transform: scale(0.96); }
-.idx-tool-icon {
-  font-size: 44rpx;
-  margin-bottom: 12rpx;
-  display: block;
-}
-.idx-tool-name {
+.idx-tool-card:active { transform: scale(0.96); }
+
+.idx-tool--emotion { background: #ECFDF5; }
+.idx-tool--health  { background: #EFF6FF; }
+.idx-tool--risk    { background: #FDF2F8; }
+
+.idx-tool-card-name {
   font-size: 24rpx;
   font-weight: 700;
   color: #3D2C1E;
-  margin-bottom: 6rpx;
+  margin-bottom: 4rpx;
+  line-height: 1.3;
 }
-.idx-tool-desc {
+.idx-tool-card-desc {
   font-size: 20rpx;
   color: #A89789;
   line-height: 1.4;
+  margin-bottom: 12rpx;
 }
-
-/* ═══════════════════════════════════════════
-   水印照片
-   ═══════════════════════════════════════════ */
-.idx-watermark {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  background: #FFFFFF;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
-}
-.idx-watermark-input-wrap {
-  flex: 1;
-}
-.idx-watermark-input {
+.idx-tool-card-img {
   width: 100%;
-  height: 80rpx;
-  background: #F5F3ED;
-  border-radius: 12rpx;
-  padding: 0 20rpx;
-  font-size: 26rpx;
-  color: #3D2C1E;
-  box-sizing: border-box;
+  height: auto;
+  display: block;
 }
-.idx-watermark-input::placeholder {
+.idx-tool-card-arrow {
+  position: absolute;
+  bottom: 12rpx;
+  right: 18rpx;
+  font-size: 28rpx;
   color: #C4B8AD;
 }
-.idx-watermark-upload {
-  flex-shrink: 0;
+
+/* ─── 上传照片 ─── */
+.idx-photo-stack {
+  position: relative;
+  width: 88%;
+  margin-bottom: 16rpx;
 }
-.idx-watermark-camera {
-  width: 100rpx;
-  height: 80rpx;
-  background: #F5F3ED;
+.idx-photo-stack::before,
+.idx-photo-stack::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 6%;
+  right: 6%;
   border-radius: 12rpx;
+  background: #E8E4DA;
+}
+.idx-photo-stack::before {
+  bottom: -10rpx;
+  transform: rotate(-3deg);
+  z-index: 0;
+}
+.idx-photo-stack::after {
+  bottom: -5rpx;
+  transform: rotate(2deg);
+  z-index: 1;
+}
+.idx-photo-stack-img {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+  border-radius: 12rpx;
+  display: block;
+  z-index: 2;
+  transform: rotate(5deg);
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+.idx-photo-upload {
+  flex: 4;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-.idx-watermark-camera-icon {
-  font-size: 36rpx;
-}
-
-/* ═══════════════════════════════════════════
-   救助专区 — 双卡
-   ═══════════════════════════════════════════ */
-.idx-rescue {
-  display: flex;
-  gap: 20rpx;
-}
-.idx-rescue-card {
-  flex: 1;
-  background: #FFFFFF;
+  min-height: 260rpx;
+  background: #FAFAF7;
+  border: 3rpx dashed #D4CFC5;
   border-radius: 20rpx;
-  padding: 32rpx 20rpx;
-  text-align: center;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
   transition: transform 0.15s;
 }
-.idx-rescue-card:active { transform: scale(0.96); }
-.idx-rescue-card-img {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #FEF3C7, #FDE68A);
-  margin: 0 auto 16rpx;
+.idx-photo-upload:active { transform: scale(0.96); }
+.idx-photo-upload-icon {
+  font-size: 48rpx;
+  margin-bottom: 10rpx;
+}
+.idx-photo-upload-text {
+  font-size: 22rpx;
+  color: #A89789;
+}
+.idx-photo-watermark {
+  font-size: 22rpx;
+  color: #A89789;
+  text-align: center;
+  margin-top: 12rpx;
+  line-height: 1.4;
+}
+.idx-photo-row {
   display: flex;
+  gap: 16rpx;
+}
+.idx-photo-card {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  padding: 28rpx 18rpx;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  transition: transform 0.15s;
 }
-.idx-rescue-emoji {
-  font-size: 36rpx;
+.idx-photo-card:active { transform: scale(0.96); }
+.idx-photo-card--left  { flex: 4; }
+.idx-photo-card--right { flex: 5; }
+.idx-photo-card-icon {
+  font-size: 44rpx;
+  margin-bottom: 12rpx;
 }
-.idx-rescue-label {
-  font-size: 28rpx;
+.idx-photo-card-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #3D2C1E;
+  margin-bottom: 4rpx;
+}
+.idx-photo-card-desc {
+  font-size: 20rpx;
+  color: #A89789;
+  text-align: center;
+  line-height: 1.4;
+}
+.idx-photo-arrow {
+  font-size: 32rpx;
+  color: #C4B8AD;
+}
+
+/* ─── 救助专区 ─── */
+.idx-rescue-row {
+  display: flex;
+  gap: 12rpx;
+}
+.idx-rescue-img {
+  flex: 1;
+  width: 100%;
+  height: auto;
+  border-radius: 16rpx;
+  display: block;
+}
+
+/* ─── 空状态 ─── */
+.idx-empty-pet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 48rpx;
+  margin: 0 32rpx;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+  text-align: center;
+}
+.idx-empty-pet-icon {
+  font-size: 72rpx;
+  margin-bottom: 20rpx;
+}
+.idx-empty-pet-title {
+  font-size: 30rpx;
   font-weight: 700;
   color: #3D2C1E;
   margin-bottom: 8rpx;
 }
-.idx-rescue-hint {
-  font-size: 22rpx;
+.idx-empty-pet-desc {
+  font-size: 24rpx;
   color: #A89789;
 }
