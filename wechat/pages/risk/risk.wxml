@@ -105,7 +105,7 @@
               <view class="info-label">硬件列表</view>
               <view class="info-value info-tags">
                 <text class="info-tag" wx:for="{{hardwareList}}" wx:key="id" wx:if="{{item.active}}">{{item.name}}</text>
-                <text wx:if="{{hardwareList.filter(h => h.active).length === 0}}">--</text>
+                <text wx:if="{{activeHardwareCount === 0}}">--</text>
               </view>
             </view>
           </view>

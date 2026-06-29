@@ -18,7 +18,8 @@ Page({
     // 环境交互
     nfcCount: 0,
     deviceCount: 0,
-    hardwareList: []
+    hardwareList: [],
+    activeHardwareCount: 0
   },
 
   onLoad() {
@@ -57,14 +58,16 @@ Page({
   loadDeviceCounts() {
     const nfcList = wx.getStorageSync('nfcList') || []
     const deviceList = wx.getStorageSync('deviceList') || []
+    const hwList = [
+      { id: 1, name: '智能项圈', active: deviceList.some(d => d.type === 'collar') },
+      { id: 2, name: 'NFC贴',    active: nfcList.length > 0 },
+      { id: 3, name: '语音盒',   active: deviceList.some(d => d.type === 'voicebox') }
+    ]
     this.setData({
       nfcCount: nfcList.length,
       deviceCount: deviceList.length,
-      hardwareList: [
-        { id: 1, name: '智能项圈', active: deviceList.some(d => d.type === 'collar') },
-        { id: 2, name: 'NFC贴',    active: nfcList.length > 0 },
-        { id: 3, name: '语音盒',   active: deviceList.some(d => d.type === 'voicebox') }
-      ]
+      hardwareList: hwList,
+      activeHardwareCount: hwList.filter(h => h.active).length
     })
   },
 
