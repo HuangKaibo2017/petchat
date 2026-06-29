@@ -4,6 +4,7 @@
     "pages/emotion/emotion",
     "pages/emotion/report/report",
     "pages/health/health",
+    "pages/risk/risk",
     "pages/mine/mine",
     "pages/mine/register/register",
     "pages/mine/pets/pets",

@@ -99,6 +99,8 @@ Page({
 
   goHealth()     { this.checkAuth(() => wx.navigateTo({ url: '/pages/health/health' })) },
 
+  goRisk()      { this.checkAuth(() => wx.navigateTo({ url: '/pages/risk/risk' })) },
+
   goRegister()   { this.checkAuth(() => wx.navigateTo({ url: '/pages/mine/register/register' })) },
 
   onShareAppMessage() {
