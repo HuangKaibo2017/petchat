@@ -5,6 +5,7 @@
     "pages/emotion/report/report",
     "pages/health/health",
     "pages/risk/risk",
+    "pages/shop/shop",
     "pages/mine/mine",
     "pages/mine/register/register",
     "pages/mine/pets/pets",
@@ -35,6 +36,12 @@
         "text": "首页",
         "iconPath": "images/tab-home.png",
         "selectedIconPath": "images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/shop/shop",
+        "text": "商城",
+        "iconPath": "images/tab-shop.png",
+        "selectedIconPath": "images/tab-shop-active.png"
       },
       {
         "pagePath": "pages/mine/mine",

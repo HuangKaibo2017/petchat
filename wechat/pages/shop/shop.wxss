@@ -1,0 +1,108 @@
+.shop-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ─── 分类标签 ─── */
+.shop-cats {
+  display: flex;
+  white-space: nowrap;
+  padding: 20rpx 32rpx;
+  gap: 16rpx;
+  background: #FFFFFF;
+}
+
+.shop-cat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 60rpx;
+  padding: 0 28rpx;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border-radius: 30rpx;
+  flex-shrink: 0;
+}
+
+.shop-cat--active {
+  color: #FFFFFF;
+  background: var(--color-primary);
+}
+
+/* ─── 商品网格 ─── */
+.shop-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20rpx 24rpx;
+  gap: 20rpx;
+}
+
+.shop-card {
+  width: calc(50% - 10rpx);
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.shop-card-img-wrap {
+  width: 100%;
+  height: 280rpx;
+  background: var(--color-bg);
+}
+
+.shop-card-img {
+  width: 100%;
+  height: 100%;
+}
+
+.shop-card-info {
+  padding: 16rpx 20rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.shop-card-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-card-desc {
+  font-size: 22rpx;
+  color: var(--color-text-hint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-card-price {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #E8443A;
+  margin-top: 4rpx;
+}
+
+/* ─── 空状态 ─── */
+.shop-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.shop-empty-icon {
+  font-size: 80rpx;
+}
+
+.shop-empty-text {
+  font-size: 28rpx;
+  color: var(--color-text-hint);
+  margin-top: 16rpx;
+}

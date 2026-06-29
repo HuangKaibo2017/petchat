@@ -1,0 +1,32 @@
+<view class="shop-page">
+  <!-- ═══ 分类标签 ═══ -->
+  <scroll-view class="shop-cats" scroll-x>
+    <view class="shop-cat {{activeCategory === item.key ? 'shop-cat--active' : ''}}"
+          wx:for="{{categories}}" wx:key="key"
+          bindtap="switchCategory" data-key="{{item.key}}">
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <!-- ═══ 商品列表 ═══ -->
+  <view class="shop-grid">
+    <view class="shop-card" wx:for="{{products}}" wx:key="id"
+          wx:if="{{activeCategory === 'all' || item.category === activeCategory}}"
+          bindtap="goDetail" data-id="{{item.id}}">
+      <view class="shop-card-img-wrap">
+        <image class="shop-card-img" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill" />
+      </view>
+      <view class="shop-card-info">
+        <view class="shop-card-name">{{item.name}}</view>
+        <view class="shop-card-desc">{{item.desc}}</view>
+        <view class="shop-card-price">¥{{item.price}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="shop-empty" wx:if="{{!loading && products.length === 0}}">
+    <view class="shop-empty-icon">🛒</view>
+    <view class="shop-empty-text">暂无商品</view>
+  </view>
+</view>
