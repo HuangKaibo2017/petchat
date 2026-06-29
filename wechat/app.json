@@ -1,25 +1,8 @@
 {
   "pages": [
-    "pages/welcome/welcome",
     "pages/index/index",
-    "pages/personality/personality",
-    "pages/lostpet/lostpet",
-    "pages/newpet/newpet",
-    "pages/photo/photo",
-    "pages/rescue/rescue",
     "pages/emotion/emotion",
     "pages/emotion/report/report",
-    "pages/health/health",
-    "pages/health/report/report",
-    "pages/risk/risk",
-    "pages/risk/report/report",
-    "pages/chat/chat",
-    "pages/chat/list/list",
-    "pages/shop/shop",
-    "pages/shop/detail/detail",
-    "pages/shop/cart/cart",
-    "pages/shop/checkout/checkout",
-    "pages/service/service",
     "pages/mine/mine",
     "pages/mine/register/register",
     "pages/mine/pets/pets",
@@ -29,14 +12,6 @@
     "pages/mine/settings/settings",
     "pages/mine/orders/orders",
     "pages/mine/agent/agent",
-    "pages/medical/medical",
-    "pages/medical/detail/detail",
-    "pages/insurance/insurance",
-    "pages/hospitals/hospitals",
-    "pages/hospitals/detail/detail",
-    "pages/community/community",
-    "pages/community/post/post",
-    "pages/favorites/favorites",
     "pages/mine/agreement/agreement",
     "pages/mine/hardware/hardware"
   ],
@@ -58,24 +33,6 @@
         "text": "首页",
         "iconPath": "images/tab-home.png",
         "selectedIconPath": "images/tab-home-active.png"
-      },
-      {
-        "pagePath": "pages/chat/chat",
-        "text": "聊天",
-        "iconPath": "images/tab-chat.png",
-        "selectedIconPath": "images/tab-chat-active.png"
-      },
-      {
-        "pagePath": "pages/shop/shop",
-        "text": "商城",
-        "iconPath": "images/tab-shop.png",
-        "selectedIconPath": "images/tab-shop-active.png"
-      },
-      {
-        "pagePath": "pages/service/service",
-        "text": "服务",
-        "iconPath": "images/tab-service.png",
-        "selectedIconPath": "images/tab-service-active.png"
       },
       {
         "pagePath": "pages/mine/mine",

@@ -44,7 +44,6 @@ Page({
     MockAPI.getPets().then(res => {
       const pets = (res && res.data) ? res.data : []
       const currentPet = pets.length > 0 ? pets[0] : null
-      // 根据 Figma Lo-fi 首页设计，随机 mock 情绪状态
       const moodMap = this.getRandomMood()
       this.setData({
         pets,
@@ -60,7 +59,6 @@ Page({
   },
 
   getRandomMood() {
-    // Figma Lo-fi 首页展示 "Sad" 状态，以此为核心随机选择一个情绪
     const moods = [
       { value: 'happy', icon: '😊', label: '开心' },
       { value: 'sad', icon: '😢', label: '难过' },
@@ -71,7 +69,6 @@ Page({
       { value: 'angry', icon: '😤', label: '生气' },
       { value: 'scared', icon: '😨', label: '害怕' }
     ]
-    // 模拟数据，默认展示 "难过" 以匹配 Figma 中 "Sad" 设计
     return moods[1]
   },
 
@@ -98,40 +95,8 @@ Page({
   },
 
   // ─── 核心工具 ───
-  goHealth()     { this.checkAuth(() => wx.navigateTo({ url: '/pages/health/health' })) },
-  goEmotion()    { this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/overview/overview' })) },
-  goPersonality(){ this.checkAuth(() => wx.navigateTo({ url: '/pages/personality/personality' })) },
-  goRisk()       { this.checkAuth(() => wx.navigateTo({ url: '/pages/risk/risk' })) },
-  goMedical()    { wx.navigateTo({ url: '/pages/health/health' }) },
-  goNewPet()     { wx.navigateTo({ url: '/pages/newpet/newpet' }) },
-  goLostPet()    { this.checkAuth(() => wx.navigateTo({ url: '/pages/lostpet/lostpet' })) },
+  goEmotion()    { this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion' })) },
 
-  // ─── 救助 ───
-  goRescue()     { wx.navigateTo({ url: '/pages/rescue/rescue' }) },
-  goRescueHelp() { wx.navigateTo({ url: '/pages/rescue/rescue?tab=help' }) },
-  goRescueAdopt(){ wx.navigateTo({ url: '/pages/rescue/rescue?tab=adopt' }) },
-
-  // ─── 照片 ───
-  goUploadPhoto() {
-    const that = this
-    wx.chooseMedia({
-      count: 9,
-      mediaType: ['image'],
-      sourceType: ['album', 'camera'],
-      success(res) {
-        const tempFiles = res.tempFiles
-        that.checkAuth(() => {
-          app.globalData._uploadPhotos = tempFiles
-          wx.navigateTo({ url: '/pages/photo/photo' })
-        })
-      }
-    })
-  },
-  goPhoto()      { this.checkAuth(() => wx.navigateTo({ url: '/pages/photo/photo' })) },
-
-  // ─── 医院 / 商城 ───
-  goHospitals()  { wx.navigateTo({ url: '/pages/hospitals/hospitals' }) },
-  goShop()       { wx.switchTab({ url: '/pages/shop/shop' }) },
   goRegister()   { this.checkAuth(() => wx.navigateTo({ url: '/pages/mine/register/register' })) },
 
   onShareAppMessage() {

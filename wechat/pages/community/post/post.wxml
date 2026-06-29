@@ -1,7 +1,0 @@
-<nav-bar title="发布动态" showBack="{{true}}" />
-<view class="page-container section">
-  <textarea class="input-field input-textarea" placeholder="分享你和宠物的故事…" value="{{content}}" bindinput="onInput" maxlength="500" />
-  <view class="upload-btn mt-md" bindtap="chooseImage"><text>📷 添加图片</text></view>
-  <image class="preview" wx:if="{{image}}" src="{{image}}" mode="aspectFill" />
-  <button class="btn btn-primary btn-block mt-xl" bindtap="publish">发布</button>
-</view>
