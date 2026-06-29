@@ -39,68 +39,6 @@
       </view>
     </view>
 
-    <!-- 异常症状 -->
-    <view class="mine-card">
-      <view class="mine-card-body">
-        <view class="mine-card-title">异常症状（如有）</view>
-        <view class="desc-row">
-          <input class="desc-input" placeholder="例如：频繁打喷嚏、拉稀、呕吐..." value="{{symptomText}}" bindinput="onSymptomInput" />
-        </view>
-      </view>
-    </view>
-
-    <!-- 饮食习惯 -->
-    <view class="mine-card">
-      <view class="mine-card-body">
-        <view class="mine-card-title">饮食习惯</view>
-        <view class="desc-row">
-          <input class="desc-input" placeholder="例如：每天两餐，以干粮为主..." value="{{dietText}}" bindinput="onDietInput" />
-        </view>
-      </view>
-    </view>
-
-    <!-- 运动情况 -->
-    <view class="mine-card">
-      <view class="mine-card-body">
-        <view class="mine-card-title">运动情况</view>
-        <view class="desc-row">
-          <input class="desc-input" placeholder="例如：每天遛两次，每次30分钟..." value="{{exerciseText}}" bindinput="onExerciseInput" />
-        </view>
-      </view>
-    </view>
-
-    <!-- 健康指标 -->
-    <view class="mine-card">
-      <view class="mine-card-body">
-        <view class="mine-card-title">健康指标</view>
-        <view class="mine-card-desc">请输入以下关键指标以辅助分析</view>
-        <view class="param-grid">
-          <view class="param-item">
-            <view class="param-label">体重 (kg)</view>
-            <input class="param-input" type="digit" placeholder="请输入" value="{{weight}}" bindinput="onFieldInput" data-field="weight" />
-          </view>
-          <view class="param-item">
-            <view class="param-label">体温 (°C)</view>
-            <input class="param-input" type="digit" placeholder="请输入" value="{{temperature}}" bindinput="onFieldInput" data-field="temperature" />
-          </view>
-          <view class="param-item">
-            <view class="param-label">心率 (次/分)</view>
-            <input class="param-input" type="number" placeholder="请输入" value="{{heartRate}}" bindinput="onFieldInput" data-field="heartRate" />
-          </view>
-        </view>
-        <view class="param-grid">
-          <view class="param-item">
-            <view class="param-label">睡眠 (小时)</view>
-            <input class="param-input" type="digit" placeholder="请输入" value="{{sleepHours}}" bindinput="onFieldInput" data-field="sleepHours" />
-          </view>
-          <view class="param-item">
-            <view class="param-label">饮水量 (ml)</view>
-            <input class="param-input" type="number" placeholder="请输入" value="{{waterIntake}}" bindinput="onFieldInput" data-field="waterIntake" />
-          </view>
-        </view>
-      </view>
-    </view>
-
     <!-- 上传照片 -->
     <view class="mine-card">
       <view class="mine-card-body">
