@@ -29,13 +29,28 @@
       <view class="pet-dropdown-add" bindtap="goAddPet">+ 添加宠物</view>
     </view>
 
-    <!-- 状态描述 -->
+    <!-- 自动获取信息 -->
     <view class="mine-card">
       <view class="mine-card-body">
-        <view class="mine-card-title">风险描述</view>
-        <view class="mine-card-desc">描述越具体，生成的风险预警越精准</view>
-        <view class="desc-row">
-          <input class="desc-input" placeholder="例如：狗狗最近总对着门口狂叫，邻居投诉..." value="{{descText}}" bindinput="onDescInput" />
+        <view class="mine-card-title">自动获取信息</view>
+        <view class="mine-card-desc">系统将自动获取以下关键信息，作为预警分析依据</view>
+        <view class="info-grid">
+          <view class="info-item">
+            <view class="info-label">宠物名称</view>
+            <view class="info-value">{{currentPet.name || '--'}}</view>
+          </view>
+          <view class="info-item">
+            <view class="info-label">品种</view>
+            <view class="info-value">{{currentPet.breed || '--'}}</view>
+          </view>
+          <view class="info-item">
+            <view class="info-label">年龄</view>
+            <view class="info-value">{{currentPet.age || '--'}}</view>
+          </view>
+          <view class="info-item">
+            <view class="info-label">性别</view>
+            <view class="info-value">{{currentPet.gender === 'male' ? '公' : currentPet.gender === 'female' ? '母' : '--'}}</view>
+          </view>
         </view>
       </view>
     </view>

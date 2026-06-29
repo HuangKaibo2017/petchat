@@ -4,7 +4,6 @@ Page({
   data: {
     currentPet: {},
     showPetDropdown: false,
-    descText: '',
     photoList: [],
     pets: []
   },
@@ -43,10 +42,6 @@ Page({
     wx.navigateTo({ url: '/pages/mine/register/register' })
   },
 
-  // ─── 输入处理 ───
-  onDescInput(e) {
-    this.setData({ descText: e.detail.value })
-  },
 
   // ─── 上传照片 ───
   addPhoto() {
