@@ -151,7 +151,7 @@
   padding: 20rpx 24rpx;
   font-size: 28rpx;
   color: var(--color-text-primary);
-  height: 80rpx;
+  height: 160rpx;
 }
 
 /* ─── 参数网格 ─── */
