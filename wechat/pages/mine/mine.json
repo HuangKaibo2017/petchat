@@ -1,4 +1,6 @@
 {
-  "usingComponents": { "nav-bar": "/components/nav-bar/nav-bar", "authorize": "/components/authorize/authorize" },
-  "navigationStyle": "custom"
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/nav-bar"
+  }
 }
