@@ -1,42 +1,51 @@
 <view class="idx-page">
-  <!-- ═══ 品牌头部 ═══ -->
-  <view class="idx-brand" style="padding-top:{{statusBarHeight + 44}}rpx">
-    <view class="idx-brand-title">更懂它</view>
-    <view class="idx-brand-slogan">更懂它的心，陪它一生长久</view>
+  <!-- ═══ 海报 Banner ═══ -->
+  <view class="idx-hero" style="padding-top:{{statusBarHeight + 44}}rpx">
+    <image class="idx-hero-img" src="/images/banner.png" mode="aspectFill" />
   </view>
 
-  <!-- ═══ 核心工具（3 项） ═══ -->
+  <!-- ═══ 核心工具 ═══ -->
   <view class="idx-section">
-    <view class="idx-section-title">核心工具</view>
-    <view class="idx-tools">
-      <view class="idx-tool" bindtap="goEmotion">
-        <view class="idx-tool-icon">🔮</view>
-        <view class="idx-tool-name">宠物心声解读</view>
-        <view class="idx-tool-desc">读懂它的情绪与需求</view>
-      </view>
-      <view class="idx-tool" bindtap="goMedical">
-        <view class="idx-tool-icon">📋</view>
-        <view class="idx-tool-name">宠物疾病科普</view>
-        <view class="idx-tool-desc">科学养护，预防先行</view>
-      </view>
-      <view class="idx-tool" bindtap="goRisk">
-        <view class="idx-tool-icon">⚡</view>
-        <view class="idx-tool-name">人宠风险预警</view>
-        <view class="idx-tool-desc">提前预警，安心相伴</view>
+    <view class="idx-tools-box">
+      <view class="idx-section-title">核心工具</view>
+      <view class="idx-tools-row">
+        <view class="idx-tool-card idx-tool--emotion" bindtap="goEmotion">
+          <view class="idx-tool-card-name">宠物心声解读</view>
+          <view class="idx-tool-card-desc">读懂它的情绪与需求</view>
+          <image class="idx-tool-card-img" src="/images/home-emotion.png" mode="widthFix" />
+        </view>
+        <view class="idx-tool-card idx-tool--health" bindtap="goHealth">
+          <view class="idx-tool-card-name">宠物健康分析</view>
+          <view class="idx-tool-card-desc">科学养护，预防先行</view>
+          <image class="idx-tool-card-img" src="/images/home-health.png" mode="widthFix" />
+        </view>
+        <view class="idx-tool-card idx-tool--risk" bindtap="goRisk">
+          <view class="idx-tool-card-name">人宠风险预警</view>
+          <view class="idx-tool-card-desc">提前预警，安心相伴</view>
+          <image class="idx-tool-card-img" src="/images/home-risk.png" mode="widthFix" />
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- ═══ 水印照片 ═══ -->
+  <!-- ═══ 上传照片 ═══ -->
   <view class="idx-section">
-    <view class="idx-section-title">水印照片</view>
-    <view class="idx-watermark">
-      <view class="idx-watermark-input-wrap">
-        <input class="idx-watermark-input" placeholder="写一句20字以内的话" maxlength="20" value="{{watermarkText}}" bindinput="onWatermarkInput" />
-      </view>
-      <view class="idx-watermark-upload" bindtap="goPhoto">
-        <view class="idx-watermark-camera">
-          <text class="idx-watermark-camera-icon">📷</text>
+    <view class="idx-tools-box">
+      <view class="idx-section-title">水印照片</view>
+      <view class="idx-photo-row">
+        <view class="idx-photo-col">
+          <view class="idx-photo-upload" bindtap="goUploadPhoto">
+            <view class="idx-photo-upload-icon">+</view>
+            <view class="idx-photo-upload-text">点击上传照片</view>
+          </view>
+          <view class="idx-photo-watermark">写一句20字以内水印</view>
+        </view>
+        <view class="idx-photo-card idx-photo-card--right" bindtap="goPhoto">
+          <view class="idx-photo-stack">
+            <image class="idx-photo-stack-img" src="/images/dog.jpg" mode="aspectFill" />
+          </view>
+          <view class="idx-photo-card-title">宠物相册</view>
+          <view class="idx-photo-card-desc">记录成长每一刻</view>
         </view>
       </view>
     </view>
@@ -44,27 +53,23 @@
 
   <!-- ═══ 救助专区 ═══ -->
   <view class="idx-section">
-    <view class="idx-section-title">救助专区</view>
-    <view class="idx-section-subtitle">汇聚爱心力量，守护每一个生命奇迹</view>
-    <view class="idx-rescue">
-      <view class="idx-rescue-card" bindtap="goRescueHelp">
-        <view class="idx-rescue-card-img">
-          <text class="idx-rescue-emoji">🐾</text>
-        </view>
-        <view class="idx-rescue-label">流浪求助</view>
-        <view class="idx-rescue-hint">发现流浪，紧急求助</view>
-      </view>
-      <view class="idx-rescue-card" bindtap="goRescueAdopt">
-        <view class="idx-rescue-card-img">
-          <text class="idx-rescue-emoji">🏠</text>
-        </view>
-        <view class="idx-rescue-label">宠物领养</view>
-        <view class="idx-rescue-hint">给它一个温暖的家</view>
+    <view class="idx-tools-box">
+      <view class="idx-section-title">救助专区</view>
+      <view class="idx-rescue-row">
+        <image class="idx-rescue-img" src="/images/liulangqiuzhu.png" mode="widthFix" bindtap="goRescueHelp" />
+        <image class="idx-rescue-img" src="/images/lingyang.png" mode="widthFix" bindtap="goRescueAdopt" />
       </view>
     </view>
   </view>
 
-  <!-- ═══ 底部间距 ═══ -->
+  <!-- ═══ 空状态 ═══ -->
+  <view class="idx-empty-pet" wx:if="{{!currentPet && !loading}}">
+    <view class="idx-empty-pet-icon">🐾</view>
+    <view class="idx-empty-pet-title">添加你的第一只宠物</view>
+    <view class="idx-empty-pet-desc">开始记录和了解它的每一天</view>
+    <button class="btn btn-primary btn-block mt-lg" bindtap="goRegister">添加宠物</button>
+  </view>
+
   <view style="height:calc(20rpx + env(safe-area-inset-bottom))"></view>
 </view>
 
