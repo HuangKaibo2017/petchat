@@ -299,3 +299,40 @@
   font-weight: 600;
   color: var(--color-text-primary);
 }
+
+/* ─── 信息子区块 ─── */
+.info-section {
+  margin-top: 32rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid var(--color-border-light);
+}
+
+.info-section:first-of-type {
+  margin-top: 20rpx;
+  padding-top: 0;
+  border-top: none;
+}
+
+.info-section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 16rpx;
+}
+
+/* ─── 标签 ─── */
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.info-tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: var(--color-primary);
+  background: rgba(45, 125, 110, 0.1);
+  border-radius: 8rpx;
+}

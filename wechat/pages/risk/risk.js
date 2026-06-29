@@ -5,12 +5,27 @@ Page({
     currentPet: {},
     showPetDropdown: false,
     photoList: [],
-    pets: []
+    pets: [],
+    // 主人信息
+    owner: {
+      age: '',
+      occupation: '',
+      city: '',
+      phone: '',
+      diet: '',
+      experience: ''
+    },
+    // 环境交互
+    nfcCount: 0,
+    deviceCount: 0,
+    hardwareList: []
   },
 
   onLoad() {
     this.loadPets()
     this.loadDefaultPet()
+    this.loadOwnerProfile()
+    this.loadDeviceCounts()
   },
 
   loadPets() {
@@ -23,6 +38,34 @@ Page({
     if (pets.length > 0 && !this.data.currentPet.id) {
       this.setData({ currentPet: pets[0] })
     }
+  },
+
+  loadOwnerProfile() {
+    const profile = wx.getStorageSync('ownerProfile') || {}
+    this.setData({
+      owner: {
+        age: profile.age || '',
+        occupation: profile.occupation || '',
+        city: profile.city || '',
+        phone: profile.phone || '',
+        diet: profile.diet || '',
+        experience: profile.experience || ''
+      }
+    })
+  },
+
+  loadDeviceCounts() {
+    const nfcList = wx.getStorageSync('nfcList') || []
+    const deviceList = wx.getStorageSync('deviceList') || []
+    this.setData({
+      nfcCount: nfcList.length,
+      deviceCount: deviceList.length,
+      hardwareList: [
+        { id: 1, name: '智能项圈', active: deviceList.some(d => d.type === 'collar') },
+        { id: 2, name: 'NFC贴',    active: nfcList.length > 0 },
+        { id: 3, name: '语音盒',   active: deviceList.some(d => d.type === 'voicebox') }
+      ]
+    })
   },
 
   // ─── 宠物选择 ───
@@ -41,7 +84,6 @@ Page({
   goAddPet() {
     wx.navigateTo({ url: '/pages/mine/register/register' })
   },
-
 
   // ─── 上传照片 ───
   addPhoto() {
