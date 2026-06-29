@@ -1,156 +1,254 @@
-<nav-bar title="我的" />
-<view class="page-container">
-  <!-- User Info with owner profile entry -->
-  <view class="user-card">
-    <view wx:if="{{isLoggedIn}}">
-      <view class="flex items-center">
-        <image class="avatar-lg" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
-        <view class="ml-md" class="flex-1">
-          <view class="flex-between items-center">
-            <view class="text-xl font-bold">{{userInfo.nickName || '宠主'}}</view>
-            <view class="tag tag-primary text-xs" bindtap="goOwnerProfile">主人档案 ›</view>
+<view class="mine-page">
+  <nav-bar title="我的" />
+
+  <!-- ═══ 头像 + 昵称 ═══ -->
+  <view class="profile-header" bindtap="goLogin">
+    <image class="profile-bg" src="{{bgUrl || '/images/hero-bg.png'}}" mode="aspectFill" />
+    <image class="profile-avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
+    <view class="profile-name">{{nickname || '点击登录'}}</view>
+  </view>
+
+  <!-- ═══ 信息卡片区 ═══ -->
+  <view class="mine-cards">
+    <!-- 主人档案 -->
+    <view class="mine-card mine-card--owner" bindtap="goOwnerProfile">
+      <view class="mine-card-body">
+        <view class="mine-card-title">主人档案</view>
+        <view class="mine-card-info">
+          <view class="mine-card-field">
+            <text class="mine-card-label">年龄</text>
+            <text class="mine-card-value">{{owner.age || '--'}}</text>
           </view>
-          <view class="text-sm text-hint mt-xs">{{currentPet ? currentPet.name + '的家长' : '暂未添加宠物'}}</view>
-          <!-- 季度提醒 -->
-          <view class="reminder-bar mt-sm" wx:if="{{seasonReminder}}" bindtap="goHealth">
-            <text class="text-xs">📅 {{seasonReminder}}</text>
+          <view class="mine-card-field">
+            <text class="mine-card-label">职业</text>
+            <text class="mine-card-value">{{owner.occupation || '--'}}</text>
           </view>
-          <!-- 硬件免费次数 -->
-          <view class="hardware-badge mt-xs" wx:if="{{hardwareFreeCount > 0}}">
-            <text class="text-xs">🎁 硬件权益：医疗科普 {{hardwareFreeCount}}次 · 风险预警 {{hardwareFreeCount}}次免费</text>
+          <view class="mine-card-field">
+            <text class="mine-card-label">居住地</text>
+            <text class="mine-card-value">{{owner.city || '--'}}</text>
+          </view>
+          <view class="mine-card-field">
+            <text class="mine-card-label">手机号</text>
+            <text class="mine-card-value">{{owner.phone || '--'}}</text>
+          </view>
+          <view class="mine-card-field">
+            <text class="mine-card-label">饮食偏好</text>
+            <text class="mine-card-value">{{owner.diet || '--'}}</text>
+          </view>
+          <view class="mine-card-field">
+            <text class="mine-card-label">养宠经验</text>
+            <text class="mine-card-value">{{owner.experience || '--'}}</text>
           </view>
         </view>
       </view>
+      <view class="mine-card-arrow">›</view>
     </view>
-    <view wx:else class="flex items-center" bindtap="showAuth">
-      <image class="avatar-lg" src="/images/default-avatar.png" mode="aspectFill" />
-      <view class="ml-md">
-        <view class="text-lg font-bold">点击登录</view>
-        <view class="text-xs text-hint mt-sm">授权后享受完整服务</view>
-      </view>
-    </view>
-  </view>
 
-  <!-- Current Pet Quick Switch -->
-  <view class="pet-switch card" wx:if="{{pets.length > 1}}">
-    <scroll-view scroll-x class="pet-scroll">
-      <view class="pet-mini {{currentPet && currentPet.id === item.id ? 'active' : ''}}" wx:for="{{pets}}" wx:key="id" bindtap="switchPet" data-id="{{item.id}}">
-        <image class="avatar-sm" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
-        <text class="text-xs mt-sm">{{item.name}}</text>
-      </view>
-      <view class="pet-mini add" bindtap="goAddPet">
-        <text class="text-xl text-hint">+</text>
-        <text class="text-xs text-hint">添加</text>
-      </view>
-    </scroll-view>
-  </view>
-
-  <!-- Menu Grid -->
-  <view class="menu-section">
-    <view class="menu-grid">
-      <view class="menu-item" bindtap="goPets">
-        <view class="menu-icon">🐾</view>
-        <view class="menu-text text-sm">宠物档案</view>
-      </view>
-      <view class="menu-item" bindtap="goOwnerProfile">
-        <view class="menu-icon">👤</view>
-        <view class="menu-text text-sm">主人档案</view>
-      </view>
-      <view class="menu-item" bindtap="goHistory">
-        <view class="menu-icon">📋</view>
-        <view class="menu-text text-sm">历史报告</view>
-      </view>
-      <view class="menu-item" bindtap="goFavorites">
-        <view class="menu-icon">❤️</view>
-        <view class="menu-text text-sm">我的收藏</view>
-      </view>
-      <view class="menu-item" bindtap="goOrders">
-        <view class="menu-icon">📦</view>
-        <view class="menu-text text-sm">我的订单</view>
-        <view class="badge" wx:if="{{pendingOrders}}">{{pendingOrders}}</view>
-      </view>
-      <view class="menu-item" bindtap="goHardware">
-        <view class="menu-icon">🔗</view>
-        <view class="menu-text text-sm">硬件绑定</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 季度体质提醒卡片 -->
-  <view class="section" wx:if="{{constitutionReminder}}">
-    <view class="reminder-card card" bindtap="goHealth">
-      <view class="flex items-center">
-        <view class="reminder-icon">⏰</view>
-        <view class="ml-md" class="flex-1">
-          <view class="text-md font-bold">季度体质提醒</view>
-          <view class="text-xs text-hint mt-xs">{{constitutionReminder}}</view>
+    <!-- 宠物档案 -->
+    <view class="mine-card mine-card--pet" bindtap="goPetProfile">
+      <view class="mine-card-body">
+        <view class="mine-card-title-row">
+          <view class="mine-card-title">宠物档案</view>
+          <view class="mine-card-add" catchtap="goAddPet">+</view>
         </view>
-        <view class="btn btn-primary btn-sm">去生成</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 硬件购买推广 -->
-  <view class="section" wx:if="{{!hasHardware}}">
-    <view class="hardware-card card" bindtap="goShop">
-      <view class="flex items-center">
-        <view class="hardware-icon">📡</view>
-        <view class="ml-md" class="flex-1">
-          <view class="text-md font-bold">购买灵犀NFC项圈</view>
-          <view class="text-xs text-hint mt-xs">购买硬件即赠：疾病科普3次 + 风险预警3次 · 体质分析1次 · 性格分析1次</view>
+        <view class="pet-list" wx:if="{{pets.length > 0}}">
+          <view class="pet-item" wx:for="{{pets}}" wx:key="id" data-index="{{index}}" catchtap="goEditPet">
+            <image class="pet-item-avatar" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+            <view class="pet-item-content">
+              <view class="pet-item-name">{{item.name}}</view>
+              <view class="pet-item-row">
+                <text class="pet-item-label">基础信息</text>
+                <text class="pet-item-text">{{item.age || '--'}} / {{item.weight || '--'}} / {{item.gender || '--'}} / {{item.breed || '--'}}</text>
+              </view>
+              <view class="pet-item-row">
+                <text class="pet-item-label">健康信息</text>
+                <text class="pet-item-text">{{item.health || '--'}}</text>
+              </view>
+              <view class="pet-item-row">
+                <text class="pet-item-label">过敏原</text>
+                <text class="pet-item-text">{{item.allergy || '无过敏史'}}</text>
+              </view>
+              <view class="pet-item-tip" wx:if="{{item.tip}}">{{item.tip}}</view>
+            </view>
+            <view class="pet-item-arrow">›</view>
+          </view>
         </view>
-        <view class="text-lg text-primary">›</view>
+        <view class="pet-empty" wx:else>
+          <view class="mine-card-desc">添加宠物，记录它的每一天</view>
+        </view>
       </view>
+    </view>
+
+    <!-- 硬件绑定 -->
+    <view class="mine-card" bindtap="goDeviceBind">
+      <view class="mine-card-body">
+        <view class="mine-card-title">硬件绑定</view>
+        <view class="device-row">
+          <view class="device-section device-section--slider">
+            <swiper class="device-swiper" indicator-dots="{{false}}" autoplay="{{false}}" circular="{{true}}" current="{{hwCurrent}}" bindchange="onHwChange">
+              <swiper-item wx:for="{{hardwareList}}" wx:key="id">
+                <view class="swiper-slide">
+                  <image class="swiper-slide-img" src="{{item.image || '/images/placeholder-product.png'}}" mode="aspectFill" />
+                </view>
+              </swiper-item>
+            </swiper>
+            <view class="swiper-slide-label">
+              <text>{{hardwareList[hwCurrent].name}}</text>
+              <text class="swiper-slide-check" wx:if="{{hardwareList[hwCurrent].active}}">✓</text>
+            </view>
+            <view class="swiper-dots">
+              <view class="swiper-dot {{hwCurrent === index ? 'swiper-dot--active' : ''}}" wx:for="{{hardwareList}}" wx:key="id" wx:for-index="index"></view>
+            </view>
+          </view>
+          <view class="device-section device-section--vip">
+            <view class="vip-label">权益特权</view>
+            <view class="vip-row-full">
+              <text>心声解读</text>
+              <text class="vip-count">{{emotionQuota || 0}}次</text>
+              <text>宠物健康通行</text>
+              <text class="vip-count">{{healthQuota || 0}}次</text>
+            </view>
+            <view class="vip-row-full">
+              <text>人宠风险预警</text>
+              <text class="vip-count">{{riskQuota || 0}}次</text>
+              <text>体质分析</text>
+              <text class="vip-count">{{bodyQuota || 0}}次</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="mine-card-arrow">›</view>
     </view>
   </view>
 
-  <!-- Function List -->
-  <view class="func-list">
-    <view class="func-item" bindtap="goInsurance">
-      <view class="func-left">
-        <text class="func-icon">🛡️</text>
-        <text class="text-md">宠物保险</text>
+  <!-- ═══ 功能列表 ═══ -->
+  <view class="mine-menu">
+    <view class="mine-menu-item" bindtap="goContact">
+      <view class="mine-menu-left">
+        <image class="mine-menu-icon" src="/images/icon-health.png" mode="aspectFit" />
+        <text>联系客服</text>
       </view>
-      <view class="func-right">
-        <text class="tag tag-success text-xs">新人免费</text>
-        <text class="text-hint ml-sm">›</text>
-      </view>
+      <view class="mine-menu-arrow">›</view>
     </view>
-    <view class="func-item" bindtap="goDeviceBind">
-      <view class="func-left">
-        <text class="func-icon">📡</text>
-        <text class="text-md">智能设备管理</text>
-        <text class="text-xs text-hint ml-sm">灵犀NFC · MCP IoT</text>
+
+    <view class="mine-menu-divider"></view>
+
+    <view class="mine-menu-item" bindtap="goAbout">
+      <view class="mine-menu-left">
+        <image class="mine-menu-icon" src="/images/icon-rescue.png" mode="aspectFit" />
+        <text>关于我们</text>
       </view>
-      <text class="text-hint">›</text>
+      <view class="mine-menu-arrow">›</view>
     </view>
-    <view class="func-item" bindtap="goAgent">
-      <view class="func-left">
-        <text class="func-icon">💎</text>
-        <text class="text-md">成为代理</text>
+
+    <view class="mine-menu-divider"></view>
+
+    <view class="mine-menu-item" bindtap="goSettings">
+      <view class="mine-menu-left">
+        <image class="mine-menu-icon" src="/images/icon-risk.png" mode="aspectFit" />
+        <text>设置</text>
       </view>
-      <text class="text-hint">›</text>
-    </view>
-    <view class="func-item" bindtap="contactService">
-      <view class="func-left">
-        <text class="func-icon">💬</text>
-        <text class="text-md">联系客服</text>
-      </view>
-      <text class="text-hint">›</text>
+      <view class="mine-menu-arrow">›</view>
     </view>
   </view>
 
-  <!-- Settings -->
-  <view class="func-list mt-md">
-    <view class="func-item" bindtap="goSettings">
-      <view class="func-left">
-        <text class="func-icon">⚙️</text>
-        <text class="text-md">设置</text>
-      </view>
-      <text class="text-hint">›</text>
-    </view>
-  </view>
-
-  <view style="height: 120rpx"></view>
+  <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
 </view>
-<authorize visible="{{showAuth}}" bind:success="onAuthSuccess" bind:cancel="onAuthCancel" />
+
+<!-- ═══════════════════════════════════════════
+     主人档案弹层
+     ═══════════════════════════════════════════ -->
+<view class="form-overlay" wx:if="{{showOwnerForm}}">
+  <view class="form-mask" catchtap="closeOwnerForm"></view>
+  <view class="form-panel">
+    <view class="form-header">
+      <text class="form-title">主人档案</text>
+      <view class="form-close" bindtap="closeOwnerForm">✕</view>
+    </view>
+    <view class="form-body">
+      <view class="form-item">
+        <text class="form-label">年龄</text>
+        <input class="form-input" type="number" placeholder="请输入年龄" value="{{ownerForm.age}}" data-field="age" bindinput="onOwnerFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">职业</text>
+        <input class="form-input" placeholder="请输入职业" value="{{ownerForm.occupation}}" data-field="occupation" bindinput="onOwnerFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">居住地</text>
+        <input class="form-input" placeholder="请输入城市" value="{{ownerForm.city}}" data-field="city" bindinput="onOwnerFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">手机号</text>
+        <input class="form-input" type="number" maxlength="11" placeholder="请输入手机号" value="{{ownerForm.phone}}" data-field="phone" bindinput="onOwnerFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">饮食偏好</text>
+        <picker mode="selector" range="{{dietOptions}}" bindchange="onOwnerDietChange">
+          <view class="form-picker">{{ownerForm.diet || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">养宠经验</text>
+        <picker mode="selector" range="{{expOptions}}" bindchange="onOwnerExpChange">
+          <view class="form-picker">{{ownerForm.experience || '请选择'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="form-footer">
+      <button class="btn btn-primary btn-block" bindtap="submitOwnerForm">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- ═══════════════════════════════════════════
+     宠物档案弹层
+     ═══════════════════════════════════════════ -->
+<view class="form-overlay" wx:if="{{showPetForm}}">
+  <view class="form-mask" catchtap="closePetForm"></view>
+  <view class="form-panel">
+    <view class="form-header">
+      <text class="form-title">{{editingPetIndex >= 0 ? '编辑宠物' : '添加宠物'}}</text>
+      <view class="form-close" bindtap="closePetForm">✕</view>
+    </view>
+    <view class="form-body">
+      <view class="form-item">
+        <text class="form-label">名字</text>
+        <input class="form-input" placeholder="请输入宠物名字" value="{{petForm.name}}" data-field="name" bindinput="onPetFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">年龄</text>
+        <input class="form-input" placeholder="如：2岁8个月" value="{{petForm.age}}" data-field="age" bindinput="onPetFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">体重</text>
+        <input class="form-input" placeholder="如：10.3kg" value="{{petForm.weight}}" data-field="weight" bindinput="onPetFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">性别</text>
+        <picker mode="selector" range="{{genderOptions}}" bindchange="onPetGenderChange">
+          <view class="form-picker">{{petForm.gender || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">品种</text>
+        <input class="form-input" placeholder="如：金毛" value="{{petForm.breed}}" data-field="breed" bindinput="onPetFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">健康信息</text>
+        <input class="form-input" placeholder="如：已绝育 / 疫苗齐全" value="{{petForm.health}}" data-field="health" bindinput="onPetFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">过敏原</text>
+        <input class="form-input" placeholder="如：无过敏史" value="{{petForm.allergy}}" data-field="allergy" bindinput="onPetFieldInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">提示文字</text>
+        <input class="form-input" placeholder="如：建议每季度更新体质分" value="{{petForm.tip}}" data-field="tip" bindinput="onPetFieldInput" />
+      </view>
+    </view>
+    <view class="form-footer">
+      <button class="btn btn-primary btn-block" bindtap="submitPetForm">{{editingPetIndex >= 0 ? '保存修改' : '添加'}}</button>
+    </view>
+  </view>
+</view>
