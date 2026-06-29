@@ -1,0 +1,129 @@
+<view class="mine-page">
+  <nav-bar title="宠物健康" showBack="{{true}}" />
+
+  <!-- ═══ Banner 海报 ═══ -->
+  <view class="banner"></view>
+
+  <!-- ═══ 信息卡片区 ═══ -->
+  <view class="mine-cards">
+    <!-- 宠物选择 -->
+    <view class="mine-card" bindtap="togglePetList">
+      <image class="pet-select-avatar" src="{{currentPet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+      <view class="mine-card-body">
+        <view class="pet-select-name">{{currentPet.name || '选择宠物'}}</view>
+        <view class="pet-select-breed">{{currentPet.breed || '请选择要分析的宠物'}}</view>
+      </view>
+      <view class="pet-select-arrow">▼</view>
+    </view>
+
+    <!-- 宠物列表下拉 -->
+    <view class="pet-dropdown" wx:if="{{showPetDropdown}}">
+      <view class="pet-dropdown-item" wx:for="{{pets}}" wx:key="id" bindtap="selectPet" data-index="{{index}}">
+        <image class="pet-dropdown-avatar" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+        <view class="pet-dropdown-info">
+          <text class="pet-dropdown-name">{{item.name}}</text>
+          <text class="pet-dropdown-breed">{{item.breed || '--'}}</text>
+        </view>
+        <view class="pet-dropdown-check" wx:if="{{item.id === currentPet.id}}">✓</view>
+      </view>
+      <view class="pet-dropdown-add" bindtap="goAddPet">+ 添加宠物</view>
+    </view>
+
+    <!-- 状态描述 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">描述它最近的状态</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：最近食欲不振，总是没精神..." value="{{descText}}" bindinput="onDescInput" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 异常症状 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">异常症状（如有）</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：频繁打喷嚏、拉稀、呕吐..." value="{{symptomText}}" bindinput="onSymptomInput" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 饮食习惯 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">饮食习惯</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：每天两餐，以干粮为主..." value="{{dietText}}" bindinput="onDietInput" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 运动情况 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">运动情况</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：每天遛两次，每次30分钟..." value="{{exerciseText}}" bindinput="onExerciseInput" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 健康指标 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">健康指标</view>
+        <view class="mine-card-desc">请输入以下关键指标以辅助分析</view>
+        <view class="param-grid">
+          <view class="param-item">
+            <view class="param-label">体重 (kg)</view>
+            <input class="param-input" type="digit" placeholder="请输入" value="{{weight}}" bindinput="onFieldInput" data-field="weight" />
+          </view>
+          <view class="param-item">
+            <view class="param-label">体温 (°C)</view>
+            <input class="param-input" type="digit" placeholder="请输入" value="{{temperature}}" bindinput="onFieldInput" data-field="temperature" />
+          </view>
+          <view class="param-item">
+            <view class="param-label">心率 (次/分)</view>
+            <input class="param-input" type="number" placeholder="请输入" value="{{heartRate}}" bindinput="onFieldInput" data-field="heartRate" />
+          </view>
+        </view>
+        <view class="param-grid">
+          <view class="param-item">
+            <view class="param-label">睡眠 (小时)</view>
+            <input class="param-input" type="digit" placeholder="请输入" value="{{sleepHours}}" bindinput="onFieldInput" data-field="sleepHours" />
+          </view>
+          <view class="param-item">
+            <view class="param-label">饮水量 (ml)</view>
+            <input class="param-input" type="number" placeholder="请输入" value="{{waterIntake}}" bindinput="onFieldInput" data-field="waterIntake" />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 上传照片 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">上传照片</view>
+        <view class="photo-grid">
+          <view class="photo-item" wx:for="{{photoList}}" wx:key="*this">
+            <image class="photo-img" src="{{item}}" mode="aspectFill" />
+            <view class="photo-del" catchtap="delPhoto" data-index="{{index}}">✕</view>
+          </view>
+          <view class="photo-add" bindtap="addPhoto" wx:if="{{photoList.length < 9}}">
+            <text class="photo-add-icon">+</text>
+            <view class="photo-add-text">点击上传照片</view>
+            <view class="photo-add-sub">可上传多张</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生成报告按钮 -->
+  <view class="report-btn" bindtap="generateReport">
+    <text class="report-btn-text">生成宠物健康报告</text>
+  </view>
+
+  <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
+</view>

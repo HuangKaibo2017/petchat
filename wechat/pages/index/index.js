@@ -97,6 +97,8 @@ Page({
   // ─── 核心工具 ───
   goEmotion()    { this.checkAuth(() => wx.navigateTo({ url: '/pages/emotion/emotion' })) },
 
+  goHealth()     { this.checkAuth(() => wx.navigateTo({ url: '/pages/health/health' })) },
+
   goRegister()   { this.checkAuth(() => wx.navigateTo({ url: '/pages/mine/register/register' })) },
 
   onShareAppMessage() {
