@@ -1,0 +1,276 @@
+.mine-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+/* ─── Banner ─── */
+.banner {
+  height: 340rpx;
+  background: linear-gradient(135deg, #D8EBE6 0%, #FFF3E8 50%, #FCE7F3 100%);
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+/* ─── 信息卡片区 ─── */
+.mine-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 24rpx 32rpx;
+  margin-top: -40rpx;
+}
+
+.mine-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.mine-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mine-card-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 12rpx;
+}
+
+.mine-card-desc {
+  font-size: 24rpx;
+  color: var(--color-text-hint);
+  margin-bottom: 16rpx;
+}
+
+/* ─── 宠物选择 ─── */
+.pet-select-avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pet-select-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.pet-select-breed {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  margin-top: 4rpx;
+}
+
+.pet-select-arrow {
+  font-size: 28rpx;
+  color: var(--color-text-hint);
+  flex-shrink: 0;
+  margin-top: 4rpx;
+  transition: transform 0.2s;
+}
+
+/* ─── 宠物下拉列表 ─── */
+.pet-dropdown {
+  margin: -12rpx 32rpx 0;
+  background: #FFFFFF;
+  border-radius: 0 0 20rpx 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.pet-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  gap: 20rpx;
+  transition: background 0.15s;
+}
+
+.pet-dropdown-item:active {
+  background: var(--color-bg);
+}
+
+.pet-dropdown-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pet-dropdown-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.pet-dropdown-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.pet-dropdown-breed {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+.pet-dropdown-check {
+  font-size: 28rpx;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.pet-dropdown-add {
+  padding: 20rpx 24rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: var(--color-primary);
+  border-top: 1rpx solid var(--color-border-light);
+}
+
+.pet-dropdown-add:active {
+  background: var(--color-bg);
+}
+
+/* ─── 输入行 ─── */
+.desc-row {
+  display: flex;
+  align-items: center;
+}
+
+.desc-input {
+  flex: 1;
+  background: var(--color-bg);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+  height: 160rpx;
+}
+
+/* ─── 参数网格 ─── */
+.param-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.param-grid:first-of-type {
+  margin-top: 12rpx;
+}
+
+.param-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.param-label {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.param-input {
+  background: var(--color-bg);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: var(--color-text-primary);
+}
+
+/* ─── 上传照片 ─── */
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.photo-item {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.photo-img {
+  width: 100%;
+  height: 100%;
+}
+
+.photo-del {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 0 16rpx 0 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  color: #FFFFFF;
+}
+
+.photo-add {
+  flex-direction: column;
+  width: 100%;
+  height: 200rpx;
+  border-radius: 16rpx;
+  border: 2rpx dashed var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.photo-add-icon {
+  font-size: 56rpx;
+  color: var(--color-text-hint);
+  line-height: 1;
+}
+
+.photo-add-text {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.photo-add-sub {
+  font-size: 20rpx;
+  color: var(--color-text-hint);
+  margin-top: 6rpx;
+}
+
+/* ─── 生成报告按钮 ─── */
+.report-btn {
+  margin: 32rpx 32rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  background: linear-gradient(135deg, #22C55E 0%, #EAB308 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-btn:active {
+  opacity: 0.85;
+}
+
+.report-btn-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}

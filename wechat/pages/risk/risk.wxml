@@ -1,0 +1,68 @@
+<view class="mine-page">
+  <nav-bar title="人宠风险" showBack="{{true}}" />
+
+  <!-- ═══ Banner 海报 ═══ -->
+  <view class="banner"></view>
+
+  <!-- ═══ 信息卡片区 ═══ -->
+  <view class="mine-cards">
+    <!-- 宠物选择 -->
+    <view class="mine-card" bindtap="togglePetList">
+      <image class="pet-select-avatar" src="{{currentPet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+      <view class="mine-card-body">
+        <view class="pet-select-name">{{currentPet.name || '选择宠物'}}</view>
+        <view class="pet-select-breed">{{currentPet.breed || '请选择要分析的宠物'}}</view>
+      </view>
+      <view class="pet-select-arrow">▼</view>
+    </view>
+
+    <!-- 宠物列表下拉 -->
+    <view class="pet-dropdown" wx:if="{{showPetDropdown}}">
+      <view class="pet-dropdown-item" wx:for="{{pets}}" wx:key="id" bindtap="selectPet" data-index="{{index}}">
+        <image class="pet-dropdown-avatar" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+        <view class="pet-dropdown-info">
+          <text class="pet-dropdown-name">{{item.name}}</text>
+          <text class="pet-dropdown-breed">{{item.breed || '--'}}</text>
+        </view>
+        <view class="pet-dropdown-check" wx:if="{{item.id === currentPet.id}}">✓</view>
+      </view>
+      <view class="pet-dropdown-add" bindtap="goAddPet">+ 添加宠物</view>
+    </view>
+
+    <!-- 状态描述 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">风险描述</view>
+        <view class="mine-card-desc">描述越具体，生成的风险预警越精准</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：狗狗最近总对着门口狂叫，邻居投诉..." value="{{descText}}" bindinput="onDescInput" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 上传照片 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">上传照片</view>
+        <view class="photo-grid">
+          <view class="photo-item" wx:for="{{photoList}}" wx:key="*this">
+            <image class="photo-img" src="{{item}}" mode="aspectFill" />
+            <view class="photo-del" catchtap="delPhoto" data-index="{{index}}">✕</view>
+          </view>
+          <view class="photo-add" bindtap="addPhoto" wx:if="{{photoList.length < 9}}">
+            <text class="photo-add-icon">+</text>
+            <view class="photo-add-text">点击上传照片</view>
+            <view class="photo-add-sub">可上传多张</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生成报告按钮 -->
+  <view class="report-btn" bindtap="generateReport">
+    <text class="report-btn-text">生成风险预警报告</text>
+  </view>
+
+  <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
+</view>
