@@ -5,17 +5,8 @@ Page({
     currentPet: {},
     showPetDropdown: false,
     descText: '',
-    symptomText: '',
-    dietText: '',
-    exerciseText: '',
     photoList: [],
-    pets: [],
-    // 健康相关参数
-    weight: '',
-    temperature: '',
-    heartRate: '',
-    sleepHours: '',
-    waterIntake: ''
+    pets: []
   },
 
   onLoad() {
@@ -55,23 +46,6 @@ Page({
   // ─── 输入处理 ───
   onDescInput(e) {
     this.setData({ descText: e.detail.value })
-  },
-
-  onSymptomInput(e) {
-    this.setData({ symptomText: e.detail.value })
-  },
-
-  onDietInput(e) {
-    this.setData({ dietText: e.detail.value })
-  },
-
-  onExerciseInput(e) {
-    this.setData({ exerciseText: e.detail.value })
-  },
-
-  onFieldInput(e) {
-    const field = e.currentTarget.dataset.field
-    this.setData({ [field]: e.detail.value })
   },
 
   // ─── 上传照片 ───
