@@ -32,7 +32,8 @@
     <!-- 状态描述 -->
     <view class="mine-card">
       <view class="mine-card-body">
-        <view class="mine-card-title">描述它最近的状态</view>
+        <view class="mine-card-title">症状描述</view>
+        <view class="mine-card-desc">症状描述越具体，生成的健康报告越精准</view>
         <view class="desc-row">
           <input class="desc-input" placeholder="例如：最近食欲不振，总是没精神..." value="{{descText}}" bindinput="onDescInput" />
         </view>
