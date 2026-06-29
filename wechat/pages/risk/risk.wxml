@@ -34,22 +34,80 @@
       <view class="mine-card-body">
         <view class="mine-card-title">自动获取信息</view>
         <view class="mine-card-desc">系统将自动获取以下关键信息，作为预警分析依据</view>
-        <view class="info-grid">
-          <view class="info-item">
-            <view class="info-label">宠物名称</view>
-            <view class="info-value">{{currentPet.name || '--'}}</view>
+
+        <!-- masterinfo: 主人信息 -->
+        <view class="info-section">
+          <view class="info-section-title">主人信息</view>
+          <view class="info-grid">
+            <view class="info-item">
+              <view class="info-label">年龄</view>
+              <view class="info-value">{{owner.age || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">职业</view>
+              <view class="info-value">{{owner.occupation || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">所在城市</view>
+              <view class="info-value">{{owner.city || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">联系电话</view>
+              <view class="info-value">{{owner.phone || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">饮食偏好</view>
+              <view class="info-value">{{owner.diet || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">养宠经验</view>
+              <view class="info-value">{{owner.experience || '--'}}</view>
+            </view>
           </view>
-          <view class="info-item">
-            <view class="info-label">品种</view>
-            <view class="info-value">{{currentPet.breed || '--'}}</view>
+        </view>
+
+        <!-- petinfo: 宠物信息 -->
+        <view class="info-section">
+          <view class="info-section-title">宠物信息</view>
+          <view class="info-grid">
+            <view class="info-item">
+              <view class="info-label">宠物名称</view>
+              <view class="info-value">{{currentPet.name || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">品种</view>
+              <view class="info-value">{{currentPet.breed || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">年龄</view>
+              <view class="info-value">{{currentPet.age || '--'}}</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">性别</view>
+              <view class="info-value">{{currentPet.gender === 'male' ? '公' : currentPet.gender === 'female' ? '母' : '--'}}</view>
+            </view>
           </view>
-          <view class="info-item">
-            <view class="info-label">年龄</view>
-            <view class="info-value">{{currentPet.age || '--'}}</view>
-          </view>
-          <view class="info-item">
-            <view class="info-label">性别</view>
-            <view class="info-value">{{currentPet.gender === 'male' ? '公' : currentPet.gender === 'female' ? '母' : '--'}}</view>
+        </view>
+
+        <!-- envint: 环境交互 -->
+        <view class="info-section">
+          <view class="info-section-title">环境交互</view>
+          <view class="info-grid">
+            <view class="info-item">
+              <view class="info-label">NFC设备</view>
+              <view class="info-value">{{nfcCount}} 个</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">智能设备</view>
+              <view class="info-value">{{deviceCount}} 个</view>
+            </view>
+            <view class="info-item">
+              <view class="info-label">硬件列表</view>
+              <view class="info-value info-tags">
+                <text class="info-tag" wx:for="{{hardwareList}}" wx:key="id" wx:if="{{item.active}}">{{item.name}}</text>
+                <text wx:if="{{hardwareList.filter(h => h.active).length === 0}}">--</text>
+              </view>
+            </view>
           </view>
         </view>
       </view>
