@@ -1,169 +1,90 @@
-<nav-bar title="{{pageTitle}}" showBack="{{true}}" />
-<view class="page-container">
-  <!-- Step 1: Select Pet -->
-  <view class="section" wx:if="{{step === 0}}">
-    <view class="section-title">选择宠物</view>
-    <view class="section-subtitle">请选择需要解读的宠物</view>
-    <view class="section-subtitle text-warning">¥0.9 / 次 · 每次扣费后生成报告</view>
-    <pet-card
-      wx:for="{{pets}}"
-      wx:key="id"
-      pet="{{item}}"
-      selected="{{selectedPet && selectedPet.id === item.id}}"
-      showArrow="{{false}}"
-      bind:select="onSelectPet"
-    />
-    <view class="add-pet-hint text-center" wx:if="{{!pets.length}}" bindtap="goRegister">
-      <text class="text-hint">暂未添加宠物，点击添加 ›</text>
-    </view>
-    <button class="btn btn-primary btn-block mt-lg" disabled="{{!selectedPet}}" bindtap="nextStep">
-      下一步
-    </button>
-  </view>
+<view class="mine-page">
+  <nav-bar title="宠物心声" showBack="{{true}}" />
 
-  <!-- Step 2: Input Question & Divination Setup -->
-  <view class="section" wx:if="{{step === 1}}">
-    <view class="section-title">宠物状态问题</view>
-    <view class="section-subtitle">描述您想了解的宠物状态</view>
+  <!-- ═══ Banner 海报 ═══ -->
+  <view class="banner"></view>
 
-    <!-- 模式切换：多维度 / 一事一问 -->
-    <view class="mode-switch flex mt-md">
-      <view class="mode-switch-item {{emotionMode==='multi'?'mode-active':''}}" bindtap="switchEmotionMode" data-mode="multi">
-        <text>🔮 多维度</text>
+  <!-- ═══ 信息卡片区 ═══ -->
+  <view class="mine-cards">
+    <!-- 宠物选择 -->
+    <view class="mine-card" bindtap="togglePetList">
+      <image class="pet-select-avatar" src="{{currentPet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+      <view class="mine-card-body">
+        <view class="pet-select-name">{{currentPet.name || '选择宠物'}}</view>
+        <view class="pet-select-breed">{{currentPet.breed || '请选择要分析的宠物'}}</view>
       </view>
-      <view class="mode-switch-item {{emotionMode==='single'?'mode-active':''}}" bindtap="switchEmotionMode" data-mode="single">
-        <text>💬 一事一问</text>
-      </view>
+      <view class="pet-select-arrow">▼</view>
     </view>
 
-    <!-- Question Input with Hint Bulb -->
-    <view class="question-area">
-      <textarea
-        class="input-field input-textarea"
-        placeholder="例如：我家猫咪这两天不爱动，总是躲在角落里…"
-        value="{{question}}"
-        bindinput="onQuestionInput"
-        maxlength="500"
-      />
-      <view class="question-hint-bulb" bindtap="toggleQuestionHints">
-        <text class="bulb-icon">💡</text>
-        <text class="bulb-text text-xs text-hint">问题引导</text>
+    <!-- 宠物列表下拉 -->
+    <view class="pet-dropdown" wx:if="{{showPetDropdown}}">
+      <view class="pet-dropdown-item" wx:for="{{pets}}" wx:key="id" bindtap="selectPet" data-index="{{index}}">
+        <image class="pet-dropdown-avatar" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+        <view class="pet-dropdown-info">
+          <text class="pet-dropdown-name">{{item.name}}</text>
+          <text class="pet-dropdown-breed">{{item.breed || '--'}}</text>
+        </view>
+        <view class="pet-dropdown-check" wx:if="{{item.id === currentPet.id}}">✓</view>
       </view>
+      <view class="pet-dropdown-add" bindtap="goAddPet">+ 添加宠物</view>
     </view>
 
-    <!-- Question Hints Panel -->
-    <view class="hints-panel" wx:if="{{showQuestionHints}}">
-      <view class="hint-item" wx:for="{{questionHints}}" wx:key="*this" bindtap="selectHint" data-hint="{{item}}">
-        {{item}}
-      </view>
-    </view>
-
-    <!-- Image / Voice Upload -->
-    <view class="upload-row flex mt-md">
-      <view class="upload-btn" bindtap="chooseImage">
-        <text>📷 图片</text>
-      </view>
-      <view class="upload-btn" bindtap="startRecord">
-        <text>🎤 语音</text>
-      </view>
-    </view>
-    <image class="upload-preview" wx:if="{{uploadImage}}" src="{{uploadImage}}" mode="aspectFill" />
-
-    <!-- Divination System Selection (多维度模式) -->
-    <block wx:if="{{emotionMode==='multi'}}">
-    <view class="section-title mt-lg">起卦体系</view>
-    <view class="divination-grid">
-      <view class="divination-item {{divSystem === 'liuyao' ? 'active' : ''}}" bindtap="selectDivSystem" data-system="liuyao">
-        <view class="div-system-icon">☯</view>
-        <view class="div-name text-sm">六爻</view>
-        <view class="div-desc text-xs text-hint">输入6个数字</view>
-      </view>
-      <view class="divination-item {{divSystem === 'meihua' ? 'active' : ''}}" bindtap="selectDivSystem" data-system="meihua">
-        <view class="div-system-icon">🌸</view>
-        <view class="div-name text-sm">梅花易数</view>
-        <view class="div-desc text-xs text-hint">输入3个数字</view>
-      </view>
-      <view class="divination-item {{divSystem === 'daliuren' ? 'active' : ''}}" bindtap="selectDivSystem" data-system="daliuren">
-        <view class="div-system-icon">🌊</view>
-        <view class="div-name text-sm">大六壬</view>
-        <view class="div-desc text-xs text-hint">输入3个数字</view>
-      </view>
-      <view class="divination-item {{divSystem === 'tarot' ? 'active' : ''}}" bindtap="selectDivSystem" data-system="tarot">
-        <view class="div-system-icon">🃏</view>
-        <view class="div-name text-sm">塔罗</view>
-        <view class="div-desc text-xs text-hint">无需输入数字</view>
-      </view>
-    </view>
-
-    <!-- Number Input (non-tarot) -->
-    <view class="number-input-section mt-md" wx:if="{{divSystem !== 'tarot'}}">
-      <view class="section-subtitle" wx:if="{{divSystem === 'liuyao'}}">请输入6个数字（0-9）</view>
-      <view class="section-subtitle" wx:else>请输入3个数字（0-9）</view>
-      <view class="number-grid">
-        <input
-          wx:for="{{numberInputs}}"
-          wx:key="index"
-          class="number-input {{item ? 'filled' : ''}}"
-          type="number"
-          maxlength="1"
-          value="{{item}}"
-          bindinput="onNumberInput"
-          data-index="{{index}}"
-        />
-      </view>
-      <view class="text-xs text-hint mt-sm">起卦时间：后台自动获取当前时间</view>
-    </view>
-
-    </block>
-    <!-- 一事一问：单个数字输入 -->
-    <block wx:if="{{emotionMode==='single'}}">
-      <view class="section-subtitle mt-md">请输入1个数字（0-9），作为感应数</view>
-      <view class="single-number-input flex items-center justify-center mt-md">
-        <input class="number-input large filled" type="number" maxlength="1" value="{{singleNum}}" bindinput="onSingleNumInput" />
-      </view>
-    </block>
-
-    <view class="text-xs text-hint text-center mt-md" wx:if="{{divSystem === 'tarot'}}">
-      塔罗模式下，提交后将自动跳转至选牌页面
-    </view>
-
-    <button
-      class="btn btn-primary btn-block mt-xl"
-      disabled="{{!canSubmit}}"
-      bindtap="submitEmotion"
-    >
-      {{divSystem === 'tarot' ? '开始选牌' : emotionMode === 'single' ? '一问便知' : '生成报告'}}
-    </button>
-  </view>
-
-  <!-- Tarot Card Selection (Step 3) -->
-  <view class="section" wx:if="{{step === 2 && divSystem === 'tarot'}}">
-    <view class="section-title">选择塔罗牌</view>
-    <view class="section-subtitle">请凭直觉选择3张牌</view>
-    <view class="tarot-grid">
-      <view
-        class="tarot-card {{selectedCards.indexOf(index) > -1 ? 'revealed' : 'hidden'}}"
-        wx:for="{{tarotCards}}"
-        wx:key="*this"
-        bindtap="selectTarotCard"
-        data-index="{{index}}"
-      >
-        <view class="tarot-back" wx:if="{{selectedCards.indexOf(index) === -1}}">🃏</view>
-        <view class="tarot-front" wx:else>
-          <text class="tarot-emoji">{{item}}</text>
-          <text class="text-xs text-hint">第{{selectedCards.indexOf(index) + 1}}张</text>
+    <!-- 状态描述 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">描述他最近的状态</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：最近不爱吃饭，总是没精神..." value="{{descText}}" bindinput="onDescInput" />
+          <view class="desc-tip-btn" bindtap="showDescTip">💡</view>
         </view>
       </view>
     </view>
-    <button
-      class="btn btn-primary btn-block mt-lg"
-      disabled="{{selectedCards.length < 3}}"
-      bindtap="generateReport"
-    >
-      确认选牌，生成报告
-    </button>
+
+    <!-- 上传照片 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">上传照片</view>
+        <view class="photo-grid">
+          <view class="photo-item" wx:for="{{photoList}}" wx:key="*this">
+            <image class="photo-img" src="{{item}}" mode="aspectFill" />
+            <view class="photo-del" catchtap="delPhoto" data-index="{{index}}">✕</view>
+          </view>
+          <view class="photo-add" bindtap="addPhoto" wx:if="{{photoList.length < 9}}">
+            <text class="photo-add-icon">+</text>
+            <view class="photo-add-text">点击上传照片</view>
+            <view class="photo-add-sub">可上传多张</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 量子波动参数 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">输入量子波动参数</view>
+        <view class="mine-card-desc">为了确保心声解读唯一性，请输入以下三组参数</view>
+        <view class="param-grid">
+          <view class="param-item">
+            <view class="param-label">宠物牵挂值</view>
+            <input class="param-input" type="number" placeholder="请输入任意数字" value="{{qpCare}}" bindinput="onQpInput" data-field="qpCare" />
+          </view>
+          <view class="param-item">
+            <view class="param-label">活力感知值</view>
+            <input class="param-input" type="number" placeholder="请输入任意数字" value="{{qpEnergy}}" bindinput="onQpInput" data-field="qpEnergy" />
+          </view>
+          <view class="param-item">
+            <view class="param-label">心声直觉值</view>
+            <input class="param-input" type="number" placeholder="请输入任意数字" value="{{qpIntuition}}" bindinput="onQpInput" data-field="qpIntuition" />
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 
-  <!-- Loading State -->
-  <loading visible="{{generating}}" text="Gengdongta正在解读中…" />
+  <!-- 生成报告按钮 -->
+  <view class="report-btn" bindtap="generateReport">
+    <text class="report-btn-text">生成宠物心声报告</text>
+  </view>
+
+  <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
 </view>
