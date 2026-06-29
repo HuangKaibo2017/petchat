@@ -336,3 +336,16 @@
   background: rgba(45, 125, 110, 0.1);
   border-radius: 8rpx;
 }
+
+/* ─── 信息图片行 ─── */
+.info-img-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.info-img {
+  width: 100%;
+  border-radius: 12rpx;
+}
