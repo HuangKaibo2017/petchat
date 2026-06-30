@@ -1,0 +1,75 @@
+<view class="page">
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="text-sm text-hint mt-sm">正在评估中...</text>
+  </view>
+
+  <view class="report-body" wx:if="{{!loading && report}}">
+    <!-- Header -->
+    <view class="header">
+      <view class="header-info">
+        <text class="pet-name">{{petName}}</text>
+        <text class="report-label">风险评估报告</text>
+      </view>
+    </view>
+
+    <!-- Risk Level -->
+    <view class="card core-card risk-card" style="background: linear-gradient(135deg, {{riskColor}} 0%, {{riskColor}}dd 100%);">
+      <view class="card-title">⚡ 风险等级</view>
+      <text class="risk-label">{{riskText}}</text>
+      <view class="score-bar" wx:if="{{report.riskScore}}">
+        <view class="score-fill" style="width: {{report.riskScore}}%"></view>
+      </view>
+      <text class="core-text" wx:if="{{report.riskScore}}">风险指数: {{report.riskScore}}/100</text>
+    </view>
+
+    <!-- Core Answer -->
+    <view class="card" wx:if="{{report.coreAnswer || report.petImbalance}}">
+      <view class="card-title">📊 综合分析</view>
+      <text class="section-text">{{report.coreAnswer || report.petImbalance}}</text>
+      <text class="section-text text-sm text-hint" wx:if="{{report.coreBasis}}">{{report.coreBasis}}</text>
+    </view>
+
+    <!-- Risk Factors -->
+    <view class="card" wx:if="{{riskFactors.length}}">
+      <view class="card-title">⚠️ 风险因素</view>
+      <view class="factor-list">
+        <view class="factor-item" wx:for="{{riskFactors}}" wx:key="name" wx:for-item="f">
+          <view class="factor-header">
+            <view class="factor-dot" style="background: {{riskColor}}"></view>
+            <text class="factor-name">{{f.name || f.factor || f}}</text>
+          </view>
+          <text class="factor-desc text-sm text-hint" wx:if="{{f.desc || f.detail}}">{{f.desc || f.detail}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Prevention -->
+    <view class="card" wx:if="{{report.prevention || report.recommendations}}">
+      <view class="card-title">🛡️ 预防措施</view>
+      <text class="section-text">{{report.prevention || report.recommendations}}</text>
+    </view>
+
+    <!-- Emergency Guide -->
+    <view class="card highlight-card" wx:if="{{report.emergencyGuide || report.medicalAdvice}}">
+      <view class="card-title">🏥 紧急指引</view>
+      <text class="section-text">{{report.emergencyGuide || report.medicalAdvice}}</text>
+    </view>
+
+    <!-- Actions -->
+    <view class="actions">
+      <button class="action-btn secondary" bindtap="onFavorite">❤️ 收藏报告</button>
+      <button class="action-btn" open-type="share">📤 分享报告</button>
+    </view>
+
+    <view class="footer text-xs text-hint">
+      <text>风险评估仅做参考，如有异常请及时就医</text>
+      <text>报告时间: {{report.createdAt || '刚刚'}}</text>
+    </view>
+  </view>
+
+  <view class="empty-wrap" wx:if="{{!loading && !report}}">
+    <text class="text-md text-hint">暂无报告数据</text>
+    <button class="action-btn secondary mt-md" bindtap="goBack">返回</button>
+  </view>
+</view>

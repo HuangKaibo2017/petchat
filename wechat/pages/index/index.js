@@ -103,6 +103,24 @@ Page({
 
   goRegister()   { this.checkAuth(() => wx.navigateTo({ url: '/pages/mine/register/register' })) },
 
+  goUploadPhoto() {
+    wx.chooseImage({
+      count: 1,
+      sizeType: ["compressed"],
+      sourceType: ["album", "camera"],
+      success: (res) => {
+        wx.showToast({ title: "照片已选择", icon: "success" })
+      }
+    })
+  },
+
+  goPhoto() {
+    this.checkAuth(() => wx.navigateTo({ url: "/pages/mine/pets/pets" }))
+  },
+
+  goRescueHelp()  { wx.showToast({ title: "救助功能即将上线", icon: "none" }) },
+  goRescueAdopt() { wx.showToast({ title: "领养功能即将上线", icon: "none" }) },
+
   onShareAppMessage() {
     return { title: '更懂它 - 更懂它的心，陪它一生长久', path: '/pages/index/index' }
   }

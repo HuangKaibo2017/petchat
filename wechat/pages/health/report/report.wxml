@@ -1,0 +1,88 @@
+<view class="page">
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="text-sm text-hint mt-sm">正在分析中...</text>
+  </view>
+
+  <view class="report-body" wx:if="{{!loading && report}}">
+    <!-- Header -->
+    <view class="header">
+      <view class="header-info">
+        <text class="pet-name">{{petName}}</text>
+        <text class="report-label">健康监测报告</text>
+      </view>
+    </view>
+
+    <!-- Health Score -->
+    <view class="card core-card health-card">
+      <view class="card-title">💊 健康评分</view>
+      <view class="score-wrap">
+        <text class="score-num">{{healthPercent}}</text>
+        <text class="score-unit">分</text>
+      </view>
+      <view class="score-bar">
+        <view class="score-fill" style="width: {{healthPercent}}%"></view>
+      </view>
+      <text class="core-text" wx:if="{{report.healthLevel}}">
+        {{report.healthLevel === 'normal' ? '状态良好' : report.healthLevel === 'warning' ? '需要关注' : '建议就医'}}
+      </text>
+    </view>
+
+    <!-- Core Answer -->
+    <view class="card" wx:if="{{report.coreAnswer || report.currentSymptoms}}">
+      <view class="card-title">📋 症状分析</view>
+      <text class="section-text">{{report.coreAnswer || report.currentSymptoms}}</text>
+    </view>
+
+    <!-- Symptom Detail -->
+    <view class="card" wx:if="{{report.symptomAnalysis}}">
+      <view class="card-title">🔍 详细分析</view>
+      <text class="section-text">{{report.symptomAnalysis}}</text>
+    </view>
+
+    <!-- Diet Advice -->
+    <view class="card" wx:if="{{report.dietAdvice}}">
+      <view class="card-title">🍖 饮食建议</view>
+      <text class="section-text">{{report.dietAdvice}}</text>
+    </view>
+
+    <!-- Exercise Advice -->
+    <view class="card" wx:if="{{report.exerciseAdvice}}">
+      <view class="card-title">🏃 运动建议</view>
+      <text class="section-text">{{report.exerciseAdvice}}</text>
+    </view>
+
+    <!-- Care Plan -->
+    <view class="card" wx:if="{{carePlan.length}}">
+      <view class="card-title">📝 护理计划</view>
+      <view class="care-list">
+        <view class="care-item" wx:for="{{carePlan}}" wx:key="title">
+          <text class="care-title">{{item.title}}</text>
+          <text class="care-desc text-sm text-hint">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Emergency -->
+    <view class="card highlight-card" wx:if="{{report.emergency}}">
+      <view class="card-title">🚨 紧急提示</view>
+      <text class="section-text">{{report.emergency}}</text>
+    </view>
+
+    <!-- Actions -->
+    <view class="actions">
+      <button class="action-btn secondary" bindtap="onFavorite">❤️ 收藏报告</button>
+      <button class="action-btn" open-type="share">📤 分享报告</button>
+    </view>
+
+    <view class="footer text-xs text-hint">
+      <text>以上内容为AI分析，不替代专业兽医诊断</text>
+      <text>报告时间: {{report.createdAt || '刚刚'}}</text>
+    </view>
+  </view>
+
+  <view class="empty-wrap" wx:if="{{!loading && !report}}">
+    <text class="text-md text-hint">暂无报告数据</text>
+    <button class="action-btn secondary mt-md" bindtap="goBack">返回</button>
+  </view>
+</view>

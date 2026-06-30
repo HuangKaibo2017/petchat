@@ -7,7 +7,7 @@ const llm = require('../core/llm')
 const memory = require('../core/memory')
 
 class Agent {
-  constructor({ name, systemPrompt, tools = [], model = 'qwen-plus', temperature = 0.7 }) {
+  constructor({ name, systemPrompt, tools = [], model = 'deepseek-chat', temperature = 0.7 }) {
     this.name = name
     this.systemPrompt = systemPrompt
     this.tools = tools
