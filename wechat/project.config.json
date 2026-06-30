@@ -5,6 +5,22 @@
       {
         "value": ".eslintrc.js",
         "type": "file"
+      },
+      {
+        "value": ".git",
+        "type": "folder"
+      },
+      {
+        "value": ".DS_Store",
+        "type": "file"
+      },
+      {
+        "value": "images/.DS_Store",
+        "type": "file"
+      },
+      {
+        "value": "images/pet",
+        "type": "folder"
       }
     ],
     "include": []
