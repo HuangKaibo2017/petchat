@@ -1,0 +1,25 @@
+<nav-bar title="商品详情" showBack="{{true}}" />
+
+<view class="page-container" wx:if="{{!loading && product}}">
+  <!-- 商品主图 -->
+  <view class="detail-image-wrap">
+    <image class="detail-image" src="{{product.image || '/images/default-product.png'}}" mode="aspectFill" />
+  </view>
+
+  <!-- 商品信息 -->
+  <view class="detail-info card">
+    <view class="detail-name">{{product.name}}</view>
+    <view class="detail-desc">{{product.desc}}</view>
+    <view class="detail-price-row">
+      <text class="detail-price">¥{{product.price}}</text>
+    </view>
+  </view>
+
+  <!-- 购买按钮 -->
+  <view class="detail-action">
+    <button class="btn btn-primary btn-block btn-lg" bindtap="onBuy">立即购买</button>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<loading wx:if="{{loading}}" />

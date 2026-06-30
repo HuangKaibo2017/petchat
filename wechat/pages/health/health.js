@@ -6,7 +6,8 @@ Page({
     showPetDropdown: false,
     descText: '',
     photoList: [],
-    pets: []
+    pets: [],
+    submitting: false,
   },
 
   onLoad() {
@@ -26,7 +27,6 @@ Page({
     }
   },
 
-  // ─── 宠物选择 ───
   togglePetList() {
     this.setData({ showPetDropdown: !this.data.showPetDropdown })
   },
@@ -43,12 +43,10 @@ Page({
     wx.navigateTo({ url: '/pages/mine/register/register' })
   },
 
-  // ─── 输入处理 ───
   onDescInput(e) {
     this.setData({ descText: e.detail.value })
   },
 
-  // ─── 上传照片 ───
   addPhoto() {
     wx.chooseImage({
       count: 9 - this.data.photoList.length,
@@ -69,16 +67,32 @@ Page({
     this.setData({ photoList: list })
   },
 
-  // ─── 生成报告 ───
-  generateReport() {
+  async generateReport() {
     if (!this.data.currentPet.id) {
       wx.showToast({ title: '请先选择宠物', icon: 'none' })
       return
     }
+
+    const API = require('../../utils/api')
+    this.setData({ submitting: true })
     wx.showLoading({ title: '分析中...' })
-    setTimeout(() => {
+
+    try {
+      const result = await API.Report.health({
+        petId: this.data.currentPet.id,
+        symptom: this.data.descText,
+        imageUrl: this.data.photoList[0] || '',
+      })
+
       wx.hideLoading()
+      app.globalData._lastHealthReport = result
       wx.navigateTo({ url: '/pages/health/report/report' })
-    }, 1500)
+    } catch (err) {
+      wx.hideLoading()
+      console.error('[health] generate error:', err)
+      wx.navigateTo({ url: '/pages/health/report/report' })
+    }
+
+    this.setData({ submitting: false })
   }
 })

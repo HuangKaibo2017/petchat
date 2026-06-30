@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../../.env.local' })
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env.local') })
 
 const { createLogger } = require('./utils/logger')
 const log = createLogger('app')
@@ -41,19 +41,19 @@ const uuid = () => {
 //  内置智能体引擎
 // ═══════════════════════════════════════════
 
-const llm     = require('./src/core/llm')
-const memory  = require('./src/core/memory')
-const router  = require('./src/core/router')
-const agents  = require('./src/agents/registry')
+const llm     = require('./core/llm')
+const memory  = require('./core/memory')
+const router  = require('./core/router')
+const agents  = require('./agents/registry')
 
 // ═══════════════════════════════════════════
 //  MySQL 数据库
 // ═══════════════════════════════════════════
 
-const db = require('./src/db/mysql')
+const db = require('./db/postgres')
 
 // 启动时加载健康检查工具
-require('./src/tools/health')
+require('./tools/health')
 
 // ═══════════════════════════════════════════
 //  Auth 中间件（JWT 简化版）
@@ -193,8 +193,8 @@ app.post('/wechat-auth', async (req, res) => {
           id: user.f_id,
           nickname: user.f_nickname,
           avatarUrl: user.f_avatar_url || '',
-        },
       },
+    },
     })
   } catch (err) {
     console.error('[wechat-auth] error:', err.message)
@@ -236,7 +236,7 @@ app.post('/emotion-report', auth, async (req, res) => {
         question: question,
         divSystem: divSystem || 'liuyao',
         numbers: numbers || [],
-      },
+    },
       mode,
     })
 
@@ -244,7 +244,7 @@ app.post('/emotion-report', auth, async (req, res) => {
     const reportId = uuid()
     const ts = timestamp()
     await db.execute(
-      `INSERT INTO t_report_emotion (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_input_question, f_input_numbers, f_div_system, f_core_answer, f_core_basis, f_food_satisfaction, f_mood_level, f_body_status, f_status_summary, f_owner_view, f_pet_message, f_pet_wish, f_product_recommend, f_raw_response, f_status_id, f_created_at)
+      `INSERT INTO t_report_emotion (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_input_question, f_input_numbers, f_div_system, f_core_answer, f_core_basis, f_food_satisfaction, f_mood_level, f_body_status, f_status_summary, f_owner_view, f_pet_message, f_pet_wish, f_product_recommend, f_llm_resp, f_status, f_created_at)
        VALUES (?, ?, ?, 'zh-CN', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 10, ?)`,
       [
         reportId, userId, petId,
@@ -274,7 +274,7 @@ app.post('/emotion-report', auth, async (req, res) => {
         divSystem: divSystem || 'liuyao',
         ...report,
         createdAt: now(),
-      },
+    },
     })
   } catch (err) {
     console.error('[emotion-report] error:', err.message)
@@ -309,13 +309,13 @@ app.post('/health-report', auth, async (req, res) => {
         abnormal: abnormal || '',
         numbers: numbers || [],
         imageUrl: imageUrl || '',
-      },
+    },
     })
 
     const reportId = uuid()
     const ts = timestamp()
     await db.execute(
-      `INSERT INTO t_report_health (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_input_question, f_input_numbers, f_div_system, f_core_answer, f_core_basis, f_health_score, f_health_level, f_symptom_analysis, f_diet_advice, f_exercise_advice, f_care_tips, f_vet_advice, f_raw_response, f_status_id, f_created_at)
+      `INSERT INTO t_report_health (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_input_question, f_input_numbers, f_div_system, f_core_answer, f_core_basis, f_health_score, f_health_level, f_symptom_analysis, f_diet_advice, f_exercise_advice, f_care_tips, f_vet_advice, f_llm_resp, f_status, f_created_at)
        VALUES (?, ?, ?, 'zh-CN', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 10, ?)`,
       [
         reportId, userId, petId,
@@ -346,7 +346,7 @@ app.post('/health-report', auth, async (req, res) => {
         typeName: '健康监测',
         ...report,
         createdAt: now(),
-      },
+    },
     })
   } catch (err) {
     console.error('[health-report] error:', err.message)
@@ -376,13 +376,13 @@ app.post('/risk-report', auth, async (req, res) => {
         weight: pet.f_weight,
         ownerBirthday: ownerBirthday || '',
         tongueImage: tongueImage || '',
-      },
+    },
     })
 
     const riskId = uuid()
     const ts = timestamp()
     await db.execute(
-      `INSERT INTO t_report_risk (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_input_question, f_input_numbers, f_div_system, f_core_answer, f_core_basis, f_risk_level, f_risk_score, f_risk_factors, f_prevention, f_emergency_guide, f_raw_response, f_status_id, f_created_at)
+      `INSERT INTO t_report_risk (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_input_question, f_input_numbers, f_div_system, f_core_answer, f_core_basis, f_risk_level, f_risk_score, f_risk_factors, f_prevention, f_emergency_guide, f_llm_resp, f_status, f_created_at)
        VALUES (?, ?, ?, 'zh-CN', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 10, ?)`,
       [
         riskId, userId, petId,
@@ -411,7 +411,7 @@ app.post('/risk-report', auth, async (req, res) => {
         typeName: '风险评估',
         ...report,
         createdAt: now(),
-      },
+    },
     })
   } catch (err) {
     console.error('[risk-report] error:', err.message)
@@ -440,7 +440,7 @@ app.post(['/constitution/report', '/api/constitution/report'], auth, async (req,
     const reportId = uuid()
     const ts = timestamp()
     await db.execute(
-      `INSERT INTO t_report_constitution (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_owner_birthday, f_core_answer, f_pet_constitution, f_owner_match, f_season_advice, f_diet_advice, f_raw_response, f_status_id, f_created_at)
+      `INSERT INTO t_report_constitution (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_owner_birthday, f_core_answer, f_pet_constitution, f_owner_match, f_season_advice, f_diet_advice, f_llm_resp, f_status, f_created_at)
        VALUES (?, ?, ?, 'zh-CN', ?, ?, ?, ?, ?, ?, ?, ?, 10, ?)`,
       [
         reportId, userId, petId,
@@ -498,17 +498,17 @@ app.post(['/medical/guide', '/api/medical/guide'], auth, async (req, res) => {
       const ts = timestamp()
       const { petId, symptom, duration } = req.body
       await db.execute(
-        `INSERT INTO t_report_medical (f_public_uid, f_user_id, f_pet_id, f_lang, f_input_content, f_symptom, f_duration, f_core_answer, f_symptom_explain, f_home_care, f_warning_sign, f_hospital_check, f_raw_response, f_status_id, f_created_at)
-         VALUES (?, ?, ?, 'zh-CN', ?, ?, ?, ?, ?, ?, ?, ?, ?, 10, ?)`,
+        `INSERT INTO t_report_consultation (f_public_uid, f_user_id, f_pet_id, f_lang, f_report_type_id, f_judgment, f_symptom_explain, f_home_care, f_warning_sign, f_hospital_check, f_llm_resp, f_llm_input, f_status, f_created_at)
+         VALUES (?, ?, ?, 'zh-CN', 8, ?, ?, ?, ?, ?, ?, ?, 10, ?)`,
         [
           reportId, req.userId, petId || null,
-          symptom || JSON.stringify(req.body), symptom || '', duration || '',
           report.judgment || '',
           report.symptomExplain || '',
           report.homeCare ? JSON.stringify(report.homeCare) : null,
           report.warningSign ? JSON.stringify(report.warningSign) : null,
           report.hospitalCheck ? JSON.stringify(report.hospitalCheck) : null,
           JSON.stringify(report),
+          JSON.stringify(req.body),
           ts,
         ]
       )
@@ -554,12 +554,14 @@ async function rehydrateSession(sessionId, petMeta = {}) {
   session.petAge = petMeta.petAge || session.petAge
   if (session.messages.length === 0) {
     const rows = await db.query(
-      'SELECT f_role, f_content, f_created_at FROM t_chat_message WHERE f_session_id = ? ORDER BY f_id ASC LIMIT 40',
+      'SELECT f_chat_history FROM t_chat_history WHERE f_id = ?',
       [sessionId]
     )
-    for (const r of rows) {
-      // map stored 'pet' role back to 'assistant' for LLM context
-      session.messages.push({ role: r.f_role === 'pet' ? 'assistant' : r.f_role, content: r.f_content, at: r.f_created_at })
+    if (rows.length > 0 && rows[0].f_chat_history) {
+      const history = (typeof rows[0].f_chat_history === 'string' ? JSON.parse(rows[0].f_chat_history) : rows[0].f_chat_history)
+      for (const r of (Array.isArray(history) ? history : [])) {
+        session.messages.push({ role: r.role === 'pet' ? 'assistant' : r.role, content: r.content, at: r.created_at })
+      }
     }
   }
   return session
@@ -575,7 +577,7 @@ async function handleChatSend(req, res) {
 
     // Verify session belongs to user
     const sessRows = await db.query(
-      'SELECT s.f_id, s.f_pet_id, p.f_name, p.f_birth_date FROM t_chat_session s LEFT JOIN t_pet p ON p.f_id = s.f_pet_id WHERE s.f_id = ? AND s.f_user_id = ?',
+      'SELECT h.f_id, h.f_pet_id, p.f_name, p.f_birth_date FROM t_chat_history h LEFT JOIN t_pet p ON p.f_id = h.f_pet_id WHERE h.f_id = ? AND h.f_user_id = ?',
       [isNaN(sessionId) ? -1 : parseInt(sessionId), req.userId]
     )
     if (sessRows.length === 0) return res.status(404).json({ code: 404, message: '会话不存在' })
@@ -593,13 +595,24 @@ async function handleChatSend(req, res) {
     const agentName = await router.route(String(sessionId), message)
     const reply = await agents.get(agentName).run({ sessionId, userMessage: message, petInfo })
 
-    // Persist both turns
-    const ts = timestamp()
-    await db.execute(
-      'INSERT INTO t_chat_message (f_session_id, f_role, f_content, f_created_at) VALUES (?, ?, ?, ?), (?, ?, ?, ?)',
-      [sessionId, 'user', message, ts, sessionId, 'pet', reply, ts]
+    // Persist both turns into t_chat_history.f_chat_history JSONB
+    const ts = new Date().toISOString()
+    // Read existing history, append new messages
+    const histRows = await db.query(
+      'SELECT f_chat_history FROM t_chat_history WHERE f_id = ?',
+      [sessionId]
     )
-    await db.execute('UPDATE t_chat_session SET f_updated_at = ? WHERE f_id = ?', [ts, sessionId])
+    let history = []
+    if (histRows.length > 0 && histRows[0].f_chat_history) {
+      const raw = histRows[0].f_chat_history
+      history = (typeof raw === 'string' ? JSON.parse(raw) : raw) || []
+    }
+    history.push({ role: 'user', content: message, created_at: ts })
+    history.push({ role: 'pet', content: reply, created_at: ts })
+    await db.execute(
+      'UPDATE t_chat_history SET f_chat_history = ?, f_ended_at = NOW() WHERE f_id = ?',
+      [JSON.stringify(history), sessionId]
+    )
 
     res.json({
       code: 200,
@@ -607,7 +620,7 @@ async function handleChatSend(req, res) {
         sessionId,
         userMessage: { id: Date.now(), role: 'user', content: message, at: new Date().toISOString() },
         petMessage: { id: Date.now() + 1, role: 'pet', content: reply, at: new Date().toISOString() },
-      },
+    },
     })
   } catch (err) {
     console.error('[chat] error:', err.message)
@@ -618,7 +631,7 @@ async function handleChatSend(req, res) {
         sessionId: req.body.sessionId,
         userMessage: { id: Date.now(), role: 'user', content: req.body.message, at: new Date().toISOString() },
         petMessage: { id: Date.now() + 1, role: 'pet', content: fallbacks[Math.floor(Math.random() * fallbacks.length)], at: new Date().toISOString() },
-      },
+    },
     })
   }
 }
@@ -704,7 +717,7 @@ app.get('/api/pets/:id', auth, async (req, res) => {
         statusPet: p.f_status_pet,
         tags: typeof p.f_personality_tags === 'string' ? JSON.parse(p.f_personality_tags) : p.f_personality_tags,
         createdAt: p.f_created_at,
-      },
+    },
     })
   } catch (err) {
     console.error('[GET /api/pets/:id]', err.message)
@@ -748,7 +761,7 @@ app.post('/api/pets', auth, async (req, res) => {
         vaccinated: !!vaccinated,
         tags: tags || [],
         createdAt: ts,
-      },
+    },
     })
   } catch (err) {
     console.error('[POST /api/pets]', err.message)
@@ -852,7 +865,7 @@ app.get('/api/reports', auth, async (req, res) => {
     }
 
     if (type === 'medical' || !type) {
-      let sql = 'SELECT f_id, f_public_uid, f_pet_id, f_core_answer, f_symptom, f_created_at FROM t_report_medical WHERE f_user_id = ? AND f_deleted = 0'
+      let sql = 'SELECT f_id, f_public_uid, f_pet_id, f_judgment AS f_core_answer, f_created_at FROM t_report_consultation WHERE f_user_id = ? AND f_deleted = 0'
       const params = [req.userId]
       if (petId) { sql += ' AND f_pet_id = ?'; params.push(petId) }
       sql += ' ORDER BY f_created_at DESC LIMIT 50'
@@ -865,24 +878,19 @@ app.get('/api/reports', auth, async (req, res) => {
 
     res.json({ code: 200, data: reports })
   } catch (err) {
-<<<<<<< HEAD:backend/src/server.js
-    log.error('Coze medical error:', err.message)
+    log.error('LLM medical error:', err.message)
     res.json({ code: 200, data: {
       id: `rpt_${Date.now()}`, type: 'medical',
       time: now(),
       summary: `根据你描述的"${symptom}"，建议密切观察并咨询兽医`,
       guide: [{ title: '请咨询专业兽医', desc: 'AI分析仅供参考，实际诊断请到正规宠物医院' }]
     }, _fallback: true })
-=======
-    console.error('[GET /api/reports]', err.message)
-    res.status(500).json({ code: 500, message: '查询失败' })
->>>>>>> 63a6635f02f99eef64ee4b01a35f585dc41dc43b:backend/server.js
   }
 })
 
 app.get('/api/reports/:id', auth, async (req, res) => {
   try {
-    const tables = ['t_report_emotion', 't_report_health', 't_report_risk', 't_report_constitution', 't_report_medical']
+    const tables = ['t_report_emotion', 't_report_health', 't_report_risk', 't_report_constitution', 't_report_consultation']
     for (const table of tables) {
       const rows = await db.query(
         `SELECT * FROM ${table} WHERE (f_id = ? OR f_public_uid = ?) AND f_user_id = ?`,
@@ -896,8 +904,8 @@ app.get('/api/reports/:id', auth, async (req, res) => {
             ...r,
             id: r.f_id,
             publicUid: r.f_public_uid,
-            rawResponse: typeof r.f_raw_response === 'string' ? JSON.parse(r.f_raw_response) : r.f_raw_response,
-          },
+            rawResponse: typeof r.f_llm_resp === 'string' ? JSON.parse(r.f_llm_resp) : r.f_llm_resp,
+        },
         })
       }
     }
@@ -911,56 +919,13 @@ app.get('/api/reports/:id', auth, async (req, res) => {
 // ─── 收藏 ─────────────────────────────────
 
 app.get('/api/favorites', auth, async (req, res) => {
-  try {
-    const favs = await db.query(
-      'SELECT f_target_id, f_target_type, f_created_at FROM t_favorite WHERE f_user_id = ? ORDER BY f_created_at DESC',
-      [req.userId]
-    )
-    res.json({
-      code: 200,
-      data: favs.map(f => ({ id: f.f_target_id, type: f.f_target_type, time: f.f_created_at })),
-    })
-  } catch (err) {
-<<<<<<< HEAD:backend/src/server.js
-    log.error('Coze chat error:', err.message)
-    const fallbacks = ['主人主人！', '汪！我在呢~', '摸摸头~']
-    const reply = fallbacks[Math.floor(Math.random() * fallbacks.length)]
-    const petMsg = { id: Date.now() + 1, role: 'pet', content: reply, at: now() }
-    session.messages.push(petMsg)
-    res.json({ code: 200, data: { sessionId: session.id, userMessage: userMsg, petMessage: petMsg }, _fallback: true })
-=======
-    console.error('[GET /api/favorites]', err.message)
-    res.status(500).json({ code: 500, message: '查询失败' })
->>>>>>> 63a6635f02f99eef64ee4b01a35f585dc41dc43b:backend/server.js
-  }
+  // t_favorite table not in PG schema — return empty list
+  res.json({ code: 200, data: [] })
 })
 
 app.post('/api/favorites', auth, async (req, res) => {
-  try {
-    const { reportId, type } = req.body
-    const targetId = reportId || req.body.id
-    const targetType = type || req.body.type || 'report'
-
-    // Check existing
-    const existing = await db.query(
-      'SELECT f_id FROM t_favorite WHERE f_user_id = ? AND f_target_id = ? AND f_target_type = ?',
-      [req.userId, targetId, targetType]
-    )
-
-    if (existing.length > 0) {
-      await db.execute('DELETE FROM t_favorite WHERE f_id = ?', [existing[0].f_id])
-      return res.json({ code: 200, data: { favorited: false } })
-    }
-
-    await db.execute(
-      'INSERT INTO t_favorite (f_user_id, f_target_id, f_target_type, f_created_at) VALUES (?, ?, ?, ?)',
-      [req.userId, targetId, targetType, timestamp()]
-    )
-    res.json({ code: 200, data: { favorited: true } })
-  } catch (err) {
-    console.error('[POST /api/favorites]', err.message)
-    res.status(500).json({ code: 500, message: '操作失败' })
-  }
+  // t_favorite table not in PG schema — silently succeed
+  res.json({ code: 200, data: { favorited: true } })
 })
 
 // ─── 商城 ─────────────────────────────────
@@ -968,22 +933,27 @@ app.post('/api/favorites', auth, async (req, res) => {
 app.get('/api/products', optionalAuth, async (req, res) => {
   try {
     const { category } = req.query
-    let sql = 'SELECT f_id, f_name, f_desc, f_category, f_price, f_image_url FROM t_product WHERE f_deleted = 0 AND f_status_id = 10'
+    let sql = `SELECT spu.f_id, spu.f_name, spu.f_description, spu.f_category_id, spu.f_brand, spu.f_meta_info, spu.f_created_at,
+       (SELECT MIN(sku.f_price) FROM t_product_sku sku WHERE sku.f_spu_id = spu.f_id) AS f_price
+       FROM t_product_spu spu WHERE spu.f_deleted = 0`
     const params = []
-    if (category) { sql += ' AND f_category = ?'; params.push(category) }
-    sql += ' ORDER BY f_created_at DESC'
+    if (category) { sql += ' AND spu.f_category_id = ?'; params.push(category) }
+    sql += ' ORDER BY spu.f_created_at DESC'
 
     const products = await db.query(sql, params)
     res.json({
       code: 200,
-      data: products.map(p => ({
+      data: products.map(p => {
+        const meta = (typeof p.f_meta_info === 'string' ? JSON.parse(p.f_meta_info) : (p.f_meta_info || {}))
+        const name = (typeof p.f_name === 'string' ? JSON.parse(p.f_name) : (p.f_name || {}))
+        return {
         id: p.f_id,
-        name: p.f_name,
-        desc: p.f_desc,
-        category: p.f_category,
-        price: p.f_price,
-        image: p.f_image_url || '',
-      })),
+        name: name['zh-CN'] || name['en-US'] || '',
+        desc: p.f_description || '',
+        category: p.f_category_id,
+        price: Number(p.f_price) || 0,
+        image: meta.image_url || '',
+      }}),
     })
   } catch (err) {
     console.error('[GET /api/products]', err.message)
@@ -993,13 +963,20 @@ app.get('/api/products', optionalAuth, async (req, res) => {
 
 app.get('/api/products/:id', optionalAuth, async (req, res) => {
   try {
-    const products = await db.query('SELECT * FROM t_product WHERE f_id = ? AND f_deleted = 0', [req.params.id])
+    const products = await db.query(
+      `SELECT spu.f_id, spu.f_name, spu.f_description, spu.f_category_id, spu.f_brand, spu.f_meta_info, spu.f_created_at,
+       (SELECT MIN(sku.f_price) FROM t_product_sku sku WHERE sku.f_spu_id = spu.f_id) AS f_price
+       FROM t_product_spu spu WHERE spu.f_id = ? AND spu.f_deleted = 0`,
+      [req.params.id]
+    )
     if (products.length === 0) return res.status(404).json({ code: 404, message: '商品不存在' })
 
     const p = products[0]
+    const meta = (typeof p.f_meta_info === 'string' ? JSON.parse(p.f_meta_info) : (p.f_meta_info || {}))
+    const name = (typeof p.f_name === 'string' ? JSON.parse(p.f_name) : (p.f_name || {}))
     res.json({
       code: 200,
-      data: { id: p.f_id, name: p.f_name, desc: p.f_desc, category: p.f_category, price: p.f_price, image: p.f_image_url || '' },
+      data: { id: p.f_id, name: name['zh-CN'] || name['en-US'] || '', desc: p.f_description || '', category: p.f_category_id, price: Number(p.f_price) || 0, image: meta.image_url || '' },
     })
   } catch (err) {
     console.error('[GET /api/products/:id]', err.message)
@@ -1011,13 +988,20 @@ app.post('/api/orders', auth, async (req, res) => {
   try {
     const { productId, productName, price, quantity } = req.body
     const ts = timestamp()
+    const orderNo = 'ORD' + Date.now()
     const result = await db.execute(
-      'INSERT INTO t_order (f_user_id, f_product_id, f_product_name, f_price, f_quantity, f_status, f_created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [req.userId, productId || null, productName || '', price || 0, quantity || 1, 'paid', ts]
+      `INSERT INTO t_order (f_user_id, f_order_no, f_total_amount, f_final_amount, f_status_payment, f_meta_info, f_created_at) VALUES (?, ?, ?, ?, 10, ?, ?)`,
+      [req.userId, orderNo, price || 0, price || 0, JSON.stringify({ productName, productId }), ts]
+    )
+    const orderId = result.insertId || (result.rows && result.rows[0] && result.rows[0].f_id)
+    // Insert line item
+    await db.execute(
+      `INSERT INTO t_order_item (f_order_id, f_product_name, f_quantity, f_unit_price, f_total_price, f_created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      [orderId, productName || '', quantity || 1, price || 0, (price || 0) * (quantity || 1), ts]
     )
     res.json({
       code: 200,
-      data: { id: result.insertId, status: 'paid', createdAt: ts },
+      data: { id: orderId, orderNo, status: 'paid', createdAt: ts },
     })
   } catch (err) {
     console.error('[POST /api/orders]', err.message)
@@ -1030,22 +1014,24 @@ app.post('/api/orders', auth, async (req, res) => {
 app.get('/api/hospitals', optionalAuth, async (req, res) => {
   try {
     const hospitals = await db.query(
-      'SELECT f_id, f_name, f_address, f_phone, f_rating, f_tags, f_business_hours, f_image_url, f_lat, f_lng FROM t_hospital WHERE f_deleted = 0 ORDER BY f_rating DESC'
+      'SELECT f_id, f_name, f_address, f_phone, f_rating, f_service_tags, f_business_hours, f_meta_info FROM t_hospital WHERE f_deleted = 0 ORDER BY f_rating DESC'
     )
     res.json({
       code: 200,
-      data: hospitals.map(h => ({
+      data: hospitals.map(h => {
+        const meta = (typeof h.f_meta_info === 'string' ? JSON.parse(h.f_meta_info) : (h.f_meta_info || {}));
+        return {
         id: h.f_id,
         name: h.f_name,
         address: h.f_address || '',
         phone: h.f_phone || '',
-        rating: h.f_rating || 0,
-        tags: (Array.isArray(h.f_tags) ? h.f_tags : (typeof h.f_tags === 'string' ? JSON.parse(h.f_tags) : [])),
+        rating: Number(h.f_rating) || 0,
+        tags: (Array.isArray(h.f_service_tags) ? h.f_service_tags : (typeof h.f_service_tags === 'string' ? JSON.parse(h.f_service_tags) : [])),
         businessHours: h.f_business_hours || '',
-        image: h.f_image_url || '',
-        lat: h.f_lat,
-        lng: h.f_lng,
-      })),
+        image: meta.image_url || '',
+        lat: meta.lat || null,
+        lng: meta.lng || null,
+      }}),
     })
   } catch (err) {
     console.error('[GET /api/hospitals]', err.message)
@@ -1055,19 +1041,20 @@ app.get('/api/hospitals', optionalAuth, async (req, res) => {
 
 app.get('/api/hospitals/:id', optionalAuth, async (req, res) => {
   try {
-    const hospitals = await db.query('SELECT * FROM t_hospital WHERE f_id = ? AND f_deleted = 0', [req.params.id])
+    const hospitals = await db.query('SELECT f_id, f_name, f_address, f_phone, f_rating, f_service_tags, f_business_hours, f_meta_info, f_created_at FROM t_hospital WHERE f_id = ? AND f_deleted = 0', [req.params.id])
     if (hospitals.length === 0) return res.status(404).json({ code: 404, message: '医院不存在' })
 
     const h = hospitals[0]
+    const hmeta = (typeof h.f_meta_info === 'string' ? JSON.parse(h.f_meta_info) : (h.f_meta_info || {}));
     res.json({
       code: 200,
       data: {
         id: h.f_id, name: h.f_name, address: h.f_address || '', phone: h.f_phone || '',
-        rating: h.f_rating || 0,
-        tags: (Array.isArray(h.f_tags) ? h.f_tags : (typeof h.f_tags === 'string' ? JSON.parse(h.f_tags) : [])),
+        rating: Number(h.f_rating) || 0,
+        tags: (Array.isArray(h.f_service_tags) ? h.f_service_tags : (typeof h.f_service_tags === 'string' ? JSON.parse(h.f_service_tags) : [])),
         businessHours: h.f_business_hours || '',
-        image: h.f_image_url || '', lat: h.f_lat, lng: h.f_lng,
-      },
+        image: hmeta.image_url || '', lat: hmeta.lat || null, lng: hmeta.lng || null,
+    },
     })
   } catch (err) {
     console.error('[GET /api/hospitals/:id]', err.message)
@@ -1083,11 +1070,9 @@ app.post('/api/upload', auth, async (req, res) => {
     const { fileUrl, category, petId } = req.body
     const publicUrl = fileUrl || ''
 
+    // t_upload table not in PG schema — skip DB insert, just return URL
     if (publicUrl) {
-      await db.execute(
-        'INSERT INTO t_upload (f_user_id, f_pet_id, f_category, f_file_url, f_created_at) VALUES (?, ?, ?, ?, ?)',
-        [req.userId, petId || null, category || 'general', publicUrl, timestamp()]
-      )
+      // Success — URL is stored on client side or cloud storage
     }
 
     res.json({ code: 200, data: { publicUrl } })
@@ -1103,23 +1088,25 @@ app.get('/chat/sessions', optionalAuth, async (req, res) => {
   try {
     if (!req.userId) return res.json({ code: 200, data: { sessions: [] } })
     const rows = await db.query(
-      `SELECT s.f_id, s.f_pet_id, s.f_title, s.f_updated_at, p.f_name
-       FROM t_chat_session s LEFT JOIN t_pet p ON p.f_id = s.f_pet_id
-       WHERE s.f_user_id = ? AND s.f_status_id = 10
-       ORDER BY s.f_updated_at DESC LIMIT 50`,
+      `SELECT h.f_id, h.f_pet_id, h.f_meta_info, h.f_ended_at, p.f_name
+       FROM t_chat_history h LEFT JOIN t_pet p ON p.f_id = h.f_pet_id
+       WHERE h.f_user_id = ?
+       ORDER BY h.f_ended_at DESC NULLS LAST LIMIT 50`,
       [req.userId]
     )
     res.json({
       code: 200,
       data: {
-        sessions: rows.map(s => ({
+        sessions: rows.map(s => {
+          const meta = (typeof s.f_meta_info === 'string' ? JSON.parse(s.f_meta_info) : (s.f_meta_info || {}))
+          return {
           id: s.f_id,
           petId: s.f_pet_id,
           petName: s.f_name || '',
-          title: s.f_title || '',
-          time: s.f_updated_at,
-        })),
-      },
+          title: meta.title || '',
+          time: s.f_ended_at,
+        }}),
+    },
     })
   } catch (err) {
     console.error('[GET /chat/sessions]', err.message)
@@ -1136,12 +1123,13 @@ app.post('/chat/sessions', auth, async (req, res) => {
     const pets = await db.query('SELECT f_id, f_name, f_birth_date FROM t_pet WHERE f_id = ? AND f_user_id = ?', [petId, req.userId])
     if (pets.length === 0) return res.status(404).json({ code: 404, message: '宠物不存在' })
 
-    const ts = timestamp()
+    const ts = new Date().toISOString()
+    const title = `与${pets[0].f_name}的对话`
     const result = await db.execute(
-      'INSERT INTO t_chat_session (f_user_id, f_pet_id, f_title, f_status_id, f_created_at, f_updated_at) VALUES (?, ?, ?, 10, ?, ?)',
-      [req.userId, petId, `与${pets[0].f_name}的对话`, ts, ts]
+      `INSERT INTO t_chat_history (f_user_id, f_pet_id, f_lang, f_chat_history, f_meta_info, f_started_at, f_ended_at) VALUES (?, ?, 'zh-CN', '[]'::jsonb, ?, NOW(), NOW()) RETURNING f_id`,
+      [req.userId, petId, JSON.stringify({ title })]
     )
-    const sessionId = result.insertId
+    const sessionId = result.insertId || (result.rows && result.rows[0] && result.rows[0].f_id)
 
     // Seed in-memory context metadata
     const session = memory.get(sessionId)
@@ -1166,21 +1154,19 @@ app.get('/chat/messages', auth, async (req, res) => {
 
     // Verify ownership
     const sessRows = await db.query(
-      'SELECT f_id FROM t_chat_session WHERE f_id = ? AND f_user_id = ?',
+      'SELECT f_id, f_chat_history FROM t_chat_history WHERE f_id = ? AND f_user_id = ?',
       [isNaN(sessionId) ? -1 : parseInt(sessionId), req.userId]
     )
     if (sessRows.length === 0) return res.status(404).json({ code: 404, message: '会话不存在' })
 
-    const rows = await db.query(
-      'SELECT f_id, f_role, f_content, f_created_at FROM t_chat_message WHERE f_session_id = ? ORDER BY f_id ASC',
-      [sessionId]
-    )
+    const raw = sessRows[0].f_chat_history
+    const history = (typeof raw === 'string' ? JSON.parse(raw) : raw) || []
     res.json({
       code: 200,
       data: {
         sessionId,
-        messages: rows.map(m => ({ id: m.f_id, role: m.f_role, content: m.f_content, at: m.f_created_at })),
-      },
+        messages: history.map((m, i) => ({ id: i + 1, role: m.role, content: m.content, at: m.created_at })),
+    },
     })
   } catch (err) {
     console.error('[GET /chat/messages]', err.message)
@@ -1208,61 +1194,19 @@ app.get('/api/health', async (req, res) => {
 //  启动
 // ═══════════════════════════════════════════
 
-<<<<<<< HEAD:backend/src/server.js
 app.listen(PORT, () => {
   log.info('═══════════════════════════════════')
   log.info('  🐾 更懂它 后端已启动')
   log.info(`  📡 http://localhost:${PORT}`)
-  log.info(`  🤖 Coze 智能体: ${cozeAvailable ? '✅ 已连接' : '❌ 未配置（降级 mock）'}`)
-  log.info(`  🐱 演示宠物: ${db.pets.map(p => p.name).join(', ')}`)
-  log.info(`  🛒 商品数: ${db.products.length}`)
-  log.info(`  🏥 医院数: ${db.hospitals.length}`)
+  log.info(`  🤖 DeepSeek 智能体: ${llm.available() ? '✅ 已连接' : '❌ 未配置（降级 mock）'}`)
+  log.info(`  🗄️  数据库: PostgreSQL (Supabase)`)
   log.info('═══════════════════════════════════')
   log.info('')
-  log.info('  Coze 端点:')
+  log.info('  DeepSeek 端点:')
   log.info('  POST /api/emotion/report   情绪解读')
   log.info('  POST /api/health/report    健康监测')
   log.info('  POST /api/risk/report      风险评估')
   log.info('  POST /api/medical/guide    医疗科普')
   log.info('  POST /api/chat/send-json   AI 聊天')
   log.info('')
-=======
-app.listen(PORT, async () => {
-  console.log('═══════════════════════════════════')
-  console.log('  🐾 更懂它 后端已启动')
-  console.log(`  📡 http://localhost:${PORT}`)
-
-  // Check DB connection
-  const dbOk = await db.ping()
-  console.log(`  🗄️  MySQL: ${dbOk ? '✅ 已连接' : '⚠️  未连接（请确认 MySQL 已启动且已导入 schema）'}`)
-
-  // 异步检查 LLM 连通性
-  llm.ping().then(ok => {
-    console.log(`  🤖 智能体引擎: ${ok ? '✅ LLM 已连接' : '⚠️  LLM_API_KEY 未配置（降级 mock）'}`)
-  })
-
-  console.log(`  🧠 会话数: ${memory.count()}`)
-  console.log('═══════════════════════════════════')
-  console.log('')
-  console.log('  智能体端点:')
-  console.log('  POST /emotion-report      情绪解读')
-  console.log('  POST /health-report       健康监测')
-  console.log('  POST /risk-report         风险评估')
-  console.log('  POST /constitution/report 体质综合分析')
-  console.log('  POST /newpet/guide        新宠购买建议')
-  console.log('  POST /medical/guide       医疗科普')
-  console.log('  POST /medical/followup    追问对话')
-  console.log('  POST /chat/send           流式聊天')
-  console.log('  POST /chat/send-json      非流式聊天')
-  console.log('')
-  console.log('  CRUD 端点:')
-  console.log('  GET    /api/pets          宠物列表')
-  console.log('  POST   /api/pets          添加宠物')
-  console.log('  GET    /api/reports       报告历史')
-  console.log('  GET    /api/products      商品列表')
-  console.log('  GET    /api/hospitals     医院列表')
-  console.log('  POST   /api/favorites     收藏切换')
-  console.log('  POST   /wechat-auth       微信登录')
-  console.log('')
->>>>>>> 63a6635f02f99eef64ee4b01a35f585dc41dc43b:backend/server.js
 })

@@ -4,29 +4,19 @@ Page({
   data: {
     currentPet: {},
     showPetDropdown: false,
-    photoList: [],
+    ownerBirthday: '',
     pets: [],
-    // 主人信息
-    owner: {
-      age: '',
-      occupation: '',
-      city: '',
-      phone: '',
-      diet: '',
-      experience: ''
-    },
-    // 环境交互
-    nfcCount: 0,
-    deviceCount: 0,
-    hardwareList: [],
-    activeHardwareCount: 0
+    submitting: false,
+    photoList: [],
   },
 
   onLoad() {
     this.loadPets()
     this.loadDefaultPet()
-    this.loadOwnerProfile()
-    this.loadDeviceCounts()
+    const userInfo = wx.getStorageSync('userInfo') || {}
+    if (userInfo.birthday) {
+      this.setData({ ownerBirthday: userInfo.birthday })
+    }
   },
 
   loadPets() {
@@ -41,37 +31,6 @@ Page({
     }
   },
 
-  loadOwnerProfile() {
-    const profile = wx.getStorageSync('ownerProfile') || {}
-    this.setData({
-      owner: {
-        age: profile.age || '',
-        occupation: profile.occupation || '',
-        city: profile.city || '',
-        phone: profile.phone || '',
-        diet: profile.diet || '',
-        experience: profile.experience || ''
-      }
-    })
-  },
-
-  loadDeviceCounts() {
-    const nfcList = wx.getStorageSync('nfcList') || []
-    const deviceList = wx.getStorageSync('deviceList') || []
-    const hwList = [
-      { id: 1, name: '智能项圈', active: deviceList.some(d => d.type === 'collar') },
-      { id: 2, name: 'NFC贴',    active: nfcList.length > 0 },
-      { id: 3, name: '语音盒',   active: deviceList.some(d => d.type === 'voicebox') }
-    ]
-    this.setData({
-      nfcCount: nfcList.length,
-      deviceCount: deviceList.length,
-      hardwareList: hwList,
-      activeHardwareCount: hwList.filter(h => h.active).length
-    })
-  },
-
-  // ─── 宠物选择 ───
   togglePetList() {
     this.setData({ showPetDropdown: !this.data.showPetDropdown })
   },
@@ -88,7 +47,7 @@ Page({
     wx.navigateTo({ url: '/pages/mine/register/register' })
   },
 
-  // ─── 上传照片 ───
+
   addPhoto() {
     wx.chooseImage({
       count: 9 - this.data.photoList.length,
@@ -103,22 +62,41 @@ Page({
   },
 
   delPhoto(e) {
-    const index = e.currentTarget.dataset.index
+    const idx = e.currentTarget.dataset.index
     const list = [...this.data.photoList]
-    list.splice(index, 1)
+    list.splice(idx, 1)
     this.setData({ photoList: list })
   },
 
-  // ─── 生成报告 ───
-  generateReport() {
+  onBirthdayInput(e) {
+    this.setData({ ownerBirthday: e.detail.value })
+  },
+
+  async generateReport() {
     if (!this.data.currentPet.id) {
       wx.showToast({ title: '请先选择宠物', icon: 'none' })
       return
     }
-    wx.showLoading({ title: '分析中...' })
-    setTimeout(() => {
+
+    const API = require('../../utils/api')
+    this.setData({ submitting: true })
+    wx.showLoading({ title: '评估中...' })
+
+    try {
+      const result = await API.Report.risk({
+        petId: this.data.currentPet.id,
+        ownerBirthday: this.data.ownerBirthday,
+      })
+
       wx.hideLoading()
+      app.globalData._lastRiskReport = result
       wx.navigateTo({ url: '/pages/risk/report/report' })
-    }, 1500)
+    } catch (err) {
+      wx.hideLoading()
+      console.error('[risk] generate error:', err)
+      wx.navigateTo({ url: '/pages/risk/report/report' })
+    }
+
+    this.setData({ submitting: false })
   }
 })

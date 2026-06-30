@@ -1,66 +1,69 @@
-// pages/emotion/report/report.js
+const app = getApp()
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    report: null,
+    loading: true,
+    petName: '',
+    petAvatar: '',
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
   onLoad(options) {
+    // Try to get report from globalData or eventChannel
+    const eventChannel = this.getOpenerEventChannel?.()
+    if (eventChannel) {
+      eventChannel.on('reportData', (data) => {
+        this.setReport(data)
+      })
+    }
 
+    // Fallback: check globalData
+    const cached = app.globalData._lastEmotionReport
+    if (cached) {
+      this.setReport(cached)
+      app.globalData._lastEmotionReport = null
+    }
+
+    // If still no data, show loading and try to get from params
+    if (!this.data.report) {
+      setTimeout(() => {
+        if (!this.data.report) {
+          this.setData({ loading: false })
+        }
+      }, 2000)
+    }
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
+  setReport(report) {
+    this.setData({
+      report,
+      loading: false,
+      petName: report.petName || '',
+      petAvatar: report.petAvatar || '',
+    })
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow() {
-
+  goBack() {
+    wx.navigateBack()
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  onShare() {
+    wx.showShareMenu({})
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
+  onFavorite() {
+    const API = require('../../../utils/api')
+    API.Favorite.toggle(this.data.report.id, 'emotion').then(() => {
+      wx.showToast({ title: '已收藏', icon: 'success' })
+    }).catch(() => {
+      wx.showToast({ title: '收藏失败', icon: 'none' })
+    })
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
   onShareAppMessage() {
-
+    return {
+      title: `${this.data.petName}的情绪解读报告`,
+      path: `/pages/emotion/report/report?id=${this.data.report?.id}`,
+    }
   }
 })

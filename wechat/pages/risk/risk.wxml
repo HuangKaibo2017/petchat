@@ -34,12 +34,21 @@
       <view class="mine-card-body">
         <view class="mine-card-title">自动获取信息</view>
         <view class="mine-card-desc">系统将自动获取以下关键信息，作为预警分析依据</view>
-        <view class="info-img-row">
-          <image class="info-img" src="/images/masterinfo.png" mode="widthFix" />
-          <image class="info-img" src="/images/petinfo.png" mode="widthFix" />
-          <image class="info-img" src="/images/envint.png" mode="widthFix" />
+        <view class="info-emoji-row">
+          <view class="info-emoji-item">
+            <text class="info-emoji">👤</text>
+            <text class="info-emoji-label">主人基础信息</text>
+          </view>
+          <view class="info-emoji-item">
+            <text class="info-emoji">🐾</text>
+            <text class="info-emoji-label">宠物体质报告</text>
+          </view>
+          <view class="info-emoji-item">
+            <text class="info-emoji">🌍</text>
+            <text class="info-emoji-label">环境风险因子</text>
+          </view>
         </view>
-      </view>
+        </view>
     </view>
 
     <!-- 上传照片 -->

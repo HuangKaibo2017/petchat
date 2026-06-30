@@ -1,6 +1,7 @@
 <view class="idx-page">
+<nav-bar title="更懂它" />
   <!-- ═══ 海报 Banner ═══ -->
-  <view class="idx-hero" style="padding-top:{{statusBarHeight + 44}}rpx">
+  <view class="idx-hero">
     <image class="idx-hero-img" src="/images/banner.png" mode="aspectFill" />
   </view>
 

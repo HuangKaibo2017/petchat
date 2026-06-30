@@ -322,5 +322,32 @@ nfcCount: 0,
 
   goSettings() {
     wx.showToast({ title: '设置', icon: 'none' })
+  },
+
+  async generateReport() {
+    if (!this.data.currentPet.id) {
+      wx.showToast({ title: '请先选择宠物', icon: 'none' })
+      return
+    }
+    const API = require('../../utils/api')
+    this.setData({ submitting: true })
+    wx.showLoading({ title: '解读中...' })
+
+    try {
+      const result = await API.Report.emotion({
+        petId: this.data.currentPet.id,
+        question: this.data.descText || '宠物最近状态如何?',
+        imageUrl: this.data.photoList[0] || '',
+      })
+      wx.hideLoading()
+      const app = getApp()
+      app.globalData._lastEmotionReport = result
+      wx.navigateTo({ url: '/pages/emotion/report/report' })
+    } catch (err) {
+      wx.hideLoading()
+      console.error('[emotion] generate error:', err)
+      wx.navigateTo({ url: '/pages/emotion/report/report' })
+    }
+    this.setData({ submitting: false })
   }
 })

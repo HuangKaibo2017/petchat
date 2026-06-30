@@ -125,7 +125,7 @@
   <view class="mine-menu">
     <view class="mine-menu-item" bindtap="goContact">
       <view class="mine-menu-left">
-        <image class="mine-menu-icon" src="/images/icon-health.png" mode="aspectFit" />
+        <image class="mine-menu-icon" src="/images/icon-health.svg" mode="aspectFit" />
         <text>联系客服</text>
       </view>
       <view class="mine-menu-arrow">›</view>
@@ -135,7 +135,7 @@
 
     <view class="mine-menu-item" bindtap="goAbout">
       <view class="mine-menu-left">
-        <image class="mine-menu-icon" src="/images/icon-rescue.png" mode="aspectFit" />
+        <image class="mine-menu-icon" src="/images/icon-rescue.svg" mode="aspectFit" />
         <text>关于我们</text>
       </view>
       <view class="mine-menu-arrow">›</view>
@@ -145,7 +145,7 @@
 
     <view class="mine-menu-item" bindtap="goSettings">
       <view class="mine-menu-left">
-        <image class="mine-menu-icon" src="/images/icon-risk.png" mode="aspectFit" />
+        <image class="mine-menu-icon" src="/images/icon-risk.svg" mode="aspectFit" />
         <text>设置</text>
       </view>
       <view class="mine-menu-arrow">›</view>

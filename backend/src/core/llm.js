@@ -1,9 +1,9 @@
 /**
- * Qwen / DashScope LLM Adapter
+ * DeepSeek LLM Adapter
  * 支持流式和非流式调用，兼容 OpenAI Chat Completions 接口
  */
 
-const LLM_API_URL = process.env.LLM_API_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
+const LLM_API_URL = process.env.LLM_API_URL || 'https://api.deepseek.com/v1/chat/completions'
 const LLM_API_KEY = process.env.LLM_API_KEY || ''
 const LLM_MODEL_DEFAULT = process.env.LLM_MODEL || 'deepseek-chat'
 
