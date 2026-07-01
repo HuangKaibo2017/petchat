@@ -2,7 +2,9 @@
   <nav-bar title="人宠风险" showBack="{{true}}" />
 
   <!-- ═══ Banner 海报 ═══ -->
-  <view class="banner"></view>
+  <view class="banner">
+    <image class="banner-img" src="/images/risk/bg.jpg" mode="aspectFill" />
+  </view>
 
   <!-- ═══ 信息卡片区 ═══ -->
   <view class="mine-cards">
@@ -36,19 +38,19 @@
         <view class="mine-card-desc">系统将自动获取以下关键信息，作为预警分析依据</view>
         <view class="info-emoji-row">
           <view class="info-emoji-item">
-            <text class="info-emoji">👤</text>
+            <image class="info-img" src="/images/risk/masterinfo.jpg" mode="aspectFit" />
             <text class="info-emoji-label">主人基础信息</text>
           </view>
           <view class="info-emoji-item">
-            <text class="info-emoji">🐾</text>
+            <image class="info-img" src="/images/risk/petinfo.jpg" mode="aspectFit" />
             <text class="info-emoji-label">宠物体质报告</text>
           </view>
           <view class="info-emoji-item">
-            <text class="info-emoji">🌍</text>
+            <image class="info-img" src="/images/risk/envint.jpg" mode="aspectFit" />
             <text class="info-emoji-label">环境风险因子</text>
           </view>
         </view>
-        </view>
+      </view>
     </view>
 
     <!-- 上传照片 -->

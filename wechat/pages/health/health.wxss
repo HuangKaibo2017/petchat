@@ -6,8 +6,16 @@
 /* ─── Banner ─── */
 .banner {
   height: 340rpx;
-  background: linear-gradient(135deg, #D8EBE6 0%, #FFF3E8 50%, #FCE7F3 100%);
-  border-radius: 0 0 40rpx 40rpx;
+  margin: 0 32rpx 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.banner-img {
+  width: 100%;
+  height: 340rpx;
+  display: block;
 }
 
 /* ─── 信息卡片区 ─── */
@@ -15,8 +23,7 @@
   display: flex;
   flex-direction: column;
   gap: 20rpx;
-  padding: 24rpx 32rpx;
-  margin-top: -40rpx;
+  padding: 0 32rpx 24rpx;
 }
 
 .mine-card {

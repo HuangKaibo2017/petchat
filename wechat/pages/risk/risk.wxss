@@ -6,17 +6,24 @@
 /* ─── Banner ─── */
 .banner {
   height: 340rpx;
-  background: linear-gradient(135deg, #D8EBE6 0%, #FFF3E8 50%, #FCE7F3 100%);
-  border-radius: 0 0 40rpx 40rpx;
+  margin: 0 32rpx 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.banner-img {
+  width: 100%;
+  height: 340rpx;
+  display: block;
 }
 
 /* ─── 信息卡片区 ─── */
 .mine-cards {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20rpx;
-  padding: 24rpx 32rpx;
-  margin-top: -40rpx;
+  padding: 0 32rpx 24rpx;
 }
 
 .mine-card {
@@ -105,7 +112,7 @@
 .pet-dropdown-info {
   flex: 1;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 4rpx;
 }
 
@@ -170,7 +177,7 @@
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 10rpx;
 }
 
@@ -225,7 +232,7 @@
 }
 
 .photo-add {
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
   height: 200rpx;
   border-radius: 16rpx;
@@ -356,9 +363,10 @@
   border-radius: 16rpx;
 }
 
-.info-emoji {
-  font-size: 48rpx;
-  line-height: 1.2;
+.info-img {
+  width: 96rpx;
+  height: 96rpx;
+  display: block;
 }
 
 .info-emoji-label {
