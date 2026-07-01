@@ -19,8 +19,88 @@
         "type": "file"
       },
       {
-        "value": "images/pet",
-        "type": "folder"
+        "value": "images/pet/bird.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/cat.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/dog.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/fish.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/mouse.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/rabbit.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/snake.png",
+        "type": "file"
+      },
+      {
+        "value": "images/pet/turtle.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/banner.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/dog.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/home-emotion.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/home-health.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/home-risk.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/lingyang.png",
+        "type": "file"
+      },
+      {
+        "value": "images/index/liulang.png",
+        "type": "file"
+      },
+      {
+        "value": "images/health/bg.png",
+        "type": "file"
+      },
+      {
+        "value": "images/mine/bg.png",
+        "type": "file"
+      },
+      {
+        "value": "images/risk/bg.png",
+        "type": "file"
+      },
+      {
+        "value": "images/risk/envint.png",
+        "type": "file"
+      },
+      {
+        "value": "images/risk/masterinfo.png",
+        "type": "file"
+      },
+      {
+        "value": "images/risk/petinfo.png",
+        "type": "file"
       }
     ],
     "include": []

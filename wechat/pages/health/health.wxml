@@ -2,7 +2,9 @@
   <nav-bar title="宠物健康" showBack="{{true}}" />
 
   <!-- ═══ Banner 海报 ═══ -->
-  <view class="banner"></view>
+  <view class="banner">
+    <image class="banner-img" src="/images/health/bg.jpg" mode="aspectFill" />
+  </view>
 
   <!-- ═══ 信息卡片区 ═══ -->
   <view class="mine-cards">

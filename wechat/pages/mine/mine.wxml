@@ -3,7 +3,7 @@
 
   <!-- ═══ 头像 + 昵称 ═══ -->
   <view class="profile-header" bindtap="goLogin">
-    <image class="profile-bg" src="{{bgUrl || '/images/hero-bg.png'}}" mode="aspectFill" />
+    <image class="profile-bg" src="{{bgUrl || '/images/mine/bg.jpg'}}" mode="aspectFill" />
     <image class="profile-avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
     <view class="profile-name">{{nickname || '点击登录'}}</view>
   </view>

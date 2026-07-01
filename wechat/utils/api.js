@@ -76,25 +76,19 @@ const RealAPI = {
   // ═══ 上传 → upload function ═══
   Upload: {
     upload: async (filePath, category, petId) => {
-      return new Promise((resolve, reject) => {
-        wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`,
-          filePath,
-          name: 'file',
-          formData: { category, petId: petId || '' },
-          header: {
-            'Authorization': `Bearer ${wx.getStorageSync('token')}`
-          },
-          success: (res) => {
-            try { resolve(JSON.parse(res.data)) }
-            catch (e) { resolve({ publicUrl: filePath }) }
-          },
-          fail: (err) => {
-            console.warn('[Upload] failed:', err)
-            resolve({ publicUrl: filePath })
-          }
+      if (!filePath) return { publicUrl: '' }
+
+      try {
+        const result = await RealAPI.post('/api/upload', {
+          fileUrl: filePath,
+          category,
+          petId: petId || ''
         })
-      })
+        return result || { publicUrl: filePath }
+      } catch (err) {
+        console.warn('[Upload] failed:', err)
+        return { publicUrl: filePath }
+      }
     }
   },
 

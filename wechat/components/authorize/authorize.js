@@ -37,21 +37,6 @@ Component({
       app.globalData.isLoggedIn = true
       wx.setStorageSync('userInfo', userInfo)
 
-      // 上传头像到后端
-      if (avatarUrl) {
-        wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`,
-          filePath: avatarUrl,
-          name: 'file',
-          formData: { category: 'avatar' },
-          header: {
-            'Authorization': `Bearer ${wx.getStorageSync('token')}`
-          },
-          success: () => {},
-          fail: () => {}
-        })
-      }
-
       this.triggerEvent('success', userInfo)
     },
 

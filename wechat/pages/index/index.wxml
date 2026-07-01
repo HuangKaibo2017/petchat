@@ -2,7 +2,7 @@
 <nav-bar title="更懂它" />
   <!-- ═══ 海报 Banner ═══ -->
   <view class="idx-hero">
-    <image class="idx-hero-img" src="/images/banner.png" mode="aspectFill" />
+    <image class="idx-hero-img" src="/images/index/banner.jpg" mode="aspectFill" />
   </view>
 
   <!-- ═══ 核心工具 ═══ -->
@@ -13,17 +13,17 @@
         <view class="idx-tool-card idx-tool--emotion" bindtap="goEmotion">
           <view class="idx-tool-card-name">宠物心声解读</view>
           <view class="idx-tool-card-desc">读懂它的情绪与需求</view>
-          <image class="idx-tool-card-img" src="/images/home-emotion.png" mode="widthFix" />
+          <image class="idx-tool-card-img" src="/images/index/home-emotion.jpg" mode="widthFix" />
         </view>
         <view class="idx-tool-card idx-tool--health" bindtap="goHealth">
           <view class="idx-tool-card-name">宠物健康分析</view>
           <view class="idx-tool-card-desc">科学养护，预防先行</view>
-          <image class="idx-tool-card-img" src="/images/home-health.png" mode="widthFix" />
+          <image class="idx-tool-card-img" src="/images/index/home-health.jpg" mode="widthFix" />
         </view>
         <view class="idx-tool-card idx-tool--risk" bindtap="goRisk">
           <view class="idx-tool-card-name">人宠风险预警</view>
           <view class="idx-tool-card-desc">提前预警，安心相伴</view>
-          <image class="idx-tool-card-img" src="/images/home-risk.png" mode="widthFix" />
+          <image class="idx-tool-card-img" src="/images/index/home-risk.jpg" mode="widthFix" />
         </view>
       </view>
     </view>
@@ -43,7 +43,7 @@
         </view>
         <view class="idx-photo-card idx-photo-card--right" bindtap="goPhoto">
           <view class="idx-photo-stack">
-            <image class="idx-photo-stack-img" src="/images/dog.jpg" mode="aspectFill" />
+            <image class="idx-photo-stack-img" src="/images/index/dog.jpg" mode="aspectFill" />
           </view>
           <view class="idx-photo-card-title">宠物相册</view>
           <view class="idx-photo-card-desc">记录成长每一刻</view>
@@ -57,8 +57,20 @@
     <view class="idx-tools-box">
       <view class="idx-section-title">救助专区</view>
       <view class="idx-rescue-row">
-        <image class="idx-rescue-img" src="/images/liulangqiuzhu.png" mode="widthFix" bindtap="goRescueHelp" />
-        <image class="idx-rescue-img" src="/images/lingyang.png" mode="widthFix" bindtap="goRescueAdopt" />
+        <view class="idx-rescue-card" bindtap="goRescueHelp">
+          <view class="idx-rescue-copy">
+            <view class="idx-rescue-title">流浪求助</view>
+            <view class="idx-rescue-desc">发现流浪，紧急求助</view>
+          </view>
+          <image class="idx-rescue-img" src="/images/index/liulang.jpg" mode="aspectFit" />
+        </view>
+        <view class="idx-rescue-card" bindtap="goRescueAdopt">
+          <view class="idx-rescue-copy">
+            <view class="idx-rescue-title">宠物领养</view>
+            <view class="idx-rescue-desc">给他一个温暖的家</view>
+          </view>
+          <image class="idx-rescue-img" src="/images/index/lingyang.jpg" mode="aspectFit" />
+        </view>
       </view>
     </view>
   </view>
