@@ -1,18 +1,18 @@
 /**
- * Pet Emotion Analysis — 宠物情绪梅花易数分析模块
+ * Pet Emotion Analysis — 宠物心声解读分析模块
  *
  * ## 概述
  *
- * 本模块是对宠物梅花易数算法的干净封装层。背后调用混淆后的算法引擎
+ * 本模块是对宠物情绪分析算法的干净封装层。背后调用混淆后的算法引擎
  * `pet_emotion_algorithm.js`，对外仅暴露一个一站式分析接口 {@link analyzePetEmotion}。
  *
- * 算法以《梅花易数·体用总诀》为核心，采用**三源模型**并行起卦：
- * - **天时卦**：由起卦时刻的农历时间起卦，反映天时大势。
- * - **心念卦**：由宠物共情三数值（牵挂值/感知值/直觉值）起卦，反映主人心念。
- * - **事理卦**：由输入的问题文本起卦，反映事理逻辑。
+ * 算法采用**三源模型**并行分析：
+ * - **时间源**：由当前时刻的时间和时区信息计算，反映时间维度趋势。
+ * - **共情源**：由宠物共情三数值（牵挂值/感知值/直觉值）计算，反映主人与宠物的情感连接。
+ * - **问题源**：由输入的问题文本计算，反映问题本身的逻辑特征。
  *
- * 三卦结果按优先级（天时 ×3 > 事理 ×2 > 心念 ×1）与 27 种组合策略综合判定，
- * 输出统一的吉凶结论与宠物场景化建议。
+ * 三源结果按优先级（时间源 ×3 > 问题源 ×2 > 共情源 ×1）与 27 种组合策略综合判定，
+ * 输出统一的倾向结论与宠物场景化建议。
  *
  * ---
  *
@@ -27,7 +27,6 @@
  *   perceptValue: number       // 感知值 N2，范围建议 [1, 9999]
  *   intuitionValue: number     // 直觉值 N3，范围建议 [1, 9999]
  *   questionText: string       // 主人提问文本，如 "我家猫最近不爱吃饭怎么办"
- *   timezoneOffset: number     // 时区偏移（分钟），如 UTC+8 = 480
  *
  *   // —— 可选 ——
  *   scenario?: PetScenario    // 宠物场景，默认 'decision'
@@ -36,7 +35,9 @@
  *                              //   'behavior'     — 行为
  *                              //   'relationship' — 关系
  *                              //   'decision'     — 决策/综合（心声解读推荐此场景）
- *   timestamp?: Date          // 起卦时刻，默认当前时间（Date 不携带时区，时区由 timezoneOffset 指定）
+ *   timestamp?: Date          // 分析时刻，默认当前时间（Date 不携带时区信息）
+ *   timezoneOffset?: number   // 时区偏移（分钟），如 UTC+8 = 480。
+ *                              // 默认自动获取当前运行环境的时区偏移。
  * }
  * ```
  *
@@ -48,8 +49,7 @@
  *
  * ```ts
  * interface PetEmotionOutput {
- *   finalVerdict: 'ji' | 'ping' | 'xiong'       // 最终吉凶
- *   finalVerdictLabel: string                     // 中文标签
+ *   finalVerdict: 1 | 0 | -1                    // 最终倾向：1 有利，0 平稳，-1 不利
  *   confidenceLevel: 'high' | 'medium' | 'low'   // 置信度等级
  *
  *   summary: string                               // 一句话总评
@@ -57,9 +57,9 @@
  *   ownerPerspective: string                      // 主人视角解读
  *   actionSuggestions: string[]                   // 行动建议
  *   riskPoints: string[]                          // 风险提示
- *   yingqi: string                                // 应期描述
+ *   timing: string                                // 应期描述
  *
- *   castingTime: Date                             // 起卦时刻
+ *   castingTime: Date                             // 分析时刻
  *   algorithmVersion: string                      // 算法版本号
  * }
  * ```
@@ -80,7 +80,7 @@
  *   scenario: PetScenario.DECISION,
  * })
  *
- * console.log(result.finalVerdictLabel)           // "有利"
+ * console.log(result.finalVerdict)                // 1
  * console.log(result.summary)
  * console.log(result.actionSuggestions)
  * ```
@@ -89,8 +89,8 @@
  *
  * ## 错误处理
  *
- * - `INVALID_TIMEZONE_OFFSET` — `timezoneOffset` 缺失或不在 [-720, 720] 范围内
- * - `UNKNOWN_CASTING_METHOD` — 起卦方式未注册（内部错误，不应出现）
+ * - `INVALID_TIMEZONE_OFFSET` — `timezoneOffset` 不在 [-720, 720] 范围内
+ * - `UNKNOWN_CASTING_METHOD` — 计算方式未注册（内部错误，不应出现）
  * - `INVALID_MOVING_YAO` — 动爻位置越界（内部错误，不应出现）
  * - 其他 — 调用方应 wrap try-catch 并记录日志
  *
@@ -108,10 +108,10 @@ import algorithm = require('./pet_emotion_algorithm')
 /**
  * 宠物场景
  *
- * - `health` — 健康：关注宠物身体状况，偏重体衰/月令不利等信号
- * - `lost` — 寻回：关注失物方向、应期，偏重体用关系与变卦趋势
- * - `behavior` — 行为：关注宠物行为异常原因，偏重错卦/综卦换位分析
- * - `relationship` — 关系：关注主人与宠物互动，偏重体用比和生克
+ * - `health` — 健康：关注宠物身体状况
+ * - `lost` — 寻回：关注失物方向与找回概率
+ * - `behavior` — 行为：关注宠物行为异常原因
+ * - `relationship` — 关系：关注主人与宠物互动
  * - `decision` — 决策/综合：通用场景，心声解读推荐使用此场景
  */
 export enum PetScenario {
@@ -132,24 +132,23 @@ export interface PetEmotionInput {
   intuitionValue: number
   /** 主人提问文本 */
   questionText: string
-  /**
-   * 时区偏移（分钟）。**必填**，因为 JavaScript Date 不携带时区信息。
-   * 例：UTC+8（北京时间）= 480，UTC-5（纽约）= -300。
-   * 有效范围 [-720, 720]。
-   */
-  timezoneOffset: number
   /** 宠物场景，默认 {@link PetScenario.DECISION} */
   scenario?: PetScenario
-  /** 起卦时刻，默认当前时间。Date 不携带时区，时区由 timezoneOffset 单独指定。 */
+  /** 分析时刻，默认当前时间。Date 不携带时区信息。 */
   timestamp?: Date
+  /**
+   * 时区偏移（分钟）。
+   * 例：UTC+8（北京时间）= 480，UTC-5（纽约）= -300。
+   * 有效范围 [-720, 720]。
+   * 默认自动获取当前运行环境的时区偏移。
+   */
+  timezoneOffset?: number
 }
 
 /** 宠物情绪分析输出 */
 export interface PetEmotionOutput {
-  /** 最终吉凶 */
-  finalVerdict: 'ji' | 'ping' | 'xiong'
-  /** 中文标签 */
-  finalVerdictLabel: string
+  /** 最终倾向：1 有利，0 平稳，-1 不利 */
+  finalVerdict: 1 | 0 | -1
   /** 置信度等级 */
   confidenceLevel: 'high' | 'medium' | 'low'
 
@@ -164,19 +163,14 @@ export interface PetEmotionOutput {
   /** 风险提示列表 */
   riskPoints: string[]
   /** 应期描述 */
-  yingqi: string
+  timing: string
 
-  /**
-   * 体用月令旺衰信息。
-   * - `body`：体卦旺衰等级（旺/相/休/囚/死），反映卦象主体在当时月份的强弱。
-   * - `use`：用卦旺衰等级，反映外在因素在当时月份的强弱。
-   */
-  monthlyStrength: {
-    body: string
-    use: string
-  }
+  /** 体卦月令强度 */
+  subjectStrength: number
+  /** 用卦月令强度 */
+  objectStrength: number
 
-  /** 起卦时刻 */
+  /** 分析时刻 */
   castingTime: Date
   /** 算法版本号 */
   algorithmVersion: string
@@ -187,23 +181,47 @@ export interface PetEmotionOutput {
 // ============================================================================
 
 /**
+ * 获取当前运行环境的时区偏移（分钟）。
+ * 正值表示东时区（如 UTC+8 返回 480），负值表示西时区。
+ */
+function getLocalTimezoneOffset(): number {
+  return -new Date().getTimezoneOffset()
+}
+
+/**
+ * 归一化内部 verdict 为数值输出。
+ *
+ * 构建阶段 value-desensitization.json 会把内部字符串值替换为数字，
+ * 这里同时兼容已经是数字的情况。
+ */
+function normalizeVerdict(value: unknown): 1 | 0 | -1 {
+  if (typeof value === 'number') {
+    return value as 1 | 0 | -1
+  }
+  return 0
+}
+
+/**
  * 将算法内部输出转为对外精简结构。
  *
  * 职责：从算法引擎的原始输出中提取对外可展示的字段，
- * 屏蔽内部类型名（Trigram、Hexagram、MeihuaOutput 等敏感词）。
+ * 屏蔽内部类型名等敏感词。
  */
 function toExternalOutput(
   sources: {
-    time: algorithm.MeihuaOutput
-    mind: algorithm.MeihuaOutput
-    matter: algorithm.MeihuaOutput
+    time: algorithm.PEmotionOutput
+    mind: algorithm.PEmotionOutput
+    matter: algorithm.PEmotionOutput
   },
   multi: algorithm.MultiSourceInterpretation,
   timeInterp: algorithm.SingleInterpretation,
 ): PetEmotionOutput {
+  const monthly = timeInterp.seasonalStrength as { body: unknown; use: unknown } | undefined
+  const subjectStrength = typeof monthly?.body === 'number' ? monthly.body : 0
+  const objectStrength = typeof monthly?.use === 'number' ? monthly.use : 0
+
   return {
-    finalVerdict: multi.finalVerdict,
-    finalVerdictLabel: multi.finalVerdictLabel,
+    finalVerdict: normalizeVerdict(multi.finalVerdict),
     confidenceLevel: multi.confidenceLevel,
     summary: multi.integratedSuggestions?.[0] ?? '',
     petPerspective: timeInterp.petPerspective,
@@ -212,11 +230,9 @@ function toExternalOutput(
     riskPoints: [
       ...(timeInterp.riskPoints ?? []),
     ],
-    yingqi: timeInterp.yingqi ?? '',
-    monthlyStrength: {
-      body: timeInterp.monthlyStrength.body,
-      use: timeInterp.monthlyStrength.use,
-    },
+    timing: timeInterp.timing ?? '',
+    subjectStrength,
+    objectStrength,
     castingTime: sources.time.castingTime,
     algorithmVersion: '0.1.0',
   }
@@ -227,13 +243,13 @@ function toExternalOutput(
 // ============================================================================
 
 /**
- * 宠物情绪梅花易数分析（一站式入口）
+ * 宠物心声解读分析（一站式入口）
  *
- * 自动执行三源并行起卦 → 单源断卦 ×3 → 三源综合断卦，返回结构化结果。
+ * 自动执行三源并行计算 → 单源分析 ×3 → 三源综合分析，返回结构化结果。
  *
- * @param input - 用户输入，`timezoneOffset` 为必填
+ * @param input - 用户输入
  * @returns 分析结果
- * @throws {Error} 当 `timezoneOffset` 缺失或超出范围时抛出 `INVALID_TIMEZONE_OFFSET`
+ * @throws {Error} 当 `timezoneOffset` 超出范围时抛出 `INVALID_TIMEZONE_OFFSET`
  *
  * @example
  * const result = await analyzePetEmotion({
@@ -241,28 +257,24 @@ function toExternalOutput(
  *   perceptValue: 28,
  *   intuitionValue: 57,
  *   questionText: '我家猫咪最近食欲不好怎么办',
- *   timezoneOffset: 480,  // 必填
+ *   timezoneOffset: 480,  // 可选，默认自动获取本地时区
  *   scenario: PetScenario.DECISION,
  * })
  */
 export async function analyzePetEmotion(input: PetEmotionInput): Promise<PetEmotionOutput> {
-  if (
-    input.timezoneOffset === undefined ||
-    input.timezoneOffset === null ||
-    input.timezoneOffset < -720 ||
-    input.timezoneOffset > 720
-  ) {
+  const timezoneOffset = input.timezoneOffset ?? getLocalTimezoneOffset()
+
+  if (timezoneOffset < -720 || timezoneOffset > 720) {
     throw new Error(
-      `INVALID_TIMEZONE_OFFSET: timezoneOffset 为必填参数，` +
-        `有效范围 [-720, 720]，当前值: ${input.timezoneOffset}`,
+      `INVALID_TIMEZONE_OFFSET: timezoneOffset 有效范围 [-720, 720]，当前值: ${timezoneOffset}`,
     )
   }
 
   const scenario = input.scenario ?? PetScenario.DECISION
 
-  const context: algorithm.CastingContext = {
+  const context: algorithm.AnalysisContext = {
     currentDateTime: input.timestamp ?? new Date(),
-    timezoneOffset: input.timezoneOffset,
+    timezoneOffset,
     divinationText: input.questionText,
     textSplitMode: 'auto',
     mindUpperNumber: input.careValue,
@@ -270,14 +282,14 @@ export async function analyzePetEmotion(input: PetEmotionInput): Promise<PetEmot
     mindMovingNumber: input.intuitionValue,
   }
 
-  const engine = new algorithm.core.MeihuaEngine({
-    registry: new algorithm.casting.CasterRegistry(),
-    guaBuilder: new algorithm.core.GuaBuilder({}),
-    tiyongAnalyzer: new algorithm.core.TiyongAnalyzer({}),
+  const engine = new algorithm.core.PEmotionEngine({
+    registry: new algorithm.casting.AnalyzerRegistry(),
+    guaBuilder: new algorithm.core.PatternBuilder({}),
+    tiyongAnalyzer: new algorithm.core.RelationAnalyzer({}),
   })
-  const sources = await engine.castTriSource(context)
+  const sources = await engine.analyzeTriSource(context)
 
-  const interpreter = new algorithm.interpretation.GuaInterpreter()
+  const interpreter = new algorithm.interpretation.PatternInterpreter()
   const timeInterp = interpreter.interpret(sources.time, scenario)
   const mindInterp = interpreter.interpret(sources.mind, scenario)
   const matterInterp = interpreter.interpret(sources.matter, scenario)
