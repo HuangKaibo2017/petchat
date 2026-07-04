@@ -3,15 +3,14 @@
  *
  * ## 概述
  *
- * 本模块是对宠物情绪分析算法的干净封装层。背后调用混淆后的算法引擎
- * `pet_emotion_algorithm.js`，对外仅暴露一个一站式分析接口 {@link analyzePetEmotion}。
+ * 本模块是对宠物情绪分析算法的封装层，对外仅暴露一个一站式分析接口
+ * {@link analyzePetEmotion}。
  *
- * 算法采用**三源模型**并行分析：
- * - **时间源**：由当前时刻的时间和时区信息计算，反映时间维度趋势。
- * - **共情源**：由宠物共情三数值（牵挂值/感知值/直觉值）计算，反映主人与宠物的情感连接。
- * - **问题源**：由输入的问题文本计算，反映问题本身的逻辑特征。
+ * 算法采用三源模型并行分析：
+ * - 时间源：由当前时刻的时间和时区信息计算，反映时间维度趋势。
+ * - 共情源：由宠物共情三数值（牵挂值/感知值/直觉值）计算，反映主人与宠物的情感连接。
+ * - 问题源：由输入的问题文本计算，反映问题本身的逻辑特征。
  *
- * 三源结果按优先级（时间源 ×3 > 问题源 ×2 > 共情源 ×1）与 27 种组合策略综合判定，
  * 输出统一的倾向结论与宠物场景化建议。
  *
  * ---
@@ -57,7 +56,9 @@
  *   ownerPerspective: string                      // 主人视角解读
  *   actionSuggestions: string[]                   // 行动建议
  *   riskPoints: string[]                          // 风险提示
- *   timing: string                                // 应期描述
+ *   timing: string                                // 时机描述
+ *   subjectStrength: number                       // 主体强度
+ *   objectStrength: number                        // 客体强度
  *
  *   castingTime: Date                             // 分析时刻
  *   algorithmVersion: string                      // 算法版本号
@@ -89,9 +90,9 @@
  *
  * ## 错误处理
  *
- * - `INVALID_TIMEZONE_OFFSET` — `timezoneOffset` 不在 [-720, 720] 范围内
- * - `UNKNOWN_CASTING_METHOD` — 计算方式未注册（内部错误，不应出现）
- * - `INVALID_MOVING_YAO` — 动爻位置越界（内部错误，不应出现）
+ * - INVALID_TIMEZONE_OFFSET — timezoneOffset 不在 [-720, 720] 范围内
+ * - UNKNOWN_CASTING_METHOD — 计算方式未注册（内部错误，不应出现）
+ * - INVALID_MOVING_YAO — 动爻位置越界（内部错误，不应出现）
  * - 其他 — 调用方应 wrap try-catch 并记录日志
  *
  * ---
@@ -162,12 +163,12 @@ export interface PetEmotionOutput {
   actionSuggestions: string[]
   /** 风险提示列表 */
   riskPoints: string[]
-  /** 应期描述 */
+  // 时机描述
   timing: string
 
-  /** 体卦月令强度 */
+  // 主体强度
   subjectStrength: number
-  /** 用卦月令强度 */
+  // 客体强度
   objectStrength: number
 
   /** 分析时刻 */
@@ -191,8 +192,7 @@ function getLocalTimezoneOffset(): number {
 /**
  * 归一化内部 verdict 为数值输出。
  *
- * 构建阶段 value-desensitization.json 会把内部字符串值替换为数字，
- * 这里同时兼容已经是数字的情况。
+ * 内部值可能是字符串或数字，统一转换为 1 / 0 / -1。
  */
 function normalizeVerdict(value: unknown): 1 | 0 | -1 {
   if (typeof value === 'number') {
@@ -205,7 +205,7 @@ function normalizeVerdict(value: unknown): 1 | 0 | -1 {
  * 将算法内部输出转为对外精简结构。
  *
  * 职责：从算法引擎的原始输出中提取对外可展示的字段，
- * 屏蔽内部类型名等敏感词。
+ * 屏蔽内部类型名等内部术语。
  */
 function toExternalOutput(
   sources: {
@@ -216,9 +216,9 @@ function toExternalOutput(
   multi: algorithm.MultiSourceInterpretation,
   timeInterp: algorithm.SingleInterpretation,
 ): PetEmotionOutput {
-  const monthly = timeInterp.seasonalStrength as { body: unknown; use: unknown } | undefined
-  const subjectStrength = typeof monthly?.body === 'number' ? monthly.body : 0
-  const objectStrength = typeof monthly?.use === 'number' ? monthly.use : 0
+  const monthly = timeInterp.seasonalStrength as { body: number; use: number } | undefined
+  const subjectStrength = monthly?.body ?? 0
+  const objectStrength = monthly?.use ?? 0
 
   return {
     finalVerdict: normalizeVerdict(multi.finalVerdict),
