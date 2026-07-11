@@ -37,7 +37,7 @@ verify_jwt = false
 # ============================================================
 #
 # WeChat:
-#   WECHAT_APPID  = wx67bdea24d2893ced
+#   WECHAT_APPID  = <SET IN SUPABASE DASHBOARD>
 #   WECHAT_SECRET = <SET IN SUPABASE DASHBOARD>
 #
 # Coze (扣子): REMOVED — now using DeepSeek directly

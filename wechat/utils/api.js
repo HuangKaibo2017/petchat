@@ -123,18 +123,16 @@ const RealAPI = {
   // ═══ 宠物档案 → api function (后端已统一返回 camelCase) ═══
   Pet: {
     create: async (data) => {
-      // 发送时兼容 mock 字段名
       const payload = { ...data };
       if (payload.avatar === undefined && payload.avatarUrl !== undefined) payload.avatar = payload.avatarUrl;
       return RealAPI.post('/api/pets', payload);
     },
     list: async () => {
       const pets = await RealAPI.get('/api/pets');
-      // 后端已返回 camelCase，做兜底兼容
       if (Array.isArray(pets)) {
         return pets.map(p => ({
           id: p.id ?? p.f_id,
-          name: p.name ?? p.f_name,
+          name: p.name ?? p.f_name ?? '',
           avatar: p.avatar ?? p.avatarUrl ?? p.f_avatar_url ?? '',
           breed: p.breed ?? '',
           breedId: p.breedId ?? p.f_breed_id,
@@ -150,6 +148,9 @@ const RealAPI = {
           vaccinated: p.vaccinated ?? p.f_vaccinated ?? false,
           tags: p.tags ?? p.f_personality_tags ?? [],
           statusPet: p.statusPet ?? p.f_status_pet,
+          history: p.history ?? '',
+          vaccineNote: p.vaccineNote ?? '',
+          allergy: p.allergy ?? '',
           createdAt: p.createdAt ?? p.f_created_at,
           updatedAt: p.updatedAt ?? p.f_updated_at,
         }));
@@ -162,7 +163,16 @@ const RealAPI = {
       if (payload.avatar === undefined && payload.avatarUrl !== undefined) payload.avatar = payload.avatarUrl;
       return RealAPI.put(`/api/pets/${id}`, payload);
     },
-    delete: async (id) => RealAPI.delete(`/api/pets/${id}`)
+    delete: async (id) => RealAPI.delete(`/api/pets/${id}`),
+    types: async () => RealAPI.get('/api/pets/types', {}, { needAuth: false }),
+    breeds: async (typeId) => RealAPI.get('/api/pets/breeds', { typeId }, { needAuth: false }),
+    genders: async () => RealAPI.get('/api/pets/genders', {}, { needAuth: false }),
+  },
+
+  // ═══ 用户档案 ═══
+  User: {
+    getProfile: async () => RealAPI.get('/api/user/profile'),
+    updateProfile: async (data) => RealAPI.put('/api/user/profile', data),
   },
 
   // ═══ 商城 → api function (后端已统一返回 camelCase) ═══
