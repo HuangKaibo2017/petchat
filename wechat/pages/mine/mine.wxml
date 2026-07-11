@@ -1,10 +1,11 @@
+<wxs module="image" src="../../utils/image.wxs" />
 <view class="mine-page">
   <nav-bar title="我的" />
 
   <!-- ═══ 头像 + 昵称 ═══ -->
   <view class="profile-header" bindtap="goLogin">
-    <image class="profile-bg" src="{{bgUrl || '/images/mine/bg.jpg'}}" mode="aspectFill" />
-    <image class="profile-avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" />
+    <image class="profile-bg" src="{{bgUrl || image.url('/images/mine/bg.jpg')}}" mode="aspectFill" />
+    <image class="profile-avatar" src="{{avatarUrl || image.url('/images/default-avatar.png')}}" mode="aspectFill" />
     <view class="profile-name">{{nickname || '点击登录'}}</view>
   </view>
 
@@ -53,7 +54,7 @@
         </view>
         <view class="pet-list" wx:if="{{pets.length > 0}}">
           <view class="pet-item" wx:for="{{pets}}" wx:key="id" data-index="{{index}}" catchtap="goEditPet">
-            <image class="pet-item-avatar" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+            <image class="pet-item-avatar" src="{{item.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
             <view class="pet-item-content">
               <view class="pet-item-name">{{item.name}}</view>
               <view class="pet-item-row">
@@ -88,7 +89,7 @@
             <swiper class="device-swiper" indicator-dots="{{false}}" autoplay="{{false}}" circular="{{true}}" current="{{hwCurrent}}" bindchange="onHwChange">
               <swiper-item wx:for="{{hardwareList}}" wx:key="id">
                 <view class="swiper-slide">
-                  <image class="swiper-slide-img" src="{{item.image || '/images/placeholder-product.png'}}" mode="aspectFill" />
+                  <image class="swiper-slide-img" src="{{item.image || image.url('/images/placeholder-product.png')}}" mode="aspectFill" />
                 </view>
               </swiper-item>
             </swiper>
@@ -123,6 +124,27 @@
 
   <!-- ═══ 功能列表 ═══ -->
   <view class="mine-menu">
+    <view class="mine-menu-item" bindtap="goCart">
+      <view class="mine-menu-left">
+        <image class="mine-menu-icon" src="{{image.url('/images/tab-shop.png')}}" mode="aspectFit" />
+        <text>我的购物车</text>
+        <view class="mine-menu-badge" wx:if="{{cartCount > 0}}">{{cartCount > 99 ? '99+' : cartCount}}</view>
+      </view>
+      <view class="mine-menu-arrow">›</view>
+    </view>
+
+    <view class="mine-menu-divider"></view>
+
+    <view class="mine-menu-item" bindtap="goOrders">
+      <view class="mine-menu-left">
+        <image class="mine-menu-icon" src="/images/icon-health.svg" mode="aspectFit" />
+        <text>我的订单</text>
+      </view>
+      <view class="mine-menu-arrow">›</view>
+    </view>
+
+    <view class="mine-menu-divider"></view>
+
     <view class="mine-menu-item" bindtap="goContact">
       <view class="mine-menu-left">
         <image class="mine-menu-icon" src="/images/icon-health.svg" mode="aspectFit" />
@@ -154,6 +176,12 @@
 
   <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
 </view>
+
+<authorize
+  visible="{{showAuthorize}}"
+  bind:success="onAuthorizeSuccess"
+  bind:cancel="onAuthorizeCancel"
+/>
 
 <!-- ═══════════════════════════════════════════
      主人档案弹层

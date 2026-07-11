@@ -4,6 +4,50 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* ─── 悬浮购物车按钮 ─── */
+.shop-float-cart {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(40rpx + env(safe-area-inset-bottom));
+  z-index: 50;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 8rpx 28rpx rgba(45, 125, 110, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.shop-float-cart:active {
+  transform: scale(0.92);
+}
+
+.shop-float-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.shop-float-badge {
+  position: absolute;
+  top: -4rpx;
+  right: -4rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  border-radius: 18rpx;
+  background: #E8443A;
+  color: #FFFFFF;
+  font-size: 22rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+  border: 3rpx solid #FFFFFF;
+}
+
 /* ─── 分类标签 ─── */
 .shop-cats {
   display: flex;

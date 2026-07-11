@@ -1,5 +1,6 @@
+<wxs module="image" src="../../utils/image.wxs" />
 <view class="empty-state">
-  <image class="empty-icon" src="{{icon || '/images/empty-default.png'}}" mode="aspectFit" />
+  <image class="empty-icon" src="{{icon || image.url('/images/empty-default.png')}}" mode="aspectFit" />
   <view class="empty-title text-lg font-bold">{{title || '暂无内容'}}</view>
   <view class="empty-desc text-sm text-muted" wx:if="{{desc}}">{{desc}}</view>
   <button class="btn btn-primary btn-sm mt-md" wx:if="{{actionText}}" bindtap="onAction">{{actionText}}</button>

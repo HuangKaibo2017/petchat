@@ -1,3 +1,4 @@
+<wxs module="image" src="../../utils/image.wxs" />
 <view class="auth-mask" wx:if="{{visible}}" bindtap="onMaskTap">
   <view class="auth-dialog" catchtap="noop">
     <view class="auth-title text-xl font-bold">完善资料</view>
@@ -7,20 +8,20 @@
     <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
       <image
         class="avatar-preview"
-        src="{{avatarUrl || '/images/default-avatar.png'}}"
+        src="{{avatarUrl || image.url('/images/default-avatar.png')}}"
         mode="aspectFill"
       />
       <view class="avatar-hint text-xs text-hint">点击选择头像</view>
     </button>
 
-    <!-- 昵称输入 -->
+    <!-- 昵称输入 (type=nickname 不能用 value 受控绑定，会与原生昵称面板冲突) -->
     <view class="nickname-input-wrap">
       <input
         class="nickname-input"
         type="nickname"
         placeholder="请输入昵称"
-        value="{{nickName}}"
         bindinput="onNicknameInput"
+        bindblur="onNicknameBlur"
       />
     </view>
 

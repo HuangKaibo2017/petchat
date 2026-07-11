@@ -2,106 +2,22 @@
   "description": "Gengdongta - 宠物智能养护平台",
   "packOptions": {
     "ignore": [
-      {
-        "value": ".eslintrc.js",
-        "type": "file"
-      },
-      {
-        "value": ".git",
-        "type": "folder"
-      },
-      {
-        "value": ".DS_Store",
-        "type": "file"
-      },
-      {
-        "value": "images/.DS_Store",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/bird.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/cat.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/dog.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/fish.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/mouse.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/rabbit.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/snake.png",
-        "type": "file"
-      },
-      {
-        "value": "images/pet/turtle.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/banner.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/dog.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/home-emotion.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/home-health.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/home-risk.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/lingyang.png",
-        "type": "file"
-      },
-      {
-        "value": "images/index/liulang.png",
-        "type": "file"
-      },
-      {
-        "value": "images/health/bg.png",
-        "type": "file"
-      },
-      {
-        "value": "images/mine/bg.png",
-        "type": "file"
-      },
-      {
-        "value": "images/risk/bg.png",
-        "type": "file"
-      },
-      {
-        "value": "images/risk/envint.png",
-        "type": "file"
-      },
-      {
-        "value": "images/risk/masterinfo.png",
-        "type": "file"
-      },
-      {
-        "value": "images/risk/petinfo.png",
-        "type": "file"
-      }
+      { "value": ".eslintrc.js", "type": "file" },
+      { "value": ".git", "type": "folder" },
+      { "value": ".DS_Store", "type": "file" },
+      { "value": "images/.DS_Store", "type": "file" },
+      { "value": "images/health", "type": "folder" },
+      { "value": "images/index", "type": "folder" },
+      { "value": "images/mine", "type": "folder" },
+      { "value": "images/pet", "type": "folder" },
+      { "value": "images/risk", "type": "folder" },
+      { "value": "images/shop", "type": "folder" },
+      { "value": "images/default-avatar.png", "type": "file" },
+      { "value": "images/default-hospital.png", "type": "file" },
+      { "value": "images/default-pet.png", "type": "file" },
+      { "value": "images/empty-default.png", "type": "file" },
+      { "value": "images/hero-bg.png", "type": "file" },
+      { "value": "images/logo.png", "type": "file" }
     ],
     "include": []
   },

@@ -58,10 +58,10 @@ const request = async (url, options = {}) => {
 
 // ─── 真实 API（直连 Supabase Edge Functions） ───
 const RealAPI = {
-  get: (url, data) => request(url, { method: 'GET', data }),
-  post: (url, data) => request(url, { method: 'POST', data }),
-  put: (url, data) => request(url, { method: 'PUT', data }),
-  delete: (url, data) => request(url, { method: 'DELETE', data }),
+  get: (url, params, opts) => request(url, { method: 'GET', data: params, ...opts }),
+  post: (url, data, opts) => request(url, { method: 'POST', data, ...opts }),
+  put: (url, data, opts) => request(url, { method: 'PUT', data, ...opts }),
+  delete: (url, data, opts) => request(url, { method: 'DELETE', data, ...opts }),
 
   // ═══ 报告接口 → emotion-report / health-report / risk-report functions ═══
   Report: {
@@ -168,16 +168,18 @@ const RealAPI = {
   // ═══ 商城 → api function (后端已统一返回 camelCase) ═══
   Product: {
     list: async (params) => {
-      const products = await RealAPI.get('/api/products', params);
+      const products = await RealAPI.get('/api/products', params, { needAuth: false });
       if (Array.isArray(products)) {
         return products.map(p => ({
           id: p.id ?? p.f_id,
-          name: p.name ?? p.f_name,
+          name: p.name ?? p.f_name ?? '',
           desc: p.desc ?? p.f_description ?? '',
           price: p.price ?? 0,
           category: p.category ?? '',
-          categoryId: p.categoryId ?? p.f_category_id,
+          categoryCode: p.categoryCode ?? p.f_category_code ?? '',
+          categoryName: p.categoryName ?? '',
           image: p.image ?? '',
+          images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []),
           brand: p.brand ?? p.f_brand ?? '',
         }));
       }
@@ -188,13 +190,16 @@ const RealAPI = {
       if (product) {
         return {
           id: product.id ?? product.f_id,
-          name: product.name ?? product.f_name,
+          name: product.name ?? product.f_name ?? '',
           desc: product.desc ?? product.f_description ?? '',
           price: product.price ?? 0,
           category: product.category ?? '',
-          categoryId: product.categoryId ?? product.f_category_id,
+          categoryCode: product.categoryCode ?? product.f_category_code ?? '',
+          categoryName: product.categoryName ?? '',
           image: product.image ?? '',
+          images: Array.isArray(product.images) ? product.images : (product.image ? [product.image] : []),
           brand: product.brand ?? product.f_brand ?? '',
+          detail: product.detail ?? null,
         };
       }
       return product;
@@ -204,7 +209,10 @@ const RealAPI = {
   // ═══ 订单 → api function ═══
   Order: {
     create: async (data) => RealAPI.post('/api/orders', data),
-    paymentStatus: async (id) => RealAPI.get(`/api/orders/${id}/payment-status`)
+    list: async () => RealAPI.get('/api/orders'),
+    paymentStatus: async (id) => RealAPI.get(`/api/orders/${id}/payment-status`),
+    cancel: async (id) => RealAPI.post(`/api/orders/${id}/cancel`),
+    complete: async (id) => RealAPI.post(`/api/orders/${id}/complete`)
   },
 
   // ═══ 微信支付 ═══
@@ -320,7 +328,39 @@ const MockNamespaced = {
     detail: async (id) => { const r = await MockAPI.getProductDetail(id); return r.data }
   },
   Order: {
-    create: async (data) => { const r = await MockAPI.createOrder(data); return r.data }
+    create: async (data) => { const r = await MockAPI.createOrder(data); return r.data },
+    list: async () => { const orders = wx.getStorageSync('orders') || []; return orders },
+    paymentStatus: async (id) => {
+      const orders = wx.getStorageSync('orders') || []
+      const order = orders.find(o => o.id === id || o.orderId === id)
+      return { status: order ? order.status || 'paid' : 'paid' }
+    },
+    cancel: async (id) => {
+      const orders = wx.getStorageSync('orders') || []
+      const idx = orders.findIndex(o => o.id === id)
+      if (idx > -1) { orders[idx].status = 'cancelled'; wx.setStorageSync('orders', orders) }
+      return { success: true }
+    },
+    complete: async (id) => {
+      const orders = wx.getStorageSync('orders') || []
+      const idx = orders.findIndex(o => o.id === id)
+      if (idx > -1) { orders[idx].status = 'completed'; wx.setStorageSync('orders', orders) }
+      return { success: true }
+    }
+  },
+  Pay: {
+    wechatJsapi: async (orderId) => {
+      const cfg = wx.getStorageSync('userInfo') || {}
+      const timeStamp = Math.floor(Date.now() / 1000).toString()
+      return {
+        appId: cfg.appId || '',
+        timeStamp,
+        nonceStr: Math.random().toString(36).slice(2),
+        package: `prepay_id=mock_${Date.now()}`,
+        signType: 'RSA',
+        paySign: 'mock_sign'
+      }
+    }
   },
   Hospital: {
     list: async (params) => { const r = await MockAPI.getHospitals(params); return r.data },

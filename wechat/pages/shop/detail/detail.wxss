@@ -199,7 +199,52 @@
   right: 0;
   bottom: 0;
   z-index: 20;
+  display: flex;
   padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
   background: rgba(250, 249, 245, 0.96);
   box-shadow: 0 -8rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+/* ─── 悬浮购物车按钮 ─── */
+.detail-float-cart {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(140rpx + env(safe-area-inset-bottom));
+  z-index: 30;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 8rpx 28rpx rgba(45, 125, 110, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.detail-float-cart:active {
+  transform: scale(0.92);
+}
+
+.detail-float-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.detail-float-badge {
+  position: absolute;
+  top: -4rpx;
+  right: -4rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  border-radius: 18rpx;
+  background: #E8443A;
+  color: #FFFFFF;
+  font-size: 22rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+  border: 3rpx solid #FFFFFF;
 }

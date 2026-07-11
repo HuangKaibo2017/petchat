@@ -1,0 +1,64 @@
+<wxs module="image" src="../../../utils/image.wxs" />
+<nav-bar title="购物车" showBack="{{true}}" />
+
+<view class="page-container">
+  <view wx:if="{{cartList.length > 0}}">
+    <view class="cart-address card" bindtap="goAddress">
+      <image class="cart-addr-icon" src="{{image.url('/images/tab-shop.png')}}" mode="aspectFit" />
+      <view class="cart-addr-info">
+        <block wx:if="{{selectedAddress}}">
+          <view class="cart-addr-name">{{selectedAddress.name}} {{selectedAddress.phone}}</view>
+          <view class="cart-addr-detail">{{selectedAddress.region}} {{selectedAddress.detail}}</view>
+        </block>
+        <block wx:else>
+          <view class="cart-addr-empty">请添加收货地址</view>
+        </block>
+      </view>
+      <view class="cart-addr-arrow">></view>
+    </view>
+
+    <view class="cart-list">
+      <view class="cart-item" wx:for="{{cartList}}" wx:key="id">
+        <image class="cart-item-img" src="{{item.images[0] || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+        <view class="cart-item-info">
+          <view class="cart-item-name">{{item.name}}</view>
+          <view class="cart-item-price">¥{{item.price}}</view>
+        </view>
+        <view class="cart-item-ctrl">
+          <view class="cart-qty-btn" bindtap="decrease" data-id="{{item.id}}">-</view>
+          <view class="cart-qty-num">{{item.count}}</view>
+          <view class="cart-qty-btn" bindtap="increase" data-id="{{item.id}}">+</view>
+        </view>
+        <view class="cart-item-del" bindtap="deleteItem" data-id="{{item.id}}">×</view>
+      </view>
+    </view>
+
+    <view class="cart-remark card">
+      <input class="cart-remark-input" placeholder="订单备注（选填）" value="{{remark}}" bindinput="inputRemark" />
+    </view>
+  </view>
+
+  <empty-state wx:else title="购物车空空如也" desc="去商城逛逛吧" actionText="去商城" bind:action="goHome" />
+</view>
+
+<view class="cart-action" wx:if="{{cartList.length > 0}}">
+  <view class="cart-action-total">
+    <text class="cart-action-total-label">合计：</text>
+    <text class="cart-action-total-price">¥{{totalPrice}}</text>
+  </view>
+  <button class="btn btn-primary" bindtap="goPay" loading="{{paying}}" disabled="{{paying}}">
+    立即下单
+  </button>
+</view>
+
+<view class="cart-pay-bar" wx:if="{{showPay}}">
+  <view class="cart-pay-info">
+    <text>待支付 ¥{{payAmount}}</text>
+  </view>
+  <view class="cart-pay-btns">
+    <button class="btn btn-outline btn-sm" bindtap="cancelPay">取消</button>
+    <button class="btn btn-primary btn-sm" bindtap="wxPay" loading="{{paying}}" disabled="{{paying}}">
+      微信支付
+    </button>
+  </view>
+</view>

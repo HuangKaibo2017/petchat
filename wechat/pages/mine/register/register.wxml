@@ -1,3 +1,4 @@
+<wxs module="image" src="../../../utils/image.wxs" />
 <nav-bar title="注册档案" showBack="{{true}}" />
 <view class="page-container">
   <view class="section">
@@ -68,7 +69,7 @@
       <view class="input-group">
         <view class="input-label">照片</view>
         <view class="flex items-center">
-          <image class="avatar-md" src="{{item.avatar || '/images/default-pet.png'}}" mode="aspectFill" bindtap="choosePetAvatar" data-index="{{index}}" />
+          <image class="avatar-md" src="{{item.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" bindtap="choosePetAvatar" data-index="{{index}}" />
           <text class="text-xs text-hint ml-sm">点击更换照片</text>
         </view>
       </view>

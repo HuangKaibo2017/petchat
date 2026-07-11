@@ -324,6 +324,20 @@
   flex-shrink: 0;
 }
 
+.mine-menu-badge {
+  margin-left: 12rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  border-radius: 18rpx;
+  background: #E8443A;
+  color: #FFFFFF;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mine-menu-arrow {
   font-size: 36rpx;
   color: var(--color-text-hint);

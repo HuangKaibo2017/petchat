@@ -20,6 +20,7 @@ nfcCount: 0,
     healthQuota: 0,
     riskQuota: 0,
     bodyQuota: 0,
+    cartCount: 0,
     hardwareList: [
       { id: 1, name: '智能项圈', image: '', active: false },
       { id: 2, name: 'NFC贴',    image: '', active: true },
@@ -27,6 +28,7 @@ nfcCount: 0,
     ],
 
     // 弹层状态
+    showAuthorize: false,
     showOwnerForm: false,
     showPetForm: false,
     editingPetIndex: -1,
@@ -51,6 +53,11 @@ nfcCount: 0,
 
   onShow() {
     this.loadUserInfo()
+    this.loadCartCount()
+  },
+
+  loadCartCount() {
+    this.setData({ cartCount: app.getCartCount() })
   },
 
   loadUserInfo() {
@@ -111,20 +118,22 @@ nfcCount: 0,
 
   // ─── 头像昵称区域点击 ───
   goLogin() {
-    if (!this.data.nickname) {
-      wx.getUserProfile({
-        desc: '用于完善个人资料',
-        success: (res) => {
-          const { avatarUrl, nickName } = res.userInfo
-          wx.setStorageSync('userInfo', { avatarUrl, nickName })
-          this.setData({ avatarUrl, nickname: nickName })
-          wx.showToast({ title: '登录成功', icon: 'success' })
-        },
-        fail: () => {
-          wx.showToast({ title: '已取消', icon: 'none' })
-        }
-      })
-    }
+    this.setData({ showAuthorize: true })
+  },
+
+  onAuthorizeSuccess(e) {
+    const { nickName, avatarUrl } = e.detail
+    wx.setStorageSync('userInfo', { nickName, avatarUrl })
+    this.setData({
+      avatarUrl: avatarUrl || '',
+      nickname: nickName || '',
+      showAuthorize: false
+    })
+    wx.showToast({ title: '设置成功', icon: 'success' })
+  },
+
+  onAuthorizeCancel() {
+    this.setData({ showAuthorize: false })
   },
 
   // ─── 主人档案 ───
@@ -259,5 +268,13 @@ nfcCount: 0,
 
   goSettings() {
     wx.showToast({ title: '设置', icon: 'none' })
+  },
+
+  goCart() {
+    wx.navigateTo({ url: '/pages/shop/cart/cart' })
+  },
+
+  goOrders() {
+    wx.navigateTo({ url: '/pages/mine/orders/orders' })
   }
 })
