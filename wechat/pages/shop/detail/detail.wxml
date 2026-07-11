@@ -1,16 +1,15 @@
+<wxs module="imgx" src="../../../utils/image.wxs" />
 <nav-bar title="商品详情" showBack="{{true}}" />
 
 <view class="page-container" wx:if="{{!loading && product}}">
-  <!-- 商品主图 -->
   <view class="detail-image-wrap">
     <swiper class="detail-swiper" indicator-dots="{{product.images.length > 1}}" indicator-color="rgba(255,255,255,0.55)" indicator-active-color="#FFFFFF">
-      <swiper-item wx:for="{{product.images}}" wx:for-item="image" wx:key="*this">
-        <image class="detail-image" src="{{image}}" mode="aspectFill" bindtap="previewImage" data-image="{{image}}" />
+      <swiper-item wx:for="{{product.images}}" wx:for-item="imgUrl" wx:key="*this">
+        <image class="detail-image" src="{{imgUrl}}" mode="aspectFill" bindtap="previewImage" data-image="{{imgUrl}}" />
       </swiper-item>
     </swiper>
   </view>
 
-  <!-- 商品信息 -->
   <view class="detail-info card">
     <view class="detail-category">{{product.categoryName}}</view>
     <view class="detail-name">{{product.displayName}}</view>
@@ -20,7 +19,6 @@
     </view>
   </view>
 
-  <!-- 详情介绍 -->
   <view wx:if="{{product.detail}}" class="detail-content">
     <view class="detail-card">
       <view class="section-title">商品规格</view>
@@ -61,13 +59,19 @@
     </view>
   </view>
 
-  <!-- 购买按钮 -->
   <view class="detail-action">
-    <button class="btn btn-primary btn-block btn-lg" bindtap="onBuy" loading="{{paying}}" disabled="{{paying}}">
-      {{paying ? '支付中' : '立即购买'}}
+    <button class="btn btn-secondary btn-lg" style="flex:1" bindtap="onAddToCart">
+      加入购物车
     </button>
+    <button class="btn btn-primary btn-lg" style="flex:1;margin-left:16rpx" bindtap="onBuyNow">
+      立即购买
+    </button>
+  </view>
+
+  <view class="detail-float-cart" bindtap="goCart">
+    <image class="detail-float-icon" src="{{imgx.url('/images/tab-shop.png')}}" mode="aspectFit" />
+    <view class="detail-float-badge" wx:if="{{cartCount > 0}}">{{cartCount > 99 ? '99+' : cartCount}}</view>
   </view>
 </view>
 
-<!-- 加载中 -->
 <loading wx:if="{{loading}}" />

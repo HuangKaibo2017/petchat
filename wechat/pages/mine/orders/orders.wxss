@@ -1,3 +1,25 @@
-.filter-tabs { padding: 16rpx 32rpx; gap: 16rpx; }
-.filter-tab { display:inline-flex; padding:12rpx 24rpx; background:#FFFFFF; border-radius:9999rpx; font-size:26rpx; color:#6B7280; }
-.filter-tab.active { background:#D8EBE6; color:#2D7D6E; font-weight:600; }
+.order-tabs { display: flex; white-space: nowrap; padding: 16rpx 24rpx; gap: 16rpx; background: #FFFFFF; }
+.order-tab { display: inline-flex; align-items: center; height: 56rpx; padding: 0 24rpx; border-radius: 28rpx; font-size: 25rpx; color: var(--color-text-secondary); background: var(--color-bg-gray); flex-shrink: 0; }
+.order-tab-active { color: #FFFFFF; background: var(--color-primary); }
+
+.order-card { margin: 16rpx 24rpx; padding: 0; overflow: hidden; }
+.order-card-header { display: flex; justify-content: space-between; align-items: center; padding: 20rpx 24rpx; border-bottom: 1rpx solid var(--color-border-light); }
+.order-card-no { font-size: 24rpx; color: var(--color-text-secondary); }
+.order-card-status { font-size: 24rpx; font-weight: 600; }
+.order-card-status.pending { color: var(--color-warning); }
+.order-card-status.paid { color: var(--color-info); }
+.order-card-status.shipped { color: var(--color-primary); }
+.order-card-status.completed { color: var(--color-success); }
+.order-card-status.cancelled { color: var(--color-text-hint); }
+
+.order-card-items { padding: 12rpx 24rpx; }
+.order-card-item { display: flex; align-items: center; gap: 16rpx; padding: 12rpx 0; border-bottom: 1rpx solid var(--color-border-light); }
+.order-card-item:last-child { border-bottom: none; }
+.order-item-img { width: 100rpx; height: 100rpx; border-radius: 10rpx; flex-shrink: 0; background: var(--color-bg-gray); }
+.order-item-info { flex: 1; min-width: 0; }
+.order-item-name { font-size: 26rpx; font-weight: 600; color: var(--color-text-primary); margin-bottom: 6rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-item-price { font-size: 26rpx; color: #E8443A; font-weight: 600; }
+
+.order-card-footer { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 24rpx; background: var(--color-bg); }
+.order-card-total { font-size: 26rpx; color: var(--color-text-secondary); }
+.order-card-actions { display: flex; gap: 16rpx; }

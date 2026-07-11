@@ -1,3 +1,4 @@
+<wxs module="imgx" src="../../utils/image.wxs" />
 <view class="shop-page">
   <!-- ═══ 分类标签 ═══ -->
   <scroll-view class="shop-cats" scroll-x>
@@ -11,12 +12,11 @@
   <!-- ═══ 商品列表 ═══ -->
   <view class="shop-grid">
     <view class="shop-card" wx:for="{{products}}" wx:key="id"
-          wx:if="{{activeCategory === 'all' || item.category === activeCategory}}"
           bindtap="goDetail" data-id="{{item.id}}">
       <view class="shop-card-img-wrap">
         <swiper class="shop-card-swiper" indicator-dots="{{item.images.length > 1}}" indicator-color="rgba(255,255,255,0.55)" indicator-active-color="#FFFFFF">
-          <swiper-item wx:for="{{item.images}}" wx:for-item="image" wx:for-index="imageIndex" wx:key="*this">
-            <image class="shop-card-img" src="{{image}}" mode="aspectFill" />
+          <swiper-item wx:for="{{item.images}}" wx:for-item="imgUrl" wx:for-index="imageIndex" wx:key="*this">
+            <image class="shop-card-img" src="{{imgUrl}}" mode="aspectFill" />
           </swiper-item>
         </swiper>
         <view class="shop-card-category">{{item.categoryName}}</view>
@@ -33,5 +33,11 @@
   <!-- 空状态 -->
   <view class="shop-empty" wx:if="{{!loading && products.length === 0}}">
     <view class="shop-empty-text">暂无商品</view>
+  </view>
+
+  <!-- 悬浮购物车按钮 -->
+  <view class="shop-float-cart" bindtap="goCart">
+    <image class="shop-float-icon" src="{{imgx.url('/images/tab-shop.png')}}" mode="aspectFit" />
+    <view class="shop-float-badge" wx:if="{{cartCount > 0}}">{{cartCount > 99 ? '99+' : cartCount}}</view>
   </view>
 </view>

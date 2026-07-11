@@ -35,6 +35,7 @@ App({
     if (options.query && options.query.scene) {
       this.handleScene(options.query.scene)
     }
+    this.syncCartBadge()
   },
 
   initDemoData() {
@@ -192,5 +193,52 @@ App({
       this.globalData.currentPet = pet
       wx.setStorageSync('currentPetId', petId)
     }
+  },
+
+  saveCart() {
+    wx.setStorageSync('cartList', this.globalData.cart)
+    this.syncCartBadge()
+  },
+
+  syncCartBadge() {
+    const count = this.getCartCount()
+    if (count > 0) {
+      wx.setTabBarBadge({
+        index: 1,
+        text: count > 99 ? '99+' : String(count)
+      })
+    } else {
+      wx.removeTabBarBadge({ index: 1 })
+    }
+  },
+
+  getCartCount() {
+    return this.globalData.cart.reduce((sum, item) => sum + item.count, 0)
+  },
+
+  getCartTotal() {
+    return this.globalData.cart.reduce((sum, item) => {
+      return sum + (item.price || 0) * item.count
+    }, 0)
+  },
+
+  addToCart(product, count) {
+    const cart = this.globalData.cart
+    const index = cart.findIndex(item => item.id === product.id)
+    if (index > -1) {
+      cart[index].count += count
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.displayName || product.name,
+        price: product.price,
+        images: product.images || [],
+        categoryName: product.categoryName || '',
+        count: count
+      })
+    }
+    this.globalData.cart = cart
+    this.saveCart()
+    return true
   }
 })

@@ -35,12 +35,18 @@ CREATE POLICY "Users can update their own files"
   ON storage.objects FOR UPDATE
   USING (
     bucket_id = 'gengdongta-assets'
-    AND auth.role() = 'authenticated'
+    AND auth.uid() = owner
   );
 
 CREATE POLICY "Users can delete their own files"
   ON storage.objects FOR DELETE
   USING (
     bucket_id = 'gengdongta-assets'
-    AND auth.role() = 'authenticated'
+    AND auth.uid() = owner
   );
+
+-- avatars storage bucket policies
+CREATE POLICY "任何人可查看头像" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "用户可上传自己的头像" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+CREATE POLICY "用户可更新自己的头像" ON storage.objects FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid() = owner);
+CREATE POLICY "用户可删除自己的头像" ON storage.objects FOR DELETE USING (bucket_id = 'avatars' AND auth.uid() = owner);

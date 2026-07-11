@@ -1,3 +1,4 @@
+<wxs module="image" src="../../../utils/image.wxs" />
 <view class="page">
   <!-- Loading -->
   <view class="loading-wrap" wx:if="{{loading}}">
@@ -9,7 +10,7 @@
   <view class="report-body" wx:if="{{!loading && report}}">
     <!-- Header -->
     <view class="header">
-      <image class="pet-avatar" src="{{petAvatar || '/images/default-pet.png'}}" mode="aspectFill" />
+      <image class="pet-avatar" src="{{petAvatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
       <view class="header-info">
         <text class="pet-name">{{petName}}</text>
         <text class="report-label">情绪解读报告</text>

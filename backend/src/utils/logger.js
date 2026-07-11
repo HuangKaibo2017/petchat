@@ -31,7 +31,9 @@ function createLogger(name, opts = {}) {
     const ts = new Date().toISOString();
     const text = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
     const line = `[${ts}] [${level}] ${text}\n`;
-    fs.appendFileSync(filepath, line);
+    fs.appendFile(filepath, line, (err) => {
+      if (err) process.stderr.write(`[Logger] write error: ${err.message}\n`);
+    });
     process.stdout.write(line);
   };
 

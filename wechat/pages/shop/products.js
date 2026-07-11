@@ -158,32 +158,8 @@ function makeHandmadeDetail(options) {
   }
 }
 
-const SHOP_ITEMS = [
-  { id: 'handmade-1', category: 'handmade', categoryName: '手作', name: '手作挂件 1', price: 49, images: ['/images/shop/handmade/WechatIMGb2313cba0db9517a8ad72b64effb6b06.jpg'], detail: makeHandmadeDetail({ title: '手作挂件 1' }) },
-  { id: 'handmade-2', category: 'handmade', categoryName: '手作', name: '手作挂件 2', price: 49, images: ['/images/shop/handmade/WechatIMGf1d7b50e1dd753e6557847ce413eaba1.jpg'], detail: makeHandmadeDetail({ title: '手作挂件 2' }) },
-  { id: 'necklace-1', category: 'necklace', categoryName: '项链', name: '水晶菩提象数本草智能项链', price: 68, images: ['/images/shop/necklace/1/1.jpg', '/images/shop/necklace/1/2.jpg', '/images/shop/necklace/1/3.jpg', '/images/shop/necklace/1/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-水晶菩提象数本草智能项链（NFC版）', colors: '紫色、墨绿色、深棕色、粉色、天蓝色' }) },
-  { id: 'necklace-2', category: 'necklace', categoryName: '项链', name: '本草智能项链硅胶扣款', price: 68, images: ['/images/shop/necklace/2/1.jpg', '/images/shop/necklace/2/2.jpg', '/images/shop/necklace/2/3.jpg', '/images/shop/necklace/2/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-本草智能项链（NFC版）（硅胶扣）', colors: '粉色、黑色' }) },
-  { id: 'necklace-3', category: 'necklace', categoryName: '项链', name: '珍珠水晶本草智能项链', price: 68, images: ['/images/shop/necklace/3/1.jpg', '/images/shop/necklace/3/2.jpg', '/images/shop/necklace/3/3.jpg', '/images/shop/necklace/3/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-珍珠水晶本草智能项链（NFC版）', buckles: '塑料插扣、金属插扣、金属圆扣' }) },
-  { id: 'necklace-4', category: 'necklace', categoryName: '项链', name: '水晶菩提硅胶带智能项链', price: 68, images: ['/images/shop/necklace/4/1.jpg', '/images/shop/necklace/4/2.jpg', '/images/shop/necklace/4/3.jpg', '/images/shop/necklace/4/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-本草智能象数项链（NFC版）（水晶菩提硅胶带）', colors: '松针绿、砂粉、薰衣草、蓝绿色、深蓝、烟紫、黄色、黑色、酒红、梅子色、杏色' }) },
-  { id: 'necklace-5', category: 'necklace', categoryName: '项链', name: '撞色硅胶本草智能项链', price: 68, images: ['/images/shop/necklace/5/1.jpg', '/images/shop/necklace/5/2.jpg', '/images/shop/necklace/5/3.jpg', '/images/shop/necklace/5/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-象数本草智能项链（NFC版）撞色硅胶版', colors: '白色、云雾灰、酒红、紫丁香、碧海、松针绿、大红、复古玫粉、午夜蓝、橙色、黄色、粉色' }) },
-  { id: 'necklace-6', category: 'necklace', categoryName: '项链', name: '菩提针织扣本草智能项链', price: 68, images: ['/images/shop/necklace/6/1.jpg', '/images/shop/necklace/6/2.jpg', '/images/shop/necklace/6/3.jpg', '/images/shop/necklace/6/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-象数本草智能项链（NFC版）菩提针织扣款', colors: '棕色、绿色、蓝色、黑色' }) },
-  { id: 'necklace-7', category: 'necklace', categoryName: '项链', name: '水晶菩提本草智能项链', price: 68, images: ['/images/shop/necklace/7/1.jpg', '/images/shop/necklace/7/2.jpg', '/images/shop/necklace/7/3.jpg', '/images/shop/necklace/7/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-水晶菩提本草智能项链（NFC版）', colors: '紫色、墨绿色、深棕色、粉色、天蓝色' }) },
-  { id: 'necklace-8', category: 'necklace', categoryName: '项链', name: '软香笼本草智能项圈', price: 68, images: ['/images/shop/necklace/8/1.jpg', '/images/shop/necklace/8/2.jpg', '/images/shop/necklace/8/3.jpg', '/images/shop/necklace/8/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-本草智能项圈（NFC版）软香笼版', catSizes: '', dogSizes: 'S 26-42cm，M 31-50cm，L 38-60cm', colors: '棕色、黑色、红色、军绿、蓝色', catHerbs: [] }) },
-  { id: 'necklace-9', category: 'necklace', categoryName: '项链', name: '菩提本草智能项链', price: 68, images: ['/images/shop/necklace/9/1.jpg', '/images/shop/necklace/9/2.jpg', '/images/shop/necklace/9/3.jpg', '/images/shop/necklace/9/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-菩提本草智能项链（NFC版）', colors: '草绿色、黄色、绿色、深蓝、浅蓝、白色、玫粉、黑色、橙色、红色、紫色' }) },
-  { id: 'necklace-10', category: 'necklace', categoryName: '项链', name: '菩提本草智能项圈', price: 68, images: ['/images/shop/necklace/10/1.jpg', '/images/shop/necklace/10/2.jpg', '/images/shop/necklace/10/3.jpg', '/images/shop/necklace/10/4.jpg'], detail: makeNecklaceDetail({ title: '更懂它-知宠康乐-菩提本草智能项圈（NFC版）', colors: '黑色、红色、黄色、深蓝色、卡其色、玫红色、紫色、白色、棕色、粉色、天蓝色' }) },
-  { id: 'toy-1', category: 'toy', categoryName: '玩具', name: '智能玩具', price: 29, images: ['/images/shop/toy/toy.jpg'], detail: makeToyDetail({ title: '更懂它-知宠康乐-智能玩具（NFC版）' }) }
-]
-
-function getProductsByCategory(category) {
-  return SHOP_ITEMS.filter(item => category === 'all' || item.category === category)
-}
-
-function getProductById(id) {
-  return SHOP_ITEMS.find(item => item.id === id)
-}
-
 module.exports = {
-  SHOP_ITEMS,
-  getProductsByCategory,
-  getProductById
+  makeNecklaceDetail,
+  makeToyDetail,
+  makeHandmadeDetail
 }

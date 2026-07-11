@@ -1,89 +1,61 @@
-/**
- * PostgreSQL / Supabase 数据库连接（接口兼容原 mysql.js）
- *
- * 用法完全兼容旧 mysql.js：
- *   const db = require('./db/postgres')
- *   const rows = await db.query('SELECT * FROM t_pet WHERE f_id = ?', [id])
- *   const result = await db.execute('INSERT INTO t_pet (...) VALUES (?)', [data])
- *   const alive = await db.ping()
- */
+const path = require('path')
+global.WebSocket = require('ws')
 
-const { Pool } = require('pg')
+const BACKEND_DIR = path.join(__dirname, '..', '..')
+require('dotenv').config({ path: path.join(BACKEND_DIR, '.env') })
 
-let pool = null
+const { createClient } = require('@supabase/supabase-js')
 
-function getPool() {
-  if (pool) return pool
+const SUPABASE_URL = process.env.SUPABASE_URL
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  // 优先使用 SUPABASE_DB_URL / DATABASE_URL 连接字符串
-  const connectionString =
-    process.env.SUPABASE_DB_URL ||
-    process.env.DATABASE_URL ||
-    `postgresql://${process.env.DB_USER || 'postgres'}:${process.env.DB_PASSWORD || ''}@${process.env.DB_HOST || 'db.dlvgbwyvxjdggxpddpod.supabase.co'}:${process.env.DB_PORT || '5432'}/${process.env.DB_NAME || 'postgres'}`
+let client = null
 
-  pool = new Pool({
-    connectionString,
-    ssl: connectionString.includes('supabase.co')
-      ? { rejectUnauthorized: false }
-      : false,
-    max: 10,
-    idleTimeoutMillis: 30000,
+function getClient() {
+  if (client) return client
+  client = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    db: { schema: 'public' },
   })
-
-  pool.on('error', (err) => {
-    console.error('[Postgres] Unexpected pool error:', err.message)
-  })
-
-  console.log('[Postgres] Pool created')
-  return pool
+  console.log('[Supabase REST] Client created')
+  return client
 }
 
-/**
- * 将 MySQL 风格的 ? 占位符转换为 PostgreSQL 的 $1, $2, ...
- * 同时跳过字符串和注释内的 ?
- */
-function convertPlaceholders(sql) {
+function convertPlaceholders(sql, params) {
+  if (!params || params.length === 0) return sql
+
+  let idx = 0
   let result = ''
-  let i = 0
-  let inSingle = false
-  let inDouble = false
-  let inDollar = false  // $$...$$ 字面量
+  let inStr = false
+  let char = ''
 
-  for (let pos = 0; pos < sql.length; pos++) {
-    const ch = sql[pos]
-    const next = sql[pos + 1] || ''
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i]
 
-    if (inDollar) {
+    if (inStr) {
       result += ch
-      if (ch === '$' && next === '$') {
-        inDollar = false
-        result += next
-        pos++
+      if (ch === char && sql[i - 1] !== '\\') inStr = false
+      continue
+    }
+
+    if (ch === "'" || ch === '"') {
+      inStr = true
+      char = ch
+      result += ch
+      continue
+    }
+
+    if (ch === '?' && idx < params.length) {
+      const val = params[idx++]
+      if (val === null || val === undefined) {
+        result += 'NULL'
+      } else if (typeof val === 'number') {
+        result += val
+      } else if (typeof val === 'boolean') {
+        result += val ? 'TRUE' : 'FALSE'
+      } else {
+        result += "'" + String(val).replace(/'/g, "''").replace(/\\/g, '\\\\') + "'"
       }
-      continue
-    }
-
-    if (ch === '$' && next === '$' && !inSingle && !inDouble) {
-      inDollar = true
-      result += ch
-      continue
-    }
-
-    if (ch === "'" && !inDouble) {
-      inSingle = !inSingle
-      result += ch
-      continue
-    }
-
-    if (ch === '"' && !inSingle) {
-      inDouble = !inDouble
-      result += ch
-      continue
-    }
-
-    if (!inSingle && !inDouble && ch === '?') {
-      i++
-      result += `$${i}`
       continue
     }
 
@@ -93,55 +65,57 @@ function convertPlaceholders(sql) {
   return result
 }
 
-/**
- * 执行 SELECT 查询，返回行数组
- */
+async function execRPC(sql) {
+  const { data, error } = await getClient().rpc('exec_sql', { sql })
+  if (error) throw new Error(error.message)
+  return data
+}
+
 async function query(sql, params = []) {
-  const pgSql = convertPlaceholders(sql)
-  const client = await getPool().connect()
-  try {
-    const result = await client.query(pgSql, params)
-    return result.rows
-  } finally {
-    client.release()
-  }
+  const fullSql = convertPlaceholders(sql, params)
+  return await execRPC(fullSql)
 }
 
-/**
- * 执行 INSERT/UPDATE/DELETE，返回结果对象
- * 兼容 mysql2 的 execute 返回值：
- *   { affectedRows, insertId, ... }
- */
 async function execute(sql, params = []) {
-  const pgSql = convertPlaceholders(sql)
-  const client = await getPool().connect()
-  try {
-    const result = await client.query(pgSql, params)
+  const fullSql = convertPlaceholders(sql, params)
+  const { data, error } = await getClient().rpc('exec_sql', { sql: fullSql })
+  if (error) throw new Error(error.message)
 
-    // 兼容 mysql2 的 result 接口
-    return {
-      affectedRows: result.rowCount || 0,
-      insertId: result.rows && result.rows.length > 0 && result.rows[0].f_id
-        ? result.rows[0].f_id
-        : null,
-      changedRows: result.rowCount || 0,
-      fieldCount: result.fields ? result.fields.length : 0,
+  const rows = data || []
+
+  let affectedRows = 0
+  let insertId = null
+
+  if (/^\s*INSERT/i.test(sql)) {
+    affectedRows = rows.length || (rows.length === 0 ? 1 : 0)
+    if (rows.length > 0 && rows[0].f_id) {
+      insertId = rows[0].f_id
     }
-  } finally {
-    client.release()
+  } else if (/^\s*(UPDATE|DELETE)/i.test(sql)) {
+    affectedRows = rows.length || 1
+  }
+
+  return {
+    affectedRows,
+    insertId,
+    changedRows: affectedRows,
+    rowCount: affectedRows,
+    rows,
+    fieldCount: rows.length > 0 ? Object.keys(rows[0]).length : 0,
   }
 }
 
-/**
- * 健康检查
- */
 async function ping() {
   try {
-    const rows = await query('SELECT 1 AS ok')
-    return rows && rows.length > 0
+    const data = await query('SELECT 1 AS ok')
+    return data && data.length > 0
   } catch {
     return false
   }
+}
+
+function getPool() {
+  return getClient()
 }
 
 module.exports = { query, execute, ping, getPool }

@@ -1,5 +1,6 @@
+<wxs module="image" src="../../utils/image.wxs" />
 <view class="pet-card {{selected ? 'selected' : ''}}" bindtap="onTap">
-  <image class="pet-avatar" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+  <image class="pet-avatar" src="{{pet.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
   <view class="pet-info">
     <view class="pet-name font-bold">{{pet.name}}</view>
     <view class="pet-detail text-xs text-muted">

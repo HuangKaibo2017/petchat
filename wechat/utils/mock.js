@@ -275,7 +275,27 @@ const MockAPI = {
   // 订单
   createOrder: async (data) => {
     await delay(1000)
-    return { code: 200, data: { orderId: `ORD${Date.now()}`, status: 'paid' } }
+    const orderId = `ORD${Date.now()}`
+    const order = {
+      id: orderId,
+      orderId,
+      orderNo: orderId,
+      status: 'pending',
+      totalAmount: data.totalAmount || '0',
+      finalPrice: data.totalAmount || '0',
+      products: (data.products || []).map(p => ({
+        id: p.productId,
+        name: p.productName,
+        price: p.price,
+        quantity: p.quantity || 1,
+        image: ''
+      })),
+      createdAt: new Date().toISOString()
+    }
+    const orders = wx.getStorageSync('orders') || []
+    orders.unshift(order)
+    wx.setStorageSync('orders', orders)
+    return { code: 200, data: { id: orderId, orderId, orderNo: orderId, status: 'paid' } }
   },
 
   // 医院

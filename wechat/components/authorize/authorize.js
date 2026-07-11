@@ -20,6 +20,11 @@ Component({
       this.setData({ nickName: e.detail.value })
     },
 
+    // 昵称失焦兜底（type=nickname 原生面板关闭时触发）
+    onNicknameBlur(e) {
+      this.setData({ nickName: e.detail.value })
+    },
+
     // 确认提交
     onSubmit() {
       const { avatarUrl, nickName } = this.data
