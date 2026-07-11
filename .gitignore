@@ -153,3 +153,5 @@ vite.config.ts.timestamp-*
 /project.private.config.json
 
 # Environment secrets - NEVER commit
+
+node_modules/
