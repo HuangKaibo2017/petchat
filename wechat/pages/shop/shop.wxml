@@ -14,19 +14,24 @@
           wx:if="{{activeCategory === 'all' || item.category === activeCategory}}"
           bindtap="goDetail" data-id="{{item.id}}">
       <view class="shop-card-img-wrap">
-        <image class="shop-card-img" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill" />
+        <swiper class="shop-card-swiper" indicator-dots="{{item.images.length > 1}}" indicator-color="rgba(255,255,255,0.55)" indicator-active-color="#FFFFFF">
+          <swiper-item wx:for="{{item.images}}" wx:for-item="image" wx:for-index="imageIndex" wx:key="*this">
+            <image class="shop-card-img" src="{{image}}" mode="aspectFill" />
+          </swiper-item>
+        </swiper>
+        <view class="shop-card-category">{{item.categoryName}}</view>
       </view>
       <view class="shop-card-info">
         <view class="shop-card-name">{{item.name}}</view>
-        <view class="shop-card-desc">{{item.desc}}</view>
-        <view class="shop-card-price">¥{{item.price}}</view>
+        <view class="shop-card-bottom">
+          <view class="shop-card-price">¥{{item.price}}</view>
+        </view>
       </view>
     </view>
   </view>
 
   <!-- 空状态 -->
   <view class="shop-empty" wx:if="{{!loading && products.length === 0}}">
-    <view class="shop-empty-icon">🛒</view>
     <view class="shop-empty-text">暂无商品</view>
   </view>
 </view>
