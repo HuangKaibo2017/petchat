@@ -203,7 +203,13 @@ const RealAPI = {
 
   // ═══ 订单 → api function ═══
   Order: {
-    create: async (data) => RealAPI.post('/api/orders', data)
+    create: async (data) => RealAPI.post('/api/orders', data),
+    paymentStatus: async (id) => RealAPI.get(`/api/orders/${id}/payment-status`)
+  },
+
+  // ═══ 微信支付 ═══
+  Pay: {
+    wechatJsapi: async (orderId) => RealAPI.post('/api/pay/wechat/jsapi', { orderId })
   },
 
   // ═══ 医院 → api function (后端已统一返回 camelCase) ═══

@@ -7,7 +7,12 @@ const express = require('express')
 const app = express()
 const PORT = process.env.SERVER_PORT || 8001
 
-app.use(express.json({ limit: '10mb' }))
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, _res, buf) => {
+    req.rawBody = buf.toString('utf8')
+  },
+}))
 
 // CORS for mini program
 app.use((req, res, next) => {
@@ -37,6 +42,8 @@ const uuid = () => {
   })
 }
 
+const yuanToFen = (amount) => Math.round(Number(amount || 0) * 100)
+
 // ═══════════════════════════════════════════
 //  内置智能体引擎
 // ═══════════════════════════════════════════
@@ -51,6 +58,7 @@ const agents  = require('./agents/registry')
 // ═══════════════════════════════════════════
 
 const db = require('./db/postgres')
+const wechatPay = require('./payments/wechatPay')
 
 // 启动时加载健康检查工具
 require('./tools/health')
@@ -986,26 +994,220 @@ app.get('/api/products/:id', optionalAuth, async (req, res) => {
 
 app.post('/api/orders', auth, async (req, res) => {
   try {
-    const { productId, productName, price, quantity } = req.body
+    const { productId, skuId, productName, price, quantity, receiver = {} } = req.body
+    const qty = Math.max(parseInt(quantity || 1, 10), 1)
+    let unitPrice = Number(price || 0)
+    let finalProductName = productName || ''
+
+    if (skuId || /^\d+$/.test(String(productId || ''))) {
+      try {
+        const products = await db.query(
+          `SELECT sku.f_id AS f_sku_id, sku.f_price, spu.f_name
+           FROM t_product_sku sku
+           LEFT JOIN t_product_spu spu ON spu.f_id = sku.f_spu_id
+           WHERE sku.f_id = ? OR spu.f_id = ?
+           ORDER BY sku.f_id ASC
+           LIMIT 1`,
+          [skuId || productId, productId || skuId]
+        )
+        if (products.length > 0) {
+          unitPrice = Number(products[0].f_price) || unitPrice
+          const name = typeof products[0].f_name === 'string' ? JSON.parse(products[0].f_name) : (products[0].f_name || {})
+          finalProductName = name['zh-CN'] || name['en-US'] || finalProductName
+        }
+      } catch (e) {
+        console.warn('[POST /api/orders] product price fallback:', e.message)
+      }
+    }
+
+    if (!finalProductName || unitPrice <= 0) {
+      return res.status(400).json({ code: 400, message: '商品信息不完整' })
+    }
+
+    const totalAmount = Number((unitPrice * qty).toFixed(2))
     const ts = timestamp()
-    const orderNo = 'ORD' + Date.now()
+    const orderNo = `ORD${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
     const result = await db.execute(
-      `INSERT INTO t_order (f_user_id, f_order_no, f_total_amount, f_final_amount, f_status_payment, f_meta_info, f_created_at) VALUES (?, ?, ?, ?, 10, ?, ?)`,
-      [req.userId, orderNo, price || 0, price || 0, JSON.stringify({ productName, productId }), ts]
+      `INSERT INTO t_order (
+        f_user_id, f_order_no, f_total_amount, f_final_amount, f_payment_method,
+        f_status_payment, f_receiver_name, f_receiver_phone, f_receiver_address,
+        f_meta_info, f_created_at, f_updated_at
+      ) VALUES (?, ?, ?, ?, 'wechat', 1, ?, ?, ?, ?, ?, ?)
+      RETURNING f_id`,
+      [
+        req.userId, orderNo, totalAmount, totalAmount,
+        receiver.name || '待填写',
+        receiver.phone || '00000',
+        receiver.address || '待填写',
+        JSON.stringify({ productName: finalProductName, productId, skuId: skuId || null, quantity: qty }),
+        ts, ts,
+      ]
     )
     const orderId = result.insertId || (result.rows && result.rows[0] && result.rows[0].f_id)
-    // Insert line item
-    await db.execute(
-      `INSERT INTO t_order_item (f_order_id, f_product_name, f_quantity, f_unit_price, f_total_price, f_created_at) VALUES (?, ?, ?, ?, ?, ?)`,
-      [orderId, productName || '', quantity || 1, price || 0, (price || 0) * (quantity || 1), ts]
-    )
+
+    try {
+      if (skuId) {
+        await db.execute(
+          `INSERT INTO t_order_item (
+            f_order_id, f_sku_id, f_product_name, f_quantity, f_unit_price,
+            f_total_price, f_final_price, f_meta_info, f_created_at, f_updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [orderId, skuId, finalProductName, qty, unitPrice, totalAmount, totalAmount, JSON.stringify({ productId }), ts, ts]
+        )
+      } else {
+        await db.execute(
+          `INSERT INTO t_order_item (f_order_id, f_product_name, f_quantity, f_unit_price, f_total_price, f_created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+          [orderId, finalProductName, qty, unitPrice, totalAmount, ts]
+        )
+      }
+    } catch (e) {
+      console.warn('[POST /api/orders] order item skipped:', e.message)
+    }
+
     res.json({
       code: 200,
-      data: { id: orderId, orderNo, status: 'paid', createdAt: ts },
+      data: { id: orderId, orderNo, status: 'pending', amount: totalAmount, createdAt: ts },
     })
   } catch (err) {
     console.error('[POST /api/orders]', err.message)
     res.status(500).json({ code: 500, message: '下单失败' })
+  }
+})
+
+app.get('/api/orders/:id/payment-status', auth, async (req, res) => {
+  try {
+    const rows = await db.query(
+      `SELECT o.f_id, o.f_order_no, o.f_status_payment, ps.f_code AS f_payment_status
+       FROM t_order o
+       LEFT JOIN t_payment_status ps ON ps.f_id = o.f_status_payment
+       WHERE o.f_id = ? AND o.f_user_id = ?`,
+      [req.params.id, req.userId]
+    )
+    if (rows.length === 0) return res.status(404).json({ code: 404, message: '订单不存在' })
+
+    const order = rows[0]
+    res.json({
+      code: 200,
+      data: {
+        id: order.f_id,
+        orderNo: order.f_order_no,
+        status: order.f_payment_status || (order.f_status_payment === 10 ? 'paid' : 'pending'),
+      },
+    })
+  } catch (err) {
+    console.error('[GET /api/orders/:id/payment-status]', err.message)
+    res.status(500).json({ code: 500, message: '查询支付状态失败' })
+  }
+})
+
+app.post('/api/pay/wechat/jsapi', auth, async (req, res) => {
+  try {
+    const { orderId } = req.body
+    const orders = await db.query(
+      `SELECT f_id, f_order_no, f_final_amount, f_status_payment, f_meta_info
+       FROM t_order
+       WHERE f_id = ? AND f_user_id = ?`,
+      [orderId, req.userId]
+    )
+    if (orders.length === 0) return res.status(404).json({ code: 404, message: '订单不存在' })
+
+    const order = orders[0]
+    if (Number(order.f_status_payment) === 10) {
+      return res.status(400).json({ code: 400, message: '订单已支付' })
+    }
+
+    const users = await db.query('SELECT f_wx_openid FROM t_user WHERE f_id = ?', [req.userId])
+    const openid = users[0] && users[0].f_wx_openid
+    if (!openid || String(openid).startsWith('dev_')) {
+      return res.status(400).json({ code: 400, message: '当前用户缺少正式微信 openid，请在真机微信环境重新登录' })
+    }
+
+    const meta = typeof order.f_meta_info === 'string' ? JSON.parse(order.f_meta_info) : (order.f_meta_info || {})
+    const payment = await wechatPay.createJsapiOrder({
+      openid,
+      outTradeNo: order.f_order_no,
+      description: meta.productName || '更懂它商品订单',
+      amountFen: yuanToFen(order.f_final_amount),
+      attach: String(order.f_id),
+    })
+
+    try {
+      await db.execute(
+        `INSERT INTO t_payment_transaction (
+          f_order_id, f_order_no, f_provider, f_out_trade_no, f_prepay_id,
+          f_amount, f_currency, f_status, f_raw_payload, f_created_at, f_updated_at
+        ) VALUES (?, ?, 'wechat', ?, ?, ?, 'CNY', 'prepay', ?, ?, ?)`,
+        [
+          order.f_id, order.f_order_no, order.f_order_no, payment.prepayId,
+          Number(order.f_final_amount), JSON.stringify({ prepayId: payment.prepayId }), timestamp(), timestamp(),
+        ]
+      )
+    } catch (e) {
+      console.warn('[POST /api/pay/wechat/jsapi] transaction log skipped:', e.message)
+    }
+
+    res.json({
+      code: 200,
+      data: {
+        orderId: order.f_id,
+        orderNo: order.f_order_no,
+        payment,
+      },
+    })
+  } catch (err) {
+    console.error('[POST /api/pay/wechat/jsapi]', err.message, err.data || '')
+    const status = err.code === 'WECHAT_PAY_CONFIG_MISSING' ? 500 : (err.status || 500)
+    res.status(status).json({ code: status, message: err.message || '微信支付下单失败' })
+  }
+})
+
+app.post('/api/pay/wechat/notify', async (req, res) => {
+  try {
+    const rawBody = req.rawBody || JSON.stringify(req.body || {})
+    const verified = wechatPay.verifyWechatPaySignature(req.headers, rawBody)
+    if (!verified) {
+      return res.status(401).json({ code: 'FAIL', message: '签名验证失败' })
+    }
+
+    const event = req.body || {}
+    const transaction = wechatPay.decryptResource(event.resource)
+    const isPaid = transaction.trade_state === 'SUCCESS'
+    const statusPayment = isPaid ? 10 : 30
+    const ts = timestamp()
+
+    const updateResult = await db.execute(
+      `UPDATE t_order
+       SET f_status_payment = ?, f_payment_method = 'wechat', f_payment_time = CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE f_payment_time END, f_updated_at = ?
+       WHERE f_order_no = ? AND f_status_payment <> 10`,
+      [statusPayment, isPaid, ts, transaction.out_trade_no]
+    )
+
+    try {
+      await db.execute(
+        `UPDATE t_payment_transaction
+         SET f_transaction_id = ?, f_status = ?, f_raw_notify = ?, f_paid_at = CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE f_paid_at END, f_updated_at = ?
+         WHERE f_out_trade_no = ?`,
+        [
+          transaction.transaction_id || '',
+          transaction.trade_state || '',
+          JSON.stringify(transaction),
+          isPaid,
+          ts,
+          transaction.out_trade_no,
+        ]
+      )
+    } catch (e) {
+      console.warn('[POST /api/pay/wechat/notify] transaction update skipped:', e.message)
+    }
+
+    if (!updateResult.affectedRows) {
+      console.log('[wechat notify] idempotent or unknown order:', transaction.out_trade_no)
+    }
+
+    res.json({ code: 'SUCCESS', message: '成功' })
+  } catch (err) {
+    console.error('[POST /api/pay/wechat/notify]', err.message)
+    res.status(500).json({ code: 'FAIL', message: err.message || '回调处理失败' })
   }
 })
 

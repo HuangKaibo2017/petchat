@@ -3,21 +3,69 @@
 <view class="page-container" wx:if="{{!loading && product}}">
   <!-- 商品主图 -->
   <view class="detail-image-wrap">
-    <image class="detail-image" src="{{product.image || '/images/default-product.png'}}" mode="aspectFill" />
+    <swiper class="detail-swiper" indicator-dots="{{product.images.length > 1}}" indicator-color="rgba(255,255,255,0.55)" indicator-active-color="#FFFFFF">
+      <swiper-item wx:for="{{product.images}}" wx:for-item="image" wx:key="*this">
+        <image class="detail-image" src="{{image}}" mode="aspectFill" bindtap="previewImage" data-image="{{image}}" />
+      </swiper-item>
+    </swiper>
   </view>
 
   <!-- 商品信息 -->
   <view class="detail-info card">
-    <view class="detail-name">{{product.name}}</view>
-    <view class="detail-desc">{{product.desc}}</view>
+    <view class="detail-category">{{product.categoryName}}</view>
+    <view class="detail-name">{{product.displayName}}</view>
+    <view class="detail-desc" wx:if="{{product.displaySummary}}">{{product.displaySummary}}</view>
     <view class="detail-price-row">
       <text class="detail-price">¥{{product.price}}</text>
     </view>
   </view>
 
+  <!-- 详情介绍 -->
+  <view wx:if="{{product.detail}}" class="detail-content">
+    <view class="detail-card">
+      <view class="section-title">商品规格</view>
+      <view class="spec-list">
+        <view class="spec-item" wx:for="{{product.detail.specs}}" wx:key="label">
+          <view class="spec-label">{{item.label}}</view>
+          <view class="spec-value">{{item.value}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="detail-card">
+      <view class="section-title">核心亮点</view>
+      <view class="bullet-list">
+        <view class="bullet-item" wx:for="{{product.detail.highlights}}" wx:key="*this">
+          <view class="bullet-dot"></view>
+          <view class="bullet-text">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="detail-card" wx:for="{{product.detail.herbGroups}}" wx:for-item="group" wx:key="title">
+      <view class="section-title">{{group.title}}</view>
+      <view class="tag-list">
+        <text class="detail-tag" wx:for="{{group.items}}" wx:for-item="herb" wx:key="*this">{{herb}}</text>
+      </view>
+    </view>
+
+    <view class="detail-card" wx:for="{{product.detail.sections}}" wx:for-item="section" wx:key="title">
+      <view class="section-title">{{section.title}}</view>
+      <view class="section-paragraph" wx:for="{{section.paragraphs}}" wx:for-item="paragraph" wx:key="*this">{{paragraph}}</view>
+      <view class="bullet-list" wx:if="{{section.bullets}}">
+        <view class="bullet-item" wx:for="{{section.bullets}}" wx:for-item="bullet" wx:key="*this">
+          <view class="bullet-dot"></view>
+          <view class="bullet-text">{{bullet}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 购买按钮 -->
   <view class="detail-action">
-    <button class="btn btn-primary btn-block btn-lg" bindtap="onBuy">立即购买</button>
+    <button class="btn btn-primary btn-block btn-lg" bindtap="onBuy" loading="{{paying}}" disabled="{{paying}}">
+      {{paying ? '支付中' : '立即购买'}}
+    </button>
   </view>
 </view>
 

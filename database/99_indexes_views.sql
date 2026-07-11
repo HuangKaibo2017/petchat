@@ -183,6 +183,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_phone
     ON public.t_user(f_phone) WHERE f_phone <> '';
 CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_email
     ON public.t_user(f_email) WHERE f_email <> '';
+CREATE UNIQUE INDEX IF NOT EXISTS uk_t_user_wx_openid
+    ON public.t_user(f_wx_openid) WHERE f_wx_openid <> '';
 -- active 状态过滤 (status_id = 10 表示 active)
 CREATE INDEX IF NOT EXISTS idx_t_user_phone_active
     ON public.t_user(f_phone) WHERE f_status_id = 10;
