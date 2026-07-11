@@ -1,5 +1,3 @@
-const { mockPets, mockUser } = require('./utils/mock')
-
 App({
   globalData: {
     userInfo: null,
@@ -10,14 +8,11 @@ App({
     cart: [],
     nfcEnabled: true,
     isGuest: false,
-    // 线上: Supabase Edge Functions
-    // 本地开发: Express 后端 http://localhost:8001
     baseUrl: 'https://www.gengdongta.com',
     debug: false
   },
 
   onLaunch() {
-    this.initDemoData()
     this.loadUserData()
     this.checkUpdate()
     this.restoreLogin()
@@ -36,18 +31,6 @@ App({
       this.handleScene(options.query.scene)
     }
     this.syncCartBadge()
-  },
-
-  initDemoData() {
-    const hasRun = wx.getStorageSync('_demo_initialized')
-    if (hasRun) return
-
-    console.log('[更懂它] 首次启动，注入演示数据…')
-    wx.setStorageSync('userInfo', mockUser)
-    wx.setStorageSync('pets', mockPets)
-    wx.setStorageSync('currentPetId', mockPets[0].id)
-    wx.setStorageSync('ownerBirthday', mockUser.birthday)
-    wx.setStorageSync('_demo_initialized', true)
   },
 
   loadUserData() {

@@ -172,6 +172,12 @@ export function parseAIJson<T>(raw: string): T {
 
 // ============================================================
 // Rate limiter
+//
+// NOTE: 当前使用内存 Map 做限流，在 Supabase Edge Functions 的多实例
+//       环境下无法生效（每个实例有独立的 Map）。生产环境应使用：
+//       - PostgreSQL 计数器表 + pg_headerkv
+//       - 或者 Upstash Redis (@upstash/redis)
+//       当前方案仅适用于单实例场景或开发环境的基本保护。
 // ============================================================
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();

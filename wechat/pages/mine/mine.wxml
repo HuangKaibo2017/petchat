@@ -1,11 +1,11 @@
-<wxs module="image" src="../../utils/image.wxs" />
+<wxs module="imgx" src="../../utils/image.wxs" />
 <view class="mine-page">
   <nav-bar title="我的" />
 
   <!-- ═══ 头像 + 昵称 ═══ -->
   <view class="profile-header" bindtap="goLogin">
-    <image class="profile-bg" src="{{bgUrl || image.url('/images/mine/bg.jpg')}}" mode="aspectFill" />
-    <image class="profile-avatar" src="{{avatarUrl || image.url('/images/default-avatar.png')}}" mode="aspectFill" />
+    <image class="profile-bg" src="{{bgUrl || imgx.url('/images/mine/bg.jpg')}}" mode="aspectFill" />
+    <image class="profile-avatar" src="{{avatarUrl || imgx.url('/images/default-avatar.png')}}" mode="aspectFill" />
     <view class="profile-name">{{nickname || '点击登录'}}</view>
   </view>
 
@@ -53,23 +53,23 @@
           <view class="mine-card-add" catchtap="goAddPet">+</view>
         </view>
         <view class="pet-list" wx:if="{{pets.length > 0}}">
-          <view class="pet-item" wx:for="{{pets}}" wx:key="id" data-index="{{index}}" catchtap="goEditPet">
-            <image class="pet-item-avatar" src="{{item.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+          <view class="pet-item" wx:for="{{pets}}" wx:key="id" data-index="{{index}}" catchtap="goEditPet" bindlongpress="deletePet">
+            <image class="pet-item-avatar" src="{{item.avatar || imgx.url('/images/default-pet.png')}}" mode="aspectFill" />
             <view class="pet-item-content">
               <view class="pet-item-name">{{item.name}}</view>
               <view class="pet-item-row">
                 <text class="pet-item-label">基础信息</text>
-                <text class="pet-item-text">{{item.age || '--'}} / {{item.weight || '--'}} / {{item.gender || '--'}} / {{item.breed || '--'}}</text>
+                <text class="pet-item-text">{{item.petType || '--'}} / {{item.breed || '--'}} / {{item.gender || '--'}} / {{item.weight ? item.weight + 'kg' : '--'}}</text>
               </view>
               <view class="pet-item-row">
                 <text class="pet-item-label">健康信息</text>
-                <text class="pet-item-text">{{item.health || '--'}}</text>
+                <text class="pet-item-text">{{item.history || '--'}}</text>
               </view>
               <view class="pet-item-row">
                 <text class="pet-item-label">过敏原</text>
                 <text class="pet-item-text">{{item.allergy || '无过敏史'}}</text>
               </view>
-              <view class="pet-item-tip" wx:if="{{item.tip}}">{{item.tip}}</view>
+              <view class="pet-item-tip" wx:if="{{item.vaccineNote}}">{{item.vaccineNote}}</view>
             </view>
             <view class="pet-item-arrow">›</view>
           </view>
@@ -89,7 +89,7 @@
             <swiper class="device-swiper" indicator-dots="{{false}}" autoplay="{{false}}" circular="{{true}}" current="{{hwCurrent}}" bindchange="onHwChange">
               <swiper-item wx:for="{{hardwareList}}" wx:key="id">
                 <view class="swiper-slide">
-                  <image class="swiper-slide-img" src="{{item.image || image.url('/images/placeholder-product.png')}}" mode="aspectFill" />
+                  <image class="swiper-slide-img" src="{{item.image || imgx.url('/images/placeholder-product.png')}}" mode="aspectFill" />
                 </view>
               </swiper-item>
             </swiper>
@@ -126,7 +126,7 @@
   <view class="mine-menu">
     <view class="mine-menu-item" bindtap="goCart">
       <view class="mine-menu-left">
-        <image class="mine-menu-icon" src="{{image.url('/images/tab-shop.png')}}" mode="aspectFit" />
+        <image class="mine-menu-icon" src="{{imgx.url('/images/tab-shop.png')}}" mode="aspectFit" />
         <text>我的购物车</text>
         <view class="mine-menu-badge" wx:if="{{cartCount > 0}}">{{cartCount > 99 ? '99+' : cartCount}}</view>
       </view>
