@@ -138,5 +138,7 @@ Page({
 
   closeModal() {
     this.setData({ showModal: false })
-  }
+  },
+
+  noop() {}
 })

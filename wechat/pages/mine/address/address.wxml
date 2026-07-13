@@ -28,7 +28,7 @@
 </view>
 
 <view class="addr-modal" wx:if="{{showModal}}" catchtap="closeModal">
-  <view class="addr-modal-content" catchtap="">
+  <view class="addr-modal-content" catchtap="noop">
     <view class="addr-modal-title">收货地址</view>
 
     <view class="input-group">
