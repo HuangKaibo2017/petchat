@@ -194,11 +194,42 @@
   display: flex;
   gap: 12rpx;
 }
+.idx-rescue-card {
+  flex: 1;
+  min-height: 164rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8rpx;
+  padding: 20rpx 8rpx 20rpx 18rpx;
+  background: #F2FBF6;
+  border-radius: 16rpx;
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+.idx-rescue-card:active { transform: scale(0.96); }
+.idx-rescue-copy {
+  flex: 0 0 132rpx;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+.idx-rescue-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #2F9B63;
+  line-height: 1.25;
+  margin-bottom: 8rpx;
+}
+.idx-rescue-desc {
+  font-size: 20rpx;
+  color: #55A678;
+  line-height: 1.35;
+}
 .idx-rescue-img {
   flex: 1;
-  width: 100%;
-  height: auto;
-  border-radius: 16rpx;
+  width: 118rpx;
+  height: 124rpx;
   display: block;
 }
 

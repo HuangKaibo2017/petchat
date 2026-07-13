@@ -1,0 +1,88 @@
+.addr-list {
+  padding: 0 24rpx;
+}
+
+.addr-card {
+  margin: 20rpx 0;
+  padding: 28rpx;
+}
+
+.addr-card-top {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.addr-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.addr-phone {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.addr-default-tag {
+  padding: 4rpx 14rpx;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 20rpx;
+  border-radius: 999rpx;
+}
+
+.addr-detail {
+  font-size: 26rpx;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+.addr-card-actions {
+  display: flex;
+  gap: 24rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--color-border-light);
+}
+
+.addr-action-btn {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  padding: 4rpx 0;
+}
+
+.addr-add-btn {
+  padding: 32rpx 48rpx;
+}
+
+.addr-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.addr-modal-content {
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 36rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.addr-modal-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.addr-modal-bottom {
+  margin-top: 24rpx;
+}

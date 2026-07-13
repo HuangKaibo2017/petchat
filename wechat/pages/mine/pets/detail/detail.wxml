@@ -1,7 +1,8 @@
+<wxs module="image" src="../../../../utils/image.wxs" />
 <nav-bar title="宠物详情" showBack="{{true}}" />
 <view class="page-container" wx:if="{{!isLoading}}">
   <view class="pet-header">
-    <image class="pet-avatar" src="{{pet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
+    <image class="pet-avatar" src="{{pet.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
     <view class="pet-header-info">
       <view class="pet-name">{{pet.name}}</view>
       <view class="pet-subtitle">{{pet.breed || '未知品种'}} · {{pet.petType || ''}}</view>

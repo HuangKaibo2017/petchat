@@ -1,8 +1,6 @@
 {
   "usingComponents": {
-    "nav-bar": "/components/nav-bar/nav-bar",
-    "pet-card": "/components/pet-card/pet-card",
-    "loading": "/components/loading/loading"
+    "nav-bar": "/components/nav-bar/nav-bar"
   },
   "navigationStyle": "custom"
 }

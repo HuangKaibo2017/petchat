@@ -11,19 +11,29 @@
     "start:express": "node src/server.js",
     "dev:express": "node src/server.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "upload-images": "node ../script/upload-images.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.27",
     "@nestjs/core": "^11.1.27",
     "@nestjs/platform-express": "^11.1.27",
+    "@supabase/supabase-js": "^2.108.2",
     "dotenv": "^17.4.2",
     "express": "^4.18.2",
+<<<<<<< HEAD
     "ip2region": "^2.3.0",
     "lunar-javascript": "^1.7.7",
     "pinyin": "^4.0.0",
+=======
+    "jsonwebtoken": "^9.0.2",
+    "lunar-javascript": "^1.7.7",
+    "pg": "^8.22.0",
+>>>>>>> df2205a57ba8a46dd3901df05fe6dcbfe307f557
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "ws": "^8.21.0",
+    "zod": "^4.4.3"
   },
   "volta": {
     "node": "24.18.0"
@@ -32,9 +42,7 @@
     "@nestjs/cli": "^11.0.23",
     "@nestjs/schematics": "^11.1.0",
     "@nestjs/testing": "^11.1.27",
-    "@supabase/supabase-js": "^2.108.2",
     "@types/node": "^26.0.0",
-    "pg": "^8.22.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3",

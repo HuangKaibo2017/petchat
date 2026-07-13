@@ -1,0 +1,13 @@
+var CDN_BASE = 'https://dlvgbwyvxjdggxpddpod.supabase.co/storage/v1/object/public/gengdongta-assets'
+
+function url(p) {
+  if (!p) return ''
+  if (p.indexOf('http://') === 0 || p.indexOf('https://') === 0) return p
+  if (p.indexOf('/images/') === 0) return CDN_BASE + p
+  return CDN_BASE + '/images/' + p
+}
+
+module.exports = {
+  url: url,
+  prefix: CDN_BASE
+}

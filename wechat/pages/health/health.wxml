@@ -1,96 +1,71 @@
-<nav-bar title="宠物体质分析" showBack="{{true}}" />
-<view class="page-container">
-  <!-- Step 0: 选择分析模式 -->
-  <view class="section" wx:if="{{step === 0}}">
-    <view class="section-title">选择分析模式</view>
-    <view class="section-subtitle">¥9.9 / 次 · 每次扣费后生成报告</view>
+<wxs module="image" src="../../utils/image.wxs" />
+<view class="mine-page">
+  <nav-bar title="宠物健康" showBack="{{true}}" />
 
-    <view class="mode-cards">
-      <view class="mode-card card" bindtap="selectMode" data-mode="overall">
-        <view class="mode-icon">🔬</view>
-        <view class="mode-title text-lg font-bold">整体分析</view>
-        <view class="mode-desc text-sm text-hint">依据当下时间自动出综合评分与雷达图，不需输入数字</view>
-        <view class="mode-tag tag tag-primary mt-sm">五运六气</view>
-      </view>
+  <!-- ═══ Banner 海报 ═══ -->
+  <view class="banner">
+    <image class="banner-img" src="{{image.url('/images/health/bg.jpg')}}" mode="aspectFill" />
+  </view>
 
-      <view class="mode-card card" bindtap="selectMode" data-mode="specific">
-        <view class="mode-icon">📋</view>
-        <view class="mode-title text-lg font-bold">具体分析</view>
-        <view class="mode-desc text-sm text-hint">输入症状与数字，出具单项报告，支持分屏/整页保存转发</view>
-        <view class="mode-tag tag tag-success mt-sm">含平台二维码</view>
+  <!-- ═══ 信息卡片区 ═══ -->
+  <view class="mine-cards">
+    <!-- 宠物选择 -->
+    <view class="mine-card" bindtap="togglePetList">
+      <image class="pet-select-avatar" src="{{currentPet.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+      <view class="mine-card-body">
+        <view class="pet-select-name">{{currentPet.name || '选择宠物'}}</view>
+        <view class="pet-select-breed">{{currentPet.breed || '请选择要分析的宠物'}}</view>
       </view>
+      <view class="pet-select-arrow">▼</view>
     </view>
-  </view>
 
-  <!-- Step 1: 选择宠物 -->
-  <view class="section" wx:if="{{step === 1}}">
-    <view class="section-title">选择宠物</view>
-    <pet-card wx:for="{{pets}}" wx:key="id" pet="{{item}}" selected="{{selectedPet && selectedPet.id === item.id}}" showArrow="{{false}}" bind:select="onSelectPet" />
-    <button class="btn btn-primary btn-block mt-lg" disabled="{{!selectedPet}}" bindtap="nextStep">下一步</button>
-  </view>
+    <!-- 宠物列表下拉 -->
+    <view class="pet-dropdown" wx:if="{{showPetDropdown}}">
+      <view class="pet-dropdown-item" wx:for="{{pets}}" wx:key="id" bindtap="selectPet" data-index="{{index}}">
+        <image class="pet-dropdown-avatar" src="{{item.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+        <view class="pet-dropdown-info">
+          <text class="pet-dropdown-name">{{item.name}}</text>
+          <text class="pet-dropdown-breed">{{item.breed || '--'}}</text>
+        </view>
+        <view class="pet-dropdown-check" wx:if="{{item.id === currentPet.id}}">✓</view>
+      </view>
+      <view class="pet-dropdown-add" bindtap="goAddPet">+ 添加宠物</view>
+    </view>
 
-  <!-- Step 2: 整体分析（自动） -->
-  <view class="section" wx:if="{{step === 2 && mode === 'overall'}}">
-    <view class="section-title">整体分析</view>
-    <view class="section-subtitle">基于五运六气，自动生成综合评分与雷达图</view>
-
-    <view class="overall-info card">
-      <view class="flex items-center mb-md">
-        <image class="avatar-md" src="{{selectedPet.avatar || '/images/default-pet.png'}}" mode="aspectFill" />
-        <view class="ml-md">
-          <view class="text-lg font-bold">{{selectedPet.name}}</view>
-          <view class="text-xs text-hint">{{selectedPet.breed}} · {{selectedPet.age}}</view>
+    <!-- 状态描述 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">症状描述</view>
+        <view class="mine-card-desc">症状描述越具体，生成的健康报告越精准</view>
+        <view class="desc-row">
+          <input class="desc-input" placeholder="例如：最近食欲不振，总是没精神..." value="{{descText}}" bindinput="onDescInput" />
         </view>
       </view>
-      <view class="info-row text-sm">
-        <text class="text-hint">分析时间：</text>
-        <text>{{currentTime}}</text>
-      </view>
-      <view class="info-row text-sm">
-        <text class="text-hint">五运六气：</text>
-        <text>{{wuyunInfo}}</text>
-      </view>
     </view>
 
-    <button class="btn btn-primary btn-block mt-lg" bindtap="generateOverall">生成体质报告</button>
+    <!-- 上传照片 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">上传照片</view>
+        <view class="photo-grid">
+          <view class="photo-item" wx:for="{{photoList}}" wx:key="*this">
+            <image class="photo-img" src="{{item}}" mode="aspectFill" />
+            <view class="photo-del" catchtap="delPhoto" data-index="{{index}}">✕</view>
+          </view>
+          <view class="photo-add" bindtap="addPhoto" wx:if="{{photoList.length < 9}}">
+            <text class="photo-add-icon">+</text>
+            <view class="photo-add-text">点击上传照片</view>
+            <view class="photo-add-sub">可上传多张</view>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 
-  <!-- Step 2: 具体分析（输入症状） -->
-  <view class="section" wx:if="{{step === 2 && mode === 'specific'}}">
-    <view class="section-title">症状描述</view>
-    <view class="section-subtitle">请详细描述宠物的异常表现</view>
-
-    <textarea class="input-field input-textarea" placeholder="例如：猫咪这两天频繁上厕所，尿量少，精神不太好…" value="{{symptom}}" bindinput="onSymptomInput" maxlength="500" />
-
-    <view class="upload-row flex mt-sm">
-      <view class="upload-btn" bindtap="chooseImage"><text>📷 上传照片</text></view>
-    </view>
-    <image class="upload-preview" wx:if="{{symptomImage}}" src="{{symptomImage}}" mode="aspectFill" />
-
-    <view class="section-title mt-lg">症状持续时长</view>
-    <view class="duration-grid">
-      <view class="duration-item {{duration === '1-3天' ? 'active' : ''}}" bindtap="selectDuration" data-dur="1-3天">1-3天</view>
-      <view class="duration-item {{duration === '4-7天' ? 'active' : ''}}" bindtap="selectDuration" data-dur="4-7天">4-7天</view>
-      <view class="duration-item {{duration === '1-2周' ? 'active' : ''}}" bindtap="selectDuration" data-dur="1-2周">1-2周</view>
-      <view class="duration-item {{duration === '2周以上' ? 'active' : ''}}" bindtap="selectDuration" data-dur="2周以上">2周以上</view>
-    </view>
-
-    <view class="section-title mt-lg">异常表现</view>
-    <textarea class="input-field input-textarea" placeholder="补充其他异常表现…" value="{{abnormal}}" bindinput="onAbnormalInput" maxlength="300" />
-
-    <view class="card bg-primary-light mt-lg">
-      <view class="text-sm text-muted text-center">
-        <text class="font-bold">数字卦</text>
-        <text> · 请输入6个数字（0-9）辅助分析</text>
-      </view>
-    </view>
-
-    <view class="number-grid mt-sm">
-      <input wx:for="{{numbers}}" wx:key="index" class="number-input {{item ? 'filled' : ''}}" type="number" maxlength="1" value="{{item}}" bindinput="onNumberInput" data-index="{{index}}" />
-    </view>
-
-    <button class="btn btn-primary btn-block mt-xl" disabled="{{!canSubmit}}" bindtap="generateSpecific">生成体质报告</button>
+  <!-- 生成报告按钮 -->
+  <view class="report-btn" bindtap="generateReport">
+    <text class="report-btn-text">生成宠物健康报告</text>
   </view>
 
-  <loading visible="{{generating}}" text="Gengdongta正在分析中…" />
+  <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
 </view>

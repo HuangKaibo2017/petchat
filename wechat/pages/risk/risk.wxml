@@ -1,40 +1,82 @@
-<nav-bar title="人宠共生报告" showBack="{{true}}" />
-<view class="page-container section">
+<wxs module="image" src="../../utils/image.wxs" />
+<view class="mine-page">
+  <nav-bar title="人宠风险" showBack="{{true}}" />
 
-  <view class="section-title">人宠共生体质报告</view>
-  <view class="section-subtitle">爱宠如照镜 — 通过爱宠的体质表现，温和映照主人的健康状态</view>
-
-  <!-- Pet selector -->
-  <view class="form-group mt-xl">
-    <view class="form-label">选择宠物</view>
-    <picker mode="selector" range="{{petNames}}" bindchange="onPetChange" value="{{petIndex}}">
-      <view class="input-field picker-field">{{petNames[petIndex] || '请选择宠物'}}</view>
-    </picker>
+  <!-- ═══ Banner 海报 ═══ -->
+  <view class="banner">
+    <image class="banner-img" src="{{image.url('/images/risk/bg.jpg')}}" mode="aspectFill" />
   </view>
 
-  <!-- Pet info preview -->
-  <view wx:if="{{selectedPet}}" class="pet-info-card card mt-md">
-    <view class="info-row"><text class="info-key">品种</text><text class="info-val">{{selectedPet.breed}}</text></view>
-    <view class="info-row"><text class="info-key">年龄</text><text class="info-val">{{selectedPet.age}}</text></view>
-    <view class="info-row"><text class="info-key">性别</text><text class="info-val">{{selectedPet.gender === 'male' ? '公' : '母'}}{{selectedPet.neutered ? '·已绝育' : '·未绝育'}}</text></view>
-    <view wx:if="{{selectedPet.tags && selectedPet.tags.length}}" class="info-row">
-      <text class="info-key">体质标签</text>
-      <view class="info-val"><text wx:for="{{selectedPet.tags}}" wx:key="*this" class="meta-tag">{{item}}</text></view>
+  <!-- ═══ 信息卡片区 ═══ -->
+  <view class="mine-cards">
+    <!-- 宠物选择 -->
+    <view class="mine-card" bindtap="togglePetList">
+      <image class="pet-select-avatar" src="{{currentPet.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+      <view class="mine-card-body">
+        <view class="pet-select-name">{{currentPet.name || '选择宠物'}}</view>
+        <view class="pet-select-breed">{{currentPet.breed || '请选择要分析的宠物'}}</view>
+      </view>
+      <view class="pet-select-arrow">▼</view>
+    </view>
+
+    <!-- 宠物列表下拉 -->
+    <view class="pet-dropdown" wx:if="{{showPetDropdown}}">
+      <view class="pet-dropdown-item" wx:for="{{pets}}" wx:key="id" bindtap="selectPet" data-index="{{index}}">
+        <image class="pet-dropdown-avatar" src="{{item.avatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+        <view class="pet-dropdown-info">
+          <text class="pet-dropdown-name">{{item.name}}</text>
+          <text class="pet-dropdown-breed">{{item.breed || '--'}}</text>
+        </view>
+        <view class="pet-dropdown-check" wx:if="{{item.id === currentPet.id}}">✓</view>
+      </view>
+      <view class="pet-dropdown-add" bindtap="goAddPet">+ 添加宠物</view>
+    </view>
+
+    <!-- 自动获取信息 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">自动获取信息</view>
+        <view class="mine-card-desc">系统将自动获取以下关键信息，作为预警分析依据</view>
+        <view class="info-emoji-row">
+          <view class="info-emoji-item">
+            <image class="info-img" src="{{image.url('/images/risk/masterinfo.jpg')}}" mode="aspectFit" />
+            <text class="info-emoji-label">主人基础信息</text>
+          </view>
+          <view class="info-emoji-item">
+            <image class="info-img" src="{{image.url('/images/risk/petinfo.jpg')}}" mode="aspectFit" />
+            <text class="info-emoji-label">宠物体质报告</text>
+          </view>
+          <view class="info-emoji-item">
+            <image class="info-img" src="{{image.url('/images/risk/envint.jpg')}}" mode="aspectFit" />
+            <text class="info-emoji-label">环境风险因子</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 上传照片 -->
+    <view class="mine-card">
+      <view class="mine-card-body">
+        <view class="mine-card-title">上传照片</view>
+        <view class="photo-grid">
+          <view class="photo-item" wx:for="{{photoList}}" wx:key="*this">
+            <image class="photo-img" src="{{item}}" mode="aspectFill" />
+            <view class="photo-del" catchtap="delPhoto" data-index="{{index}}">✕</view>
+          </view>
+          <view class="photo-add" bindtap="addPhoto" wx:if="{{photoList.length < 9}}">
+            <text class="photo-add-icon">+</text>
+            <view class="photo-add-text">点击上传照片</view>
+            <view class="photo-add-sub">可上传多张</view>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 
-  <!-- Core concept -->
-  <view class="concept-card card mt-lg">
-    <view class="concept-icon">🪞</view>
-    <view class="concept-text">
-      <view class="text-md font-bold">爱宠如照镜</view>
-      <view class="text-xs text-hint mt-xs">宠物的体质状态是主人生活习惯的一面镜子。通过解读宠物的脾虚、肝郁、肾虚等表现，温和映射主人的作息、饮食、情绪状态。</view>
-    </view>
+  <!-- 生成报告按钮 -->
+  <view class="report-btn" bindtap="generateReport">
+    <text class="report-btn-text">生成风险预警报告</text>
   </view>
 
-  <button class="btn btn-primary btn-block mt-xl" disabled="{{!selectedPet}}" bindtap="generateReport">
-    🔍 生成人宠共生报告
-  </button>
-
-  <loading visible="{{generating}}" text="正在分析人宠体质关联…" />
+  <view style="height:calc(40rpx + env(safe-area-inset-bottom))"></view>
 </view>
