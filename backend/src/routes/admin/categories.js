@@ -30,7 +30,7 @@ module.exports = function createAdminCategoriesRoutes({ db, timestamp }) {
       if (pid !== -1) { const pr = await db.query(`SELECT f_level FROM t_product_category WHERE f_id = ?`, [pid]); level = pr.length > 0 ? pr[0].f_level + 1 : 1 }
       const ts = timestamp()
       const name = JSON.stringify({ 'zh-CN': nameZh, 'en-US': nameEn || nameZh })
-      const result = await db.execute(`INSERT INTO t_product_category (f_parent_id, f_level, f_code, f_name, f_icon_url, f_order, f_created_at, f_updated_at) VALUES (?, ?, ?, ?::jsonb, ?, ?, ?, ?)`, [pid, level, code, name, iconUrl || '', order || 0, ts, ts])
+      const result = await db.execute(`INSERT INTO t_product_category (f_public_uid, f_parent_id, f_level, f_code, f_name, f_icon_url, f_order, f_created_at, f_updated_at) VALUES ((SELECT public.rpc_gen_uuid()), ?, ?, ?, ?::jsonb, ?, ?, ?, ?) RETURNING f_id`, [pid, level, code, name, iconUrl || '', order || 0, ts, ts])
       res.json({ code: 200, data: { id: result.insertId }, message: '创建成功' })
     } catch (err) {
       console.error('[POST /api/admin/categories]', err.message)

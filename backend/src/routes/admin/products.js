@@ -85,12 +85,12 @@ module.exports = function createAdminProductsRoutes({ db, timestamp }) {
       const meta = JSON.stringify({ image_url: imageUrl || '' })
       const name = JSON.stringify({ 'zh-CN': nameZh, 'en-US': nameEn || nameZh })
       const desc = JSON.stringify({ 'zh-CN': descZh || '', 'en-US': descEn || '' })
-      const result = await db.execute(`INSERT INTO t_product_spu (f_category_id, f_brand, f_name, f_description, f_meta_info, f_created_at, f_updated_at) VALUES (?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?, ?)`, [categoryId, brand || '', name, desc, meta, ts, ts])
+      const result = await db.execute(`INSERT INTO t_product_spu (f_public_uid, f_category_id, f_brand, f_name, f_description, f_meta_info, f_created_at, f_updated_at) VALUES ((SELECT public.rpc_gen_uuid()), ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?, ?) RETURNING f_id`, [categoryId, brand || '', name, desc, meta, ts, ts])
       const spuId = result.insertId
       if (!spuId) return res.status(500).json({ code: 500, message: '创建商品失败' })
       for (const sku of skus) {
         if (sku.skuCode && sku.price) {
-          await db.execute(`INSERT INTO t_product_sku (f_spu_id, f_sku_code, f_price, f_cost_price, f_weight, f_created_at, f_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [spuId, sku.skuCode, Number(sku.price), sku.costPrice ? Number(sku.costPrice) : null, sku.weight ? Number(sku.weight) : null, ts, ts])
+          await db.execute(`INSERT INTO t_product_sku (f_public_uid, f_spu_id, f_sku_code, f_price, f_cost_price, f_weight, f_created_at, f_updated_at) VALUES ((SELECT public.rpc_gen_uuid()), ?, ?, ?, ?, ?, ?, ?)`, [spuId, sku.skuCode, Number(sku.price), sku.costPrice ? Number(sku.costPrice) : null, sku.weight ? Number(sku.weight) : null, ts, ts])
         }
       }
       res.json({ code: 200, data: { id: spuId }, message: '创建成功' })
@@ -110,13 +110,15 @@ module.exports = function createAdminProductsRoutes({ db, timestamp }) {
       const desc = JSON.stringify({ 'zh-CN': descZh || '', 'en-US': descEn || '' })
       await db.execute(`UPDATE t_product_spu SET f_category_id = ?, f_brand = ?, f_name = ?::jsonb, f_description = ?::jsonb, f_meta_info = ?::jsonb, f_updated_at = ? WHERE f_id = ? AND f_deleted = 0`, [categoryId, brand || '', name, desc, meta, ts, req.params.id])
       if (skus && Array.isArray(skus)) {
-        const existingSkus = await db.query(`SELECT f_id FROM t_product_sku WHERE f_spu_id = ?`, [req.params.id])
-        const existingIds = existingSkus.map(s => s.f_id)
+        const existingSkus = await db.query(`SELECT f_id, f_sku_code FROM t_product_sku WHERE f_spu_id = ?`, [req.params.id])
+        const existingIds = new Set(existingSkus.map(s => s.f_id))
+        const codeToId = new Map(existingSkus.filter(s => s.f_sku_code).map(s => [s.f_sku_code, s.f_id]))
         for (const sku of skus) {
-          if (sku.id && existingIds.includes(sku.id)) {
-            await db.execute(`UPDATE t_product_sku SET f_sku_code = ?, f_price = ?, f_cost_price = ?, f_weight = ?, f_updated_at = ? WHERE f_id = ?`, [sku.skuCode, Number(sku.price), sku.costPrice ? Number(sku.costPrice) : null, sku.weight ? Number(sku.weight) : null, ts, sku.id])
+          const matchId = sku.id || codeToId.get(sku.skuCode)
+          if (matchId && existingIds.has(matchId)) {
+            await db.execute(`UPDATE t_product_sku SET f_sku_code = ?, f_price = ?, f_cost_price = ?, f_weight = ?, f_updated_at = ? WHERE f_id = ?`, [sku.skuCode, Number(sku.price), sku.costPrice ? Number(sku.costPrice) : null, sku.weight ? Number(sku.weight) : null, ts, matchId])
           } else if (sku.skuCode && sku.price) {
-            await db.execute(`INSERT INTO t_product_sku (f_spu_id, f_sku_code, f_price, f_cost_price, f_weight, f_created_at, f_updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [req.params.id, sku.skuCode, Number(sku.price), sku.costPrice ? Number(sku.costPrice) : null, sku.weight ? Number(sku.weight) : null, ts, ts])
+            await db.execute(`INSERT INTO t_product_sku (f_public_uid, f_spu_id, f_sku_code, f_price, f_cost_price, f_weight, f_created_at, f_updated_at) VALUES ((SELECT public.rpc_gen_uuid()), ?, ?, ?, ?, ?, ?, ?)`, [req.params.id, sku.skuCode, Number(sku.price), sku.costPrice ? Number(sku.costPrice) : null, sku.weight ? Number(sku.weight) : null, ts, ts])
           }
         }
       }
