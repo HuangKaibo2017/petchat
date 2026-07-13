@@ -1,42 +1,12 @@
 const { Router } = require('express')
 const { adminAuth } = require('./auth-guard')
 
-const MOCK_ORDERS = [
-  { id: 1, orderNo: "ORD20260711001", userName: "张先生", totalAmount: 258.0, finalAmount: 258.0, statusPayment: "paid", statusShipping: "shipped", createdAt: "20260711103000" },
-  { id: 2, orderNo: "ORD20260711002", userName: "李女士", totalAmount: 128.0, finalAmount: 128.0, statusPayment: "pending", statusShipping: "pending", createdAt: "20260711113000" },
-  { id: 3, orderNo: "ORD20260710003", userName: "王先生", totalAmount: 456.0, finalAmount: 420.0, statusPayment: "paid", statusShipping: "pending", createdAt: "20260710093000" },
-  { id: 4, orderNo: "ORD20260710004", userName: "赵女士", totalAmount: 89.0, finalAmount: 89.0, statusPayment: "paid", statusShipping: "shipped", createdAt: "20260710143000" },
-  { id: 5, orderNo: "ORD20260709005", userName: "刘先生", totalAmount: 320.0, finalAmount: 320.0, statusPayment: "paid", statusShipping: "completed", createdAt: "20260709173000" },
-]
-
-const MOCK_DETAILS = {
-  1: { ...MOCK_ORDERS[0], discountAmount: 0, paymentMethod: "微信支付", paymentStatus: "paid", shippingStatus: "shipped", receiverName: "张明", receiverPhone: "13800138000", receiverAddress: "北京市朝阳区某某街道100号", items: [{ id: 1, productName: "编织宠物项圈", quantity: 2, unitPrice: 129.0, totalPrice: 258.0 }], shipment: { carrier: "顺丰速运", trackingNumber: "SF1234567890" }, updatedAt: "20260711142000" },
-}
-
 module.exports = function createAdminOrdersRoutes({ db, timestamp }) {
   const router = Router()
   router.use(adminAuth)
 
-  let dbOk = false
-  db.ping().then(ok => { dbOk = ok }).catch(() => {})
-
   router.get('/orders', async (req, res) => {
     try {
-      if (!dbOk) {
-        const page = Math.max(parseInt(req.query.page || '1', 10), 1)
-        const pageSize = 20
-        const status = req.query.status || ''
-        const search = (req.query.search || '').toLowerCase()
-        let list = MOCK_ORDERS
-        if (status) {
-          if (status === 'unpaid') list = list.filter(o => o.statusPayment === 'pending')
-          else if (status === 'pending') list = list.filter(o => o.statusPayment === 'paid' && o.statusShipping === 'pending')
-          else if (status === 'shipped') list = list.filter(o => o.statusShipping === 'shipped')
-          else if (status === 'completed') list = list.filter(o => o.statusShipping === 'completed')
-        }
-        if (search) list = list.filter(o => o.orderNo.toLowerCase().includes(search) || o.userName.includes(search))
-        return res.json({ code: 200, data: { list, total: list.length, page, pageSize } })
-      }
       const page = Math.max(parseInt(req.query.page || '1', 10), 1)
       const pageSize = Math.min(Math.max(parseInt(req.query.pageSize || '20', 10), 1), 100)
       const status = req.query.status || ''
@@ -73,11 +43,6 @@ module.exports = function createAdminOrdersRoutes({ db, timestamp }) {
 
   router.get('/orders/:id', async (req, res) => {
     try {
-      if (!dbOk) {
-        const detail = MOCK_DETAILS[Number(req.params.id)]
-        if (!detail) return res.status(404).json({ code: 404, message: '订单不存在' })
-        return res.json({ code: 200, data: detail })
-      }
       const rows = await db.query(
         `SELECT o.f_id, o.f_order_no, o.f_user_id, o.f_total_amount, o.f_discount_amount, o.f_final_amount, o.f_payment_method, o.f_status_payment, o.f_status_shipping, o.f_receiver_name, o.f_receiver_phone, o.f_receiver_address, o.f_created_at, o.f_updated_at FROM t_order o WHERE o.f_id = ?`, [req.params.id]
       )
@@ -98,7 +63,6 @@ module.exports = function createAdminOrdersRoutes({ db, timestamp }) {
 
   router.put('/orders/:id/ship', async (req, res) => {
     try {
-      if (!dbOk) return res.json({ code: 200, message: '发货成功（Mock 模式）' })
       const { carrier, trackingNumber } = req.body || {}
       if (!carrier || !trackingNumber) return res.status(400).json({ code: 400, message: '物流商和快递单号为必填项' })
       const ts = timestamp()

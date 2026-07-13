@@ -1,38 +1,12 @@
 const { Router } = require('express')
 const { adminAuth } = require('./auth-guard')
 
-const MOCK_PRODUCTS = [
-  { id: 1, nameZh: "编织宠物项圈", nameEn: "Braided Pet Collar", categoryName: "项链", categoryId: 2, price: 128.0, status: "active", imageUrl: "", createdAt: "20260701000000" },
-  { id: 2, nameZh: "手工毛线玩具", nameEn: "Handmade Wool Toy", categoryName: "玩具", categoryId: 4, price: 68.0, status: "active", imageUrl: "", createdAt: "20260702000000" },
-  { id: 3, nameZh: "宠物皮质牵引绳", nameEn: "Leather Pet Leash", categoryName: "手作", categoryId: 5, price: 198.0, status: "active", imageUrl: "", createdAt: "20260703000000" },
-  { id: 4, nameZh: "天然羽毛逗猫棒", nameEn: "Natural Feather Cat Toy", categoryName: "玩具", categoryId: 4, price: 45.0, status: "active", imageUrl: "", createdAt: "20260705000000" },
-]
-
-const MOCK_SKUS = {
-  1: [{ id: 1, skuCode: "NECKLACE-S", price: 128.0, costPrice: 80.0, weight: 0.1 }],
-  2: [{ id: 2, skuCode: "TOY-WOOL", price: 68.0, costPrice: 40.0, weight: 0.2 }],
-}
-
 module.exports = function createAdminProductsRoutes({ db, timestamp }) {
   const router = Router()
   router.use(adminAuth)
 
-  let dbOk = false
-  db.ping().then(ok => { dbOk = ok }).catch(() => {})
-
   router.get('/products', async (req, res) => {
     try {
-      if (!dbOk) {
-        const page = Math.max(parseInt(req.query.page || '1', 10), 1)
-        const pageSize = 20
-        const search = (req.query.search || '').toLowerCase()
-        const category = req.query.category || ''
-        let list = MOCK_PRODUCTS
-        if (search) list = list.filter(p => p.nameZh.includes(search) || p.nameEn.toLowerCase().includes(search))
-        if (category) list = list.filter(p => String(p.categoryId) === category)
-        return res.json({ code: 200, data: { list, total: list.length, page, pageSize } })
-      }
-
       const page = Math.max(parseInt(req.query.page || '1', 10), 1)
       const pageSize = Math.min(Math.max(parseInt(req.query.pageSize || '20', 10), 1), 100)
       const search = req.query.search || ''
@@ -85,11 +59,6 @@ module.exports = function createAdminProductsRoutes({ db, timestamp }) {
 
   router.get('/products/:id', async (req, res) => {
     try {
-      if (!dbOk) {
-        const p = MOCK_PRODUCTS.find(x => x.id === Number(req.params.id))
-        if (!p) return res.status(404).json({ code: 404, message: '商品不存在' })
-        return res.json({ code: 200, data: { ...p, descZh: '', descEn: '', skus: MOCK_SKUS[p.id] || [], createdAt: p.createdAt } })
-      }
       const rows = await db.query(
         `SELECT spu.f_id, spu.f_name, spu.f_description, spu.f_category_id, spu.f_brand, spu.f_meta_info, spu.f_created_at FROM t_product_spu spu WHERE spu.f_id = ? AND spu.f_deleted = 0`,
         [req.params.id]
@@ -110,10 +79,6 @@ module.exports = function createAdminProductsRoutes({ db, timestamp }) {
 
   router.post('/products', async (req, res) => {
     try {
-      if (!dbOk) {
-        const newId = Math.max(...MOCK_PRODUCTS.map(p => p.id), 0) + 1
-        return res.json({ code: 200, data: { id: newId }, message: '创建成功（Mock 模式）' })
-      }
       const { categoryId, brand, nameZh, nameEn, descZh, descEn, imageUrl, skus } = req.body || {}
       if (!nameZh || !categoryId || !skus || skus.length === 0) return res.status(400).json({ code: 400, message: '商品名称、分类和SKU为必填项' })
       const ts = timestamp()
@@ -137,7 +102,6 @@ module.exports = function createAdminProductsRoutes({ db, timestamp }) {
 
   router.put('/products/:id', async (req, res) => {
     try {
-      if (!dbOk) return res.json({ code: 200, message: '更新成功（Mock 模式）' })
       const { categoryId, brand, nameZh, nameEn, descZh, descEn, imageUrl, skus } = req.body || {}
       if (!nameZh || !categoryId) return res.status(400).json({ code: 400, message: '商品名称和分类为必填项' })
       const ts = timestamp()
@@ -165,7 +129,6 @@ module.exports = function createAdminProductsRoutes({ db, timestamp }) {
 
   router.delete('/products/:id', async (req, res) => {
     try {
-      if (!dbOk) return res.json({ code: 200, message: '删除成功（Mock 模式）' })
       await db.execute(`UPDATE t_product_spu SET f_deleted = 1, f_updated_at = ? WHERE f_id = ?`, [timestamp(), req.params.id])
       res.json({ code: 200, message: '删除成功' })
     } catch (err) {
