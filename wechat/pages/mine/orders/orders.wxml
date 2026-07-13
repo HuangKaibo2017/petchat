@@ -1,10 +1,42 @@
+<wxs module="image" src="../../../utils/image.wxs" />
 <nav-bar title="我的订单" showBack="{{true}}" />
+
 <view class="page-container">
-  <view class="filter-tabs flex">
-    <view class="filter-tab {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
-    <view class="filter-tab {{activeTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">待付款</view>
-    <view class="filter-tab {{activeTab === 'shipped' ? 'active' : ''}}" bindtap="switchTab" data-tab="shipped">待收货</view>
-    <view class="filter-tab {{activeTab === 'done' ? 'active' : ''}}" bindtap="switchTab" data-tab="done">已完成</view>
+  <scroll-view class="order-tabs" scroll-x>
+    <view class="order-tab {{activeTab === item.key ? 'order-tab-active' : ''}}"
+          wx:for="{{tabs}}" wx:key="key"
+          bindtap="switchTab" data-tab="{{item.key}}">
+      {{item.name}}
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{orderList.length > 0}}">
+    <view wx:for="{{filterOrders()}}" wx:key="id" class="order-card card">
+      <view class="order-card-header">
+        <view class="order-card-no">订单号：{{item.orderNo || item.id}}</view>
+        <view class="order-card-status {{item.status}}">{{statusMap[item.status] || item.status}}</view>
+      </view>
+
+      <view class="order-card-items">
+        <view class="order-card-item" wx:for="{{item.products || item.items}}" wx:for-item="p" wx:key="id">
+          <image class="order-item-img" src="{{p.image || p.images[0] || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+          <view class="order-item-info">
+            <view class="order-item-name">{{p.name || p.productName}}</view>
+            <view class="order-item-price">¥{{p.price}} x{{p.quantity || 1}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="order-card-footer">
+        <view class="order-card-total">合计：¥{{item.totalAmount || item.finalPrice || '0'}}</view>
+        <view class="order-card-actions">
+          <button class="btn btn-outline btn-sm" wx:if="{{item.status === 'pending'}}" bindtap="cancelOrder" data-id="{{item.id}}">取消</button>
+          <button class="btn btn-primary btn-sm" wx:if="{{item.status === 'pending'}}" bindtap="payOrder" data-id="{{item.id}}">去支付</button>
+          <button class="btn btn-primary btn-sm" wx:if="{{item.status === 'shipped'}}" bindtap="confirmReceive" data-id="{{item.id}}">确认收货</button>
+        </view>
+      </view>
+    </view>
   </view>
-  <empty-state title="暂无订单" desc="去商城逛逛吧" actionText="去商城" bind:action="goShop" />
+
+  <empty-state wx:else title="暂无订单" desc="去商城逛逛吧" actionText="去商城" bind:action="goShop" />
 </view>

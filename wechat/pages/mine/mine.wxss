@@ -12,9 +12,13 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 64rpx 32rpx 56rpx;
+  min-height: 340rpx;
+  margin: 0 32rpx 32rpx;
+  padding: 48rpx 32rpx;
   gap: 28rpx;
   overflow: hidden;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
 .profile-bg {
@@ -49,7 +53,7 @@
 
 /* ─── 信息卡片区 ─── */
 .mine-cards {
-  margin: -20rpx 32rpx 24rpx;
+  margin: 0 32rpx 24rpx;
   position: relative;
   z-index: 2;
   display: flex;
@@ -318,6 +322,20 @@
   width: 40rpx;
   height: 40rpx;
   flex-shrink: 0;
+}
+
+.mine-menu-badge {
+  margin-left: 12rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  border-radius: 18rpx;
+  background: #E8443A;
+  color: #FFFFFF;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mine-menu-arrow {

@@ -1,4 +1,3 @@
-const util = require('../../../utils/util')
 const app = getApp()
 const API = require('../../../utils/api')
 
@@ -7,12 +6,33 @@ Page({
     ownerName: '',
     phone: '',
     birthday: '',
-    breedList: util.breedList,
+    breedList: [],
+    breedIdList: [],
     submitting: false,
     pets: [{
-      name: '', breed: '', breedIndex: -1, age: '', gender: '', neutered: null,
+      name: '', breed: '', breedId: null, age: '', gender: '', neutered: null,
       history: '', vaccine: '', avatar: ''
     }]
+  },
+
+  onLoad() {
+    this.loadBreeds()
+  },
+
+  async loadBreeds() {
+    try {
+      const breeds = await API.Pet.breeds()
+      if (breeds && breeds.length > 0) {
+        this.setData({
+          breedList: breeds.map(b => b.name),
+          breedIdList: breeds.map(b => b.id)
+        })
+      }
+    } catch (err) {
+      console.warn('[Register] 加载品种失败:', err.message)
+      const util = require('../../../utils/util')
+      this.setData({ breedList: util.breedList })
+    }
   },
 
   onFieldInput(e) {
@@ -35,8 +55,8 @@ Page({
     const index = e.currentTarget.dataset.index
     const breedIndex = parseInt(e.detail.value)
     const pets = [...this.data.pets]
-    pets[index].breed = this.data.breedList[breedIndex]
-    pets[index].breedIndex = breedIndex
+    pets[index].breed = this.data.breedList[breedIndex] || ''
+    pets[index].breedId = this.data.breedIdList[breedIndex] || null
     this.setData({ pets })
   },
 
@@ -70,7 +90,7 @@ Page({
     if (this.data.pets.length >= 5) return wx.showToast({ title: '最多添加5只宠物', icon: 'none' })
     this.setData({
       pets: [...this.data.pets, {
-        name: '', breed: '', breedIndex: -1, age: '', gender: '', neutered: null,
+        name: '', breed: '', breedId: null, age: '', gender: '', neutered: null,
         history: '', vaccine: '', avatar: ''
       }]
     })
@@ -90,12 +110,14 @@ Page({
 
     for (let i = 0; i < pets.length; i++) {
       if (!pets[i].name.trim()) return wx.showToast({ title: `请输入宠物${i+1}的名字`, icon: 'none' })
-      if (!pets[i].breed) return wx.showToast({ title: `请选择宠物${i+1}的品种`, icon: 'none' })
     }
 
     if (!app.globalData.isLoggedIn) {
-      app.wxLogin().then(token => { if (token) this.submitRegister() })
-      return
+      const token = await app.wxLogin()
+      if (!token) {
+        wx.showToast({ title: '登录失败，请重试', icon: 'none' })
+        return
+      }
     }
 
     this.setData({ submitting: true })
@@ -116,17 +138,29 @@ Page({
 
         const petPayload = {
           name: pet.name,
-          breedId: pet.breedIndex + 1,
+          breedId: pet.breedId,
           genderId: pet.gender === 'male' ? 1 : pet.gender === 'female' ? 2 : -1,
-          age: pet.age ? parseInt(pet.age) : null,
+          birthYear: pet.age ? (new Date().getFullYear() - parseInt(pet.age)) : null,
           sterilized: pet.neutered,
           vaccinated: pet.vaccine === 'yes',
-          tags: ['平和质'],
+          tags: [],
           avatar: avatarUrl,
+          history: pet.history || '',
+          vaccineNote: pet.vaccine === 'yes' ? '已接种疫苗' : '',
         }
 
-        // API.Pet.create is an alias for API.Pet.save
         await API.Pet.save(petPayload)
+      }
+
+      // 保存主人信息
+      const ownerPayload = { nickname: ownerName, phone }
+      if (birthday) {
+        ownerPayload.birthday = birthday
+      }
+      try {
+        await API.User.updateProfile(ownerPayload)
+      } catch (e) {
+        console.warn('[Register] 保存主人信息失败:', e.message)
       }
 
       wx.hideLoading()

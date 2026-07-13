@@ -152,6 +152,74 @@ CREATE POLICY "Users can read own subscription" ON public.t_user_subscription FO
 DROP POLICY IF EXISTS "Users can read own usage" ON public.t_usage_record;
 CREATE POLICY "Users can read own usage" ON public.t_usage_record FOR SELECT USING (f_user_id = public.current_user_f_id());
 
+-- t_user_device
+DROP POLICY IF EXISTS "Users can read own devices" ON public.t_user_device;
+CREATE POLICY "Users can read own devices" ON public.t_user_device FOR SELECT USING (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can insert devices" ON public.t_user_device;
+CREATE POLICY "Users can insert devices" ON public.t_user_device FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can update own devices" ON public.t_user_device;
+CREATE POLICY "Users can update own devices" ON public.t_user_device FOR UPDATE USING (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can delete own devices" ON public.t_user_device;
+CREATE POLICY "Users can delete own devices" ON public.t_user_device FOR DELETE USING (f_user_id = public.current_user_f_id());
+
+-- t_interpretation_voice
+DROP POLICY IF EXISTS "Users can read own interpretation voices" ON public.t_interpretation_voice;
+CREATE POLICY "Users can read own interpretation voices" ON public.t_interpretation_voice FOR SELECT USING (f_user_id = public.current_user_f_id());
+
+-- t_agent_application
+DROP POLICY IF EXISTS "Users can read own agent applications" ON public.t_agent_application;
+CREATE POLICY "Users can read own agent applications" ON public.t_agent_application FOR SELECT USING (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can insert agent applications" ON public.t_agent_application;
+CREATE POLICY "Users can insert agent applications" ON public.t_agent_application FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+
+-- t_agent_withdrawal
+DROP POLICY IF EXISTS "Users can read own agent withdrawals" ON public.t_agent_withdrawal;
+CREATE POLICY "Users can read own agent withdrawals" ON public.t_agent_withdrawal FOR SELECT USING (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can insert agent withdrawals" ON public.t_agent_withdrawal;
+CREATE POLICY "Users can insert agent withdrawals" ON public.t_agent_withdrawal FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+
+-- t_agent_revenue
+DROP POLICY IF EXISTS "Users can read own agent revenues" ON public.t_agent_revenue;
+CREATE POLICY "Users can read own agent revenues" ON public.t_agent_revenue FOR SELECT USING (f_user_id = public.current_user_f_id());
+
+-- t_rescue_request
+DROP POLICY IF EXISTS "Anyone can read rescue requests" ON public.t_rescue_request;
+CREATE POLICY "Anyone can read rescue requests" ON public.t_rescue_request FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert rescue requests" ON public.t_rescue_request;
+CREATE POLICY "Users can insert rescue requests" ON public.t_rescue_request FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can update own rescue requests" ON public.t_rescue_request;
+CREATE POLICY "Users can update own rescue requests" ON public.t_rescue_request FOR UPDATE USING (f_user_id = public.current_user_f_id());
+
+-- t_adoption
+DROP POLICY IF EXISTS "Anyone can read adoptions" ON public.t_adoption;
+CREATE POLICY "Anyone can read adoptions" ON public.t_adoption FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert adoptions" ON public.t_adoption;
+CREATE POLICY "Users can insert adoptions" ON public.t_adoption FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can update own adoptions" ON public.t_adoption;
+CREATE POLICY "Users can update own adoptions" ON public.t_adoption FOR UPDATE USING (f_user_id = public.current_user_f_id());
+
+-- t_volunteer
+DROP POLICY IF EXISTS "Anyone can read volunteers" ON public.t_volunteer;
+CREATE POLICY "Anyone can read volunteers" ON public.t_volunteer FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert own volunteer profile" ON public.t_volunteer;
+CREATE POLICY "Users can insert own volunteer profile" ON public.t_volunteer FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can update own volunteer profile" ON public.t_volunteer;
+CREATE POLICY "Users can update own volunteer profile" ON public.t_volunteer FOR UPDATE USING (f_user_id = public.current_user_f_id());
+
+-- t_donation
+DROP POLICY IF EXISTS "Anyone can read donations" ON public.t_donation;
+CREATE POLICY "Anyone can read donations" ON public.t_donation FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert donations" ON public.t_donation;
+CREATE POLICY "Users can insert donations" ON public.t_donation FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id() OR f_user_id = -1);
+
+-- t_record_lost_pet
+DROP POLICY IF EXISTS "Anyone can read lost pet records" ON public.t_record_lost_pet;
+CREATE POLICY "Anyone can read lost pet records" ON public.t_record_lost_pet FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can insert lost pet records" ON public.t_record_lost_pet;
+CREATE POLICY "Users can insert lost pet records" ON public.t_record_lost_pet FOR INSERT WITH CHECK (f_user_id = public.current_user_f_id());
+DROP POLICY IF EXISTS "Users can update own lost pet records" ON public.t_record_lost_pet;
+CREATE POLICY "Users can update own lost pet records" ON public.t_record_lost_pet FOR UPDATE USING (f_user_id = public.current_user_f_id());
+
 -- ============================================================
 -- Public reference tables
 -- ============================================================

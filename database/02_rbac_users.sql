@@ -99,6 +99,8 @@ CREATE TABLE public.t_user (
     f_avatar_url      VARCHAR(512) NOT NULL DEFAULT '',
     f_phone           VARCHAR(32)  NOT NULL DEFAULT '',
     f_email           VARCHAR(128) NOT NULL DEFAULT '',
+    f_wx_openid       VARCHAR(128) NOT NULL DEFAULT '',
+    f_wx_unionid      VARCHAR(128) NOT NULL DEFAULT '',
     f_password_hash   VARCHAR(256) NOT NULL DEFAULT '',
     f_status_id     INTEGER     NOT NULL DEFAULT 1,
     f_meta_info       JSONB       NOT NULL DEFAULT '{}'::jsonb,
@@ -122,6 +124,8 @@ COMMENT ON COLUMN public.t_user.f_nickname      IS '昵称, 1-64 字符';
 COMMENT ON COLUMN public.t_user.f_avatar_url    IS '头像 URL (空 = 默认头像)';
 COMMENT ON COLUMN public.t_user.f_phone         IS '手机号 (空字符串表示未填, 部分唯一索引见 99_indexes_views.sql)';
 COMMENT ON COLUMN public.t_user.f_email         IS '邮箱 (空字符串表示未填, 部分唯一索引见 99_indexes_views.sql)';
+COMMENT ON COLUMN public.t_user.f_wx_openid     IS '微信小程序 openid, 用于微信登录与 JSAPI 支付';
+COMMENT ON COLUMN public.t_user.f_wx_unionid    IS '微信开放平台 unionid, 可空字符串';
 COMMENT ON COLUMN public.t_user.f_password_hash IS '密码哈希 (argon2id / bcrypt, 不存明文)';
 COMMENT ON COLUMN public.t_user.f_status_id   IS 'FK -> public.t_status(f_id) | defined in 01_enums.sql';
 COMMENT ON COLUMN public.t_user.f_meta_info     IS '扩展元数据, 存 is_anonymous / role / 偏好设置等; 匿名捐款哨兵 f_id=-1 通过 f_meta_info.role=anonymous 标识';

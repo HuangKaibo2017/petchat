@@ -20,6 +20,11 @@ Component({
       this.setData({ nickName: e.detail.value })
     },
 
+    // 昵称失焦兜底（type=nickname 原生面板关闭时触发）
+    onNicknameBlur(e) {
+      this.setData({ nickName: e.detail.value })
+    },
+
     // 确认提交
     onSubmit() {
       const { avatarUrl, nickName } = this.data
@@ -36,21 +41,6 @@ Component({
       app.globalData.userInfo = userInfo
       app.globalData.isLoggedIn = true
       wx.setStorageSync('userInfo', userInfo)
-
-      // 上传头像到后端
-      if (avatarUrl) {
-        wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`,
-          filePath: avatarUrl,
-          name: 'file',
-          formData: { category: 'avatar' },
-          header: {
-            'Authorization': `Bearer ${wx.getStorageSync('token')}`
-          },
-          success: () => {},
-          fail: () => {}
-        })
-      }
 
       this.triggerEvent('success', userInfo)
     },

@@ -1,5 +1,3 @@
-const { mockPets, mockUser } = require('./utils/mock')
-
 App({
   globalData: {
     userInfo: null,
@@ -10,14 +8,11 @@ App({
     cart: [],
     nfcEnabled: true,
     isGuest: false,
-    // 线上: Supabase Edge Functions
-    // 本地开发: Express 后端 http://localhost:8001
-    baseUrl: 'https://gengdongta.com',
+    baseUrl: 'https://www.gengdongta.com',
     debug: false
   },
 
   onLaunch() {
-    this.initDemoData()
     this.loadUserData()
     this.checkUpdate()
     this.restoreLogin()
@@ -35,18 +30,7 @@ App({
     if (options.query && options.query.scene) {
       this.handleScene(options.query.scene)
     }
-  },
-
-  initDemoData() {
-    const hasRun = wx.getStorageSync('_demo_initialized')
-    if (hasRun) return
-
-    console.log('[更懂它] 首次启动，注入演示数据…')
-    wx.setStorageSync('userInfo', mockUser)
-    wx.setStorageSync('pets', mockPets)
-    wx.setStorageSync('currentPetId', mockPets[0].id)
-    wx.setStorageSync('ownerBirthday', mockUser.birthday)
-    wx.setStorageSync('_demo_initialized', true)
+    this.syncCartBadge()
   },
 
   loadUserData() {
@@ -192,5 +176,52 @@ App({
       this.globalData.currentPet = pet
       wx.setStorageSync('currentPetId', petId)
     }
+  },
+
+  saveCart() {
+    wx.setStorageSync('cartList', this.globalData.cart)
+    this.syncCartBadge()
+  },
+
+  syncCartBadge() {
+    const count = this.getCartCount()
+    if (count > 0) {
+      wx.setTabBarBadge({
+        index: 1,
+        text: count > 99 ? '99+' : String(count)
+      })
+    } else {
+      wx.removeTabBarBadge({ index: 1 })
+    }
+  },
+
+  getCartCount() {
+    return this.globalData.cart.reduce((sum, item) => sum + item.count, 0)
+  },
+
+  getCartTotal() {
+    return this.globalData.cart.reduce((sum, item) => {
+      return sum + (item.price || 0) * item.count
+    }, 0)
+  },
+
+  addToCart(product, count) {
+    const cart = this.globalData.cart
+    const index = cart.findIndex(item => item.id === product.id)
+    if (index > -1) {
+      cart[index].count += count
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.displayName || product.name,
+        price: product.price,
+        images: product.images || [],
+        categoryName: product.categoryName || '',
+        count: count
+      })
+    }
+    this.globalData.cart = cart
+    this.saveCart()
+    return true
   }
 })

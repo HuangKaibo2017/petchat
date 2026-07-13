@@ -1,3 +1,4 @@
+const API = require('../../utils/api')
 const app = getApp()
 
 Page({
@@ -14,28 +15,27 @@ Page({
     },
     pets: [],
     hwCurrent: 0,
-nfcCount: 0,
+    nfcCount: 0,
     deviceCount: 0,
     emotionQuota: 0,
     healthQuota: 0,
     riskQuota: 0,
     bodyQuota: 0,
+    cartCount: 0,
     hardwareList: [
       { id: 1, name: '智能项圈', image: '', active: false },
       { id: 2, name: 'NFC贴',    image: '', active: true },
       { id: 3, name: '语音盒',   image: '', active: false }
     ],
 
-    // 弹层状态
+    showAuthorize: false,
     showOwnerForm: false,
     showPetForm: false,
     editingPetIndex: -1,
 
-    // 表单数据
     ownerForm: {},
     petForm: {},
 
-    // 选项
     dietOptions: ['无特殊偏好', '素食', '杂食', '生骨肉', '处方粮'],
     expOptions: ['新手', '1-3年', '3-5年', '5年以上'],
     genderOptions: ['公', '母'],
@@ -51,33 +51,67 @@ nfcCount: 0,
 
   onShow() {
     this.loadUserInfo()
+    this.loadCartCount()
+  },
+
+  loadCartCount() {
+    this.setData({ cartCount: app.getCartCount() })
   },
 
   loadUserInfo() {
-    const userInfo = wx.getStorageSync('userInfo') || {}
+    const ui = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
     this.setData({
-      avatarUrl: userInfo.avatarUrl || '',
-      nickname: userInfo.nickName || ''
+      avatarUrl: ui.avatarUrl || '',
+      nickname: ui.nickName || ui.nickname || ''
     })
   },
 
-  loadOwnerProfile() {
-    const profile = wx.getStorageSync('ownerProfile') || {}
-    this.setData({
-      owner: {
-        age: profile.age || '',
-        occupation: profile.occupation || '',
-        city: profile.city || '',
-        phone: profile.phone || '',
-        diet: profile.diet || '',
-        experience: profile.experience || ''
+  async loadOwnerProfile() {
+    try {
+      const profile = await API.User.getProfile()
+      if (profile) {
+        this.setData({
+          owner: {
+            age: profile.age || '',
+            occupation: profile.occupation || '',
+            city: profile.city || '',
+            phone: profile.phone || '',
+            diet: profile.diet || '',
+            experience: profile.experience || ''
+          }
+        })
+        wx.setStorageSync('ownerProfile', profile)
       }
-    })
+    } catch (err) {
+      console.warn('[Mine] 加载主人档案失败，从缓存读取:', err.message)
+      const cached = wx.getStorageSync('ownerProfile') || {}
+      this.setData({
+        owner: {
+          age: cached.age || '',
+          occupation: cached.occupation || '',
+          city: cached.city || '',
+          phone: cached.phone || '',
+          diet: cached.diet || '',
+          experience: cached.experience || ''
+        }
+      })
+    }
   },
 
-  loadPets() {
-    const pets = wx.getStorageSync('pets') || []
-    this.setData({ pets })
+  async loadPets() {
+    try {
+      const pets = await API.Pet.list()
+      if (pets && pets.length > 0) {
+        this.setData({ pets })
+        app.globalData.pets = pets
+        wx.setStorageSync('pets', pets)
+      } else if (app.globalData.pets && app.globalData.pets.length > 0) {
+        this.setData({ pets: app.globalData.pets })
+      }
+    } catch (err) {
+      console.warn('[Mine] 加载宠物失败:', err.message)
+      this.setData({ pets: app.globalData.pets || [] })
+    }
   },
 
   loadDeviceCounts() {
@@ -99,35 +133,43 @@ nfcCount: 0,
     })
   },
 
-  saveOwnerProfile(profile) {
-    wx.setStorageSync('ownerProfile', profile)
-    this.loadOwnerProfile()
-  },
-
-  savePets(pets) {
-    wx.setStorageSync('pets', pets)
-    this.loadPets()
-  },
-
-  // ─── 头像昵称区域点击 ───
-  goLogin() {
-    if (!this.data.nickname) {
-      wx.getUserProfile({
-        desc: '用于完善个人资料',
-        success: (res) => {
-          const { avatarUrl, nickName } = res.userInfo
-          wx.setStorageSync('userInfo', { avatarUrl, nickName })
-          this.setData({ avatarUrl, nickname: nickName })
-          wx.showToast({ title: '登录成功', icon: 'success' })
-        },
-        fail: () => {
-          wx.showToast({ title: '已取消', icon: 'none' })
-        }
-      })
+  async saveOwnerProfile(form) {
+    try {
+      await API.User.updateProfile(form)
+      wx.setStorageSync('ownerProfile', form)
+      this.loadOwnerProfile()
+      wx.showToast({ title: '保存成功', icon: 'success' })
+    } catch (err) {
+      console.warn('[Mine] 保存主人档案失败:', err.message)
+      wx.setStorageSync('ownerProfile', form)
+      this.loadOwnerProfile()
+      wx.showToast({ title: '已本地保存', icon: 'none' })
     }
   },
 
-  // ─── 主人档案 ───
+  // ═══ 头像昵称 ═══
+  goLogin() {
+    this.setData({ showAuthorize: true })
+  },
+
+  onAuthorizeSuccess(e) {
+    const { nickName, avatarUrl } = e.detail
+    const userInfo = { nickName, avatarUrl }
+    wx.setStorageSync('userInfo', userInfo)
+    app.globalData.userInfo = userInfo
+    this.setData({ avatarUrl: avatarUrl || '', nickname: nickName || '', showAuthorize: false })
+
+    if (nickName || avatarUrl) {
+      API.User.updateProfile({ nickname: nickName, avatarUrl }).catch(() => {})
+    }
+    wx.showToast({ title: '设置成功', icon: 'success' })
+  },
+
+  onAuthorizeCancel() {
+    this.setData({ showAuthorize: false })
+  },
+
+  // ═══ 主人档案 ═══
   goOwnerProfile() {
     this.setData({
       showOwnerForm: true,
@@ -159,11 +201,10 @@ nfcCount: 0,
       return
     }
     this.saveOwnerProfile(form)
-    wx.showToast({ title: '保存成功', icon: 'success' })
     this.closeOwnerForm()
   },
 
-  // ─── 宠物档案 ───
+  // ═══ 宠物档案 ═══
   goPetProfile() {},
 
   goAddPet() {
@@ -190,7 +231,17 @@ nfcCount: 0,
     this.setData({
       showPetForm: true,
       editingPetIndex: index,
-      petForm: { ...pet }
+      petForm: {
+        avatar: pet.avatar || '',
+        name: pet.name || '',
+        age: pet.age || (pet.birthYear ? String(pet.birthYear) : ''),
+        weight: pet.weight ? String(pet.weight) : '',
+        gender: pet.gender || '',
+        breed: pet.breed || '',
+        health: pet.history || '',
+        allergy: pet.allergy || '',
+        tip: pet.vaccineNote || ''
+      }
     })
   },
 
@@ -207,31 +258,72 @@ nfcCount: 0,
     this.setData({ 'petForm.gender': this.data.genderOptions[e.detail.value] })
   },
 
-  submitPetForm() {
+  async submitPetForm() {
     const form = this.data.petForm
     if (!form.name) {
       wx.showToast({ title: '请填写宠物名字', icon: 'none' })
       return
     }
-    const pets = [...this.data.pets]
     const idx = this.data.editingPetIndex
-    const newPet = {
-      ...form,
-      id: idx >= 0 ? pets[idx].id : Date.now()
+
+    const payload = {
+      name: form.name,
+      avatar: form.avatar || '',
+      history: form.health || '',
+      allergy: form.allergy || '',
+      vaccineNote: form.tip || '',
     }
 
-    if (idx >= 0) {
-      pets[idx] = newPet
-    } else {
-      pets.push(newPet)
+    if (form.gender === '公') payload.genderId = 1
+    else if (form.gender === '母') payload.genderId = 2
+    else payload.genderId = -1
+
+    if (form.age && !isNaN(parseInt(form.age))) {
+      payload.birthYear = new Date().getFullYear() - parseInt(form.age)
+    }
+    if (form.weight && !isNaN(parseFloat(form.weight))) {
+      payload.weight = parseFloat(form.weight)
     }
 
-    this.savePets(pets)
-    wx.showToast({ title: idx >= 0 ? '修改成功' : '添加成功', icon: 'success' })
-    this.closePetForm()
+    try {
+      if (idx >= 0) {
+        await API.Pet.update(this.data.pets[idx].id, payload)
+      } else {
+        await API.Pet.create(payload)
+      }
+      await app.refreshPets()
+      await this.loadPets()
+      wx.showToast({ title: idx >= 0 ? '修改成功' : '添加成功', icon: 'success' })
+      this.closePetForm()
+    } catch (err) {
+      console.warn('[Mine] 保存宠物失败:', err.message)
+      wx.showToast({ title: '保存失败，请重试', icon: 'none' })
+    }
   },
 
-  // ─── 硬件绑定 ───
+  async deletePet(e) {
+    const index = e.currentTarget.dataset.index
+    const pet = this.data.pets[index]
+    if (!pet) return
+
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除「${pet.name}」的档案吗？`,
+      success: async (res) => {
+        if (!res.confirm) return
+        try {
+          await API.Pet.delete(pet.id)
+          await app.refreshPets()
+          await this.loadPets()
+          wx.showToast({ title: '已删除', icon: 'success' })
+        } catch (err) {
+          console.warn('[Mine] 删除宠物失败:', err.message)
+          wx.showToast({ title: '删除失败', icon: 'none' })
+        }
+      }
+    })
+  },
+
   goDeviceBind() {
     wx.showToast({ title: '硬件绑定', icon: 'none' })
   },
@@ -248,7 +340,6 @@ nfcCount: 0,
     wx.showToast({ title: '智能设备列表', icon: 'none' })
   },
 
-  // ─── 菜单点击 ───
   goContact() {
     wx.showToast({ title: '联系客服', icon: 'none' })
   },
@@ -259,5 +350,13 @@ nfcCount: 0,
 
   goSettings() {
     wx.showToast({ title: '设置', icon: 'none' })
+  },
+
+  goCart() {
+    wx.navigateTo({ url: '/pages/shop/cart/cart' })
+  },
+
+  goOrders() {
+    wx.navigateTo({ url: '/pages/mine/orders/orders' })
   }
 })

@@ -1,0 +1,95 @@
+<wxs module="image" src="../../../utils/image.wxs" />
+<view class="page">
+  <!-- Loading -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="text-sm text-hint mt-sm">正在解读...</text>
+  </view>
+
+  <!-- Report Content -->
+  <view class="report-body" wx:if="{{!loading && report}}">
+    <!-- Header -->
+    <view class="header">
+      <image class="pet-avatar" src="{{petAvatar || image.url('/images/default-pet.png')}}" mode="aspectFill" />
+      <view class="header-info">
+        <text class="pet-name">{{petName}}</text>
+        <text class="report-label">情绪解读报告</text>
+      </view>
+      <view class="div-system" wx:if="{{report.divSystem}}">
+        <text>占卜: {{report.divSystem === 'liuyao' ? '六爻' : report.divSystem === 'meihua' ? '梅花易数' : report.divSystem === 'daliuren' ? '大六壬' : report.divSystem === 'tarot' ? '塔罗' : report.divSystem}}</text>
+      </view>
+    </view>
+
+    <!-- Core Answer -->
+    <view class="card core-card">
+      <view class="card-title">🔮 综合解读</view>
+      <text class="core-text">{{report.coreAnswer || report.interpretation || '暂无解读'}}</text>
+      <text class="basis-text text-sm text-hint" wx:if="{{report.coreBasis}}">{{report.coreBasis}}</text>
+    </view>
+
+    <!-- Mood & Body -->
+    <view class="card" wx:if="{{report.moodLevel || report.bodyStatus}}">
+      <view class="card-title">😊 情绪与身体状态</view>
+      <view class="stat-row" wx:if="{{report.moodLevel}}">
+        <text class="stat-label">心情指数</text>
+        <text class="stat-value">{{report.moodLevel}}</text>
+      </view>
+      <view class="stat-row" wx:if="{{report.foodSatisfaction}}">
+        <text class="stat-label">饮食满意度</text>
+        <text class="stat-value">{{report.foodSatisfaction}}</text>
+      </view>
+      <view class="stat-row" wx:if="{{report.bodyStatus}}">
+        <text class="stat-label">身体状态</text>
+        <text class="stat-value">{{report.bodyStatus}}</text>
+      </view>
+      <text class="section-text" wx:if="{{report.statusSummary}}">{{report.statusSummary}}</text>
+    </view>
+
+    <!-- Owner View -->
+    <view class="card" wx:if="{{report.ownerView}}">
+      <view class="card-title">👤 主人视角</view>
+      <text class="section-text">{{report.ownerView}}</text>
+    </view>
+
+    <!-- Pet Message -->
+    <view class="card highlight-card" wx:if="{{report.petMessage}}">
+      <view class="card-title">💬 宠物想对你说</view>
+      <text class="core-text">{{report.petMessage}}</text>
+    </view>
+
+    <!-- Pet Wish -->
+    <view class="card" wx:if="{{report.petWish}}">
+      <view class="card-title">🌟 宠物的心愿</view>
+      <text class="section-text">{{report.petWish}}</text>
+    </view>
+
+    <!-- Product Recommendations -->
+    <view class="card" wx:if="{{report.products && report.products.length}}">
+      <view class="card-title">🛒 推荐好物</view>
+      <view class="product-list">
+        <view class="product-item" wx:for="{{report.products}}" wx:key="name">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-desc text-sm text-hint">{{item.reason || item.desc}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Actions -->
+    <view class="actions">
+      <button class="action-btn secondary" bindtap="onFavorite">❤️ 收藏报告</button>
+      <button class="action-btn" open-type="share">📤 分享报告</button>
+    </view>
+
+    <!-- Footer -->
+    <view class="footer text-xs text-hint">
+      <text>更懂它 · 宠物智能养护平台</text>
+      <text>报告生成时间: {{report.createdAt || '刚刚'}}</text>
+    </view>
+  </view>
+
+  <!-- Empty State -->
+  <view class="empty-wrap" wx:if="{{!loading && !report}}">
+    <text class="text-md text-hint">暂无报告数据</text>
+    <button class="action-btn secondary mt-md" bindtap="goBack">返回</button>
+  </view>
+</view>

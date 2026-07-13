@@ -58,10 +58,10 @@ const request = async (url, options = {}) => {
 
 // ─── 真实 API（直连 Supabase Edge Functions） ───
 const RealAPI = {
-  get: (url, data) => request(url, { method: 'GET', data }),
-  post: (url, data) => request(url, { method: 'POST', data }),
-  put: (url, data) => request(url, { method: 'PUT', data }),
-  delete: (url, data) => request(url, { method: 'DELETE', data }),
+  get: (url, params, opts) => request(url, { method: 'GET', data: params, ...opts }),
+  post: (url, data, opts) => request(url, { method: 'POST', data, ...opts }),
+  put: (url, data, opts) => request(url, { method: 'PUT', data, ...opts }),
+  delete: (url, data, opts) => request(url, { method: 'DELETE', data, ...opts }),
 
   // ═══ 报告接口 → emotion-report / health-report / risk-report functions ═══
   Report: {
@@ -76,25 +76,19 @@ const RealAPI = {
   // ═══ 上传 → upload function ═══
   Upload: {
     upload: async (filePath, category, petId) => {
-      return new Promise((resolve, reject) => {
-        wx.uploadFile({
-          url: `${app.globalData.baseUrl}/api/upload`,
-          filePath,
-          name: 'file',
-          formData: { category, petId: petId || '' },
-          header: {
-            'Authorization': `Bearer ${wx.getStorageSync('token')}`
-          },
-          success: (res) => {
-            try { resolve(JSON.parse(res.data)) }
-            catch (e) { resolve({ publicUrl: filePath }) }
-          },
-          fail: (err) => {
-            console.warn('[Upload] failed:', err)
-            resolve({ publicUrl: filePath })
-          }
+      if (!filePath) return { publicUrl: '' }
+
+      try {
+        const result = await RealAPI.post('/api/upload', {
+          fileUrl: filePath,
+          category,
+          petId: petId || ''
         })
-      })
+        return result || { publicUrl: filePath }
+      } catch (err) {
+        console.warn('[Upload] failed:', err)
+        return { publicUrl: filePath }
+      }
     }
   },
 
@@ -129,18 +123,16 @@ const RealAPI = {
   // ═══ 宠物档案 → api function (后端已统一返回 camelCase) ═══
   Pet: {
     create: async (data) => {
-      // 发送时兼容 mock 字段名
       const payload = { ...data };
       if (payload.avatar === undefined && payload.avatarUrl !== undefined) payload.avatar = payload.avatarUrl;
       return RealAPI.post('/api/pets', payload);
     },
     list: async () => {
       const pets = await RealAPI.get('/api/pets');
-      // 后端已返回 camelCase，做兜底兼容
       if (Array.isArray(pets)) {
         return pets.map(p => ({
           id: p.id ?? p.f_id,
-          name: p.name ?? p.f_name,
+          name: p.name ?? p.f_name ?? '',
           avatar: p.avatar ?? p.avatarUrl ?? p.f_avatar_url ?? '',
           breed: p.breed ?? '',
           breedId: p.breedId ?? p.f_breed_id,
@@ -156,6 +148,9 @@ const RealAPI = {
           vaccinated: p.vaccinated ?? p.f_vaccinated ?? false,
           tags: p.tags ?? p.f_personality_tags ?? [],
           statusPet: p.statusPet ?? p.f_status_pet,
+          history: p.history ?? '',
+          vaccineNote: p.vaccineNote ?? '',
+          allergy: p.allergy ?? '',
           createdAt: p.createdAt ?? p.f_created_at,
           updatedAt: p.updatedAt ?? p.f_updated_at,
         }));
@@ -168,22 +163,33 @@ const RealAPI = {
       if (payload.avatar === undefined && payload.avatarUrl !== undefined) payload.avatar = payload.avatarUrl;
       return RealAPI.put(`/api/pets/${id}`, payload);
     },
-    delete: async (id) => RealAPI.delete(`/api/pets/${id}`)
+    delete: async (id) => RealAPI.delete(`/api/pets/${id}`),
+    types: async () => RealAPI.get('/api/pets/types', {}, { needAuth: false }),
+    breeds: async (typeId) => RealAPI.get('/api/pets/breeds', { typeId }, { needAuth: false }),
+    genders: async () => RealAPI.get('/api/pets/genders', {}, { needAuth: false }),
+  },
+
+  // ═══ 用户档案 ═══
+  User: {
+    getProfile: async () => RealAPI.get('/api/user/profile'),
+    updateProfile: async (data) => RealAPI.put('/api/user/profile', data),
   },
 
   // ═══ 商城 → api function (后端已统一返回 camelCase) ═══
   Product: {
     list: async (params) => {
-      const products = await RealAPI.get('/api/products', params);
+      const products = await RealAPI.get('/api/products', params, { needAuth: false });
       if (Array.isArray(products)) {
         return products.map(p => ({
           id: p.id ?? p.f_id,
-          name: p.name ?? p.f_name,
+          name: p.name ?? p.f_name ?? '',
           desc: p.desc ?? p.f_description ?? '',
           price: p.price ?? 0,
           category: p.category ?? '',
-          categoryId: p.categoryId ?? p.f_category_id,
+          categoryCode: p.categoryCode ?? p.f_category_code ?? '',
+          categoryName: p.categoryName ?? '',
           image: p.image ?? '',
+          images: Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []),
           brand: p.brand ?? p.f_brand ?? '',
         }));
       }
@@ -194,13 +200,16 @@ const RealAPI = {
       if (product) {
         return {
           id: product.id ?? product.f_id,
-          name: product.name ?? product.f_name,
+          name: product.name ?? product.f_name ?? '',
           desc: product.desc ?? product.f_description ?? '',
           price: product.price ?? 0,
           category: product.category ?? '',
-          categoryId: product.categoryId ?? product.f_category_id,
+          categoryCode: product.categoryCode ?? product.f_category_code ?? '',
+          categoryName: product.categoryName ?? '',
           image: product.image ?? '',
+          images: Array.isArray(product.images) ? product.images : (product.image ? [product.image] : []),
           brand: product.brand ?? product.f_brand ?? '',
+          detail: product.detail ?? null,
         };
       }
       return product;
@@ -209,7 +218,16 @@ const RealAPI = {
 
   // ═══ 订单 → api function ═══
   Order: {
-    create: async (data) => RealAPI.post('/api/orders', data)
+    create: async (data) => RealAPI.post('/api/orders', data),
+    list: async () => RealAPI.get('/api/orders'),
+    paymentStatus: async (id) => RealAPI.get(`/api/orders/${id}/payment-status`),
+    cancel: async (id) => RealAPI.post(`/api/orders/${id}/cancel`),
+    complete: async (id) => RealAPI.post(`/api/orders/${id}/complete`)
+  },
+
+  // ═══ 微信支付 ═══
+  Pay: {
+    wechatJsapi: async (orderId) => RealAPI.post('/api/pay/wechat/jsapi', { orderId })
   },
 
   // ═══ 医院 → api function (后端已统一返回 camelCase) ═══
@@ -320,7 +338,39 @@ const MockNamespaced = {
     detail: async (id) => { const r = await MockAPI.getProductDetail(id); return r.data }
   },
   Order: {
-    create: async (data) => { const r = await MockAPI.createOrder(data); return r.data }
+    create: async (data) => { const r = await MockAPI.createOrder(data); return r.data },
+    list: async () => { const orders = wx.getStorageSync('orders') || []; return orders },
+    paymentStatus: async (id) => {
+      const orders = wx.getStorageSync('orders') || []
+      const order = orders.find(o => o.id === id || o.orderId === id)
+      return { status: order ? order.status || 'paid' : 'paid' }
+    },
+    cancel: async (id) => {
+      const orders = wx.getStorageSync('orders') || []
+      const idx = orders.findIndex(o => o.id === id)
+      if (idx > -1) { orders[idx].status = 'cancelled'; wx.setStorageSync('orders', orders) }
+      return { success: true }
+    },
+    complete: async (id) => {
+      const orders = wx.getStorageSync('orders') || []
+      const idx = orders.findIndex(o => o.id === id)
+      if (idx > -1) { orders[idx].status = 'completed'; wx.setStorageSync('orders', orders) }
+      return { success: true }
+    }
+  },
+  Pay: {
+    wechatJsapi: async (orderId) => {
+      const cfg = wx.getStorageSync('userInfo') || {}
+      const timeStamp = Math.floor(Date.now() / 1000).toString()
+      return {
+        appId: cfg.appId || '',
+        timeStamp,
+        nonceStr: Math.random().toString(36).slice(2),
+        package: `prepay_id=mock_${Date.now()}`,
+        signType: 'RSA',
+        paySign: 'mock_sign'
+      }
+    }
   },
   Hospital: {
     list: async (params) => { const r = await MockAPI.getHospitals(params); return r.data },

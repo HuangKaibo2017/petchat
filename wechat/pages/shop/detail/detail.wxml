@@ -1,34 +1,77 @@
+<wxs module="imgx" src="../../../utils/image.wxs" />
 <nav-bar title="商品详情" showBack="{{true}}" />
-<view class="page-container">
-  <view wx:if="{{loading}}" class="flex-center" style="padding-top:200rpx">
-    <text class="text-hint">加载中...</text>
+
+<view class="page-container" wx:if="{{!loading && product}}">
+  <view class="detail-image-wrap">
+    <swiper class="detail-swiper" indicator-dots="{{product.images.length > 1}}" indicator-color="rgba(255,255,255,0.55)" indicator-active-color="#FFFFFF">
+      <swiper-item wx:for="{{product.images}}" wx:for-item="imgUrl" wx:key="*this">
+        <image class="detail-image" src="{{imgUrl}}" mode="aspectFill" bindtap="previewImage" data-image="{{imgUrl}}" />
+      </swiper-item>
+    </swiper>
   </view>
-  <block wx:elif="{{product}}">
-    <image class="detail-img" src="{{product.image}}" mode="aspectFill" />
-    <view class="detail-info card">
-      <view class="text-xl font-bold">{{product.name}}</view>
-      <view class="text-xs text-hint mt-sm">{{product.desc}}</view>
-      <view class="flex-between mt-md">
-        <view class="text-primary font-bold text-2xl">¥{{product.price}}</view>
-        <view class="text-xs text-hint">已售 1000+</view>
+
+  <view class="detail-info card">
+    <view class="detail-category">{{product.categoryName}}</view>
+    <view class="detail-name">{{product.displayName}}</view>
+    <view class="detail-desc" wx:if="{{product.displaySummary}}">{{product.displaySummary}}</view>
+    <view class="detail-price-row">
+      <text class="detail-price">¥{{product.price}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{product.detail}}" class="detail-content">
+    <view class="detail-card">
+      <view class="section-title">商品规格</view>
+      <view class="spec-list">
+        <view class="spec-item" wx:for="{{product.detail.specs}}" wx:key="label">
+          <view class="spec-label">{{item.label}}</view>
+          <view class="spec-value">{{item.value}}</view>
+        </view>
       </view>
     </view>
-    <view class="detail-section card">
-      <view class="text-md font-bold mb-sm">商品详情</view>
-      <view class="text-sm text-muted">{{product.desc || "商品详情请查看产品介绍"}}</view>
+
+    <view class="detail-card">
+      <view class="section-title">核心亮点</view>
+      <view class="bullet-list">
+        <view class="bullet-item" wx:for="{{product.detail.highlights}}" wx:key="*this">
+          <view class="bullet-dot"></view>
+          <view class="bullet-text">{{item}}</view>
+        </view>
+      </view>
     </view>
-    <view class="detail-section card">
-      <view class="text-md font-bold mb-sm">合规提示</view>
-      <view class="text-xs text-hint">本品为非药品类商品，如有健康问题请及时就医。</view>
+
+    <view class="detail-card" wx:for="{{product.detail.herbGroups}}" wx:for-item="group" wx:key="title">
+      <view class="section-title">{{group.title}}</view>
+      <view class="tag-list">
+        <text class="detail-tag" wx:for="{{group.items}}" wx:for-item="herb" wx:key="*this">{{herb}}</text>
+      </view>
     </view>
-    <view style="height: 140rpx"></view>
-    <view class="detail-bar safe-bottom">
-      <view class="flex items-center" bindtap="goCart"><text class="text-lg">🛒</text><text class="text-xs ml-sm">购物车</text></view>
-      <button class="btn btn-outline btn-sm flex-1" bindtap="addToCart">加入购物车</button>
-      <button class="btn btn-primary btn-sm flex-1" bindtap="buyNow" style="margin-left:16rpx">立即购买</button>
+
+    <view class="detail-card" wx:for="{{product.detail.sections}}" wx:for-item="section" wx:key="title">
+      <view class="section-title">{{section.title}}</view>
+      <view class="section-paragraph" wx:for="{{section.paragraphs}}" wx:for-item="paragraph" wx:key="*this">{{paragraph}}</view>
+      <view class="bullet-list" wx:if="{{section.bullets}}">
+        <view class="bullet-item" wx:for="{{section.bullets}}" wx:for-item="bullet" wx:key="*this">
+          <view class="bullet-dot"></view>
+          <view class="bullet-text">{{bullet}}</view>
+        </view>
+      </view>
     </view>
-  </block>
-  <view wx:else class="flex-center" style="padding-top:200rpx">
-    <text class="text-hint">商品不存在</text>
+  </view>
+
+  <view class="detail-action">
+    <button class="btn btn-secondary btn-lg" style="flex:1" bindtap="onAddToCart">
+      加入购物车
+    </button>
+    <button class="btn btn-primary btn-lg" style="flex:1;margin-left:16rpx" bindtap="onBuyNow">
+      立即购买
+    </button>
+  </view>
+
+  <view class="detail-float-cart" bindtap="goCart">
+    <image class="detail-float-icon" src="{{imgx.url('/images/tab-shop.png')}}" mode="aspectFit" />
+    <view class="detail-float-badge" wx:if="{{cartCount > 0}}">{{cartCount > 99 ? '99+' : cartCount}}</view>
   </view>
 </view>
+
+<loading wx:if="{{loading}}" />

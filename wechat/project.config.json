@@ -2,10 +2,22 @@
   "description": "Gengdongta - 宠物智能养护平台",
   "packOptions": {
     "ignore": [
-      {
-        "value": ".eslintrc.js",
-        "type": "file"
-      }
+      { "value": ".eslintrc.js", "type": "file" },
+      { "value": ".git", "type": "folder" },
+      { "value": ".DS_Store", "type": "file" },
+      { "value": "images/.DS_Store", "type": "file" },
+      { "value": "images/health", "type": "folder" },
+      { "value": "images/index", "type": "folder" },
+      { "value": "images/mine", "type": "folder" },
+      { "value": "images/pet", "type": "folder" },
+      { "value": "images/risk", "type": "folder" },
+      { "value": "images/shop", "type": "folder" },
+      { "value": "images/default-avatar.png", "type": "file" },
+      { "value": "images/default-hospital.png", "type": "file" },
+      { "value": "images/default-pet.png", "type": "file" },
+      { "value": "images/empty-default.png", "type": "file" },
+      { "value": "images/hero-bg.png", "type": "file" },
+      { "value": "images/logo.png", "type": "file" }
     ],
     "include": []
   },

@@ -1,5 +1,0 @@
-<nav-bar title="我的收藏" showBack="{{true}}" />
-<view class="page-container">
-  <report-card wx:for="{{favorites}}" wx:key="id" report="{{item}}" bind:tap="goDetail" />
-  <empty-state wx:if="{{!favorites.length}}" title="暂无收藏" desc="收藏的报告会显示在这里" />
-</view>
